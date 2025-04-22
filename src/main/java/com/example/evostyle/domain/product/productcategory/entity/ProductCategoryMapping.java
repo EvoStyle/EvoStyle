@@ -33,4 +33,5 @@ public class ProductCategoryMapping extends BaseEntity {
     public static ProductCategoryMapping of(Product product, ProductCategory productCategory) {
         return new ProductCategoryMapping(product, productCategory);
     }
+
 }
