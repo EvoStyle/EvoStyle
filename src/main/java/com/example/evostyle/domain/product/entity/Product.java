@@ -22,6 +22,8 @@ public class Product extends BaseEntity {
     @JoinColumn(name = "brand_id")
     private Brand brand;
 
+    private Long categoryId;
+
     @Column(nullable = false)
     private String name;
 
@@ -38,14 +40,15 @@ public class Product extends BaseEntity {
     @ColumnDefault("0.0")
     private Float averageRating = 0.0F;
 
-    private Product(Brand brand, String name, Integer price, String description){
+    private Product(Brand brand, Long categoryId, String name, Integer price, String description){
         this.brand = brand;
+        this.categoryId = categoryId ;
         this.name = name;
         this.price = price;
         this.description = description;
     }
 
-    public static Product of(Brand brand, String name, Integer price, String description){
-        return new Product(brand, name, price, description);
+    public static Product of(Brand brand, Long categoryId, String name, Integer price, String description){
+        return new Product(brand, categoryId, name, price, description);
     }
 }

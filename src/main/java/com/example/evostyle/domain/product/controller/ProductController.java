@@ -1,0 +1,26 @@
+package com.example.evostyle.domain.product.controller;
+
+import com.example.evostyle.domain.product.dto.request.CreateProductRequest;
+import com.example.evostyle.domain.product.dto.response.ProductResponse;
+import com.example.evostyle.domain.product.service.ProductService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RequestMapping("/api")
+@RestController
+@RequiredArgsConstructor
+public class ProductController {
+
+    private final ProductService productService;
+
+    @PostMapping("brandes/{brandId}/categories/{categoryId}/products")
+    public ResponseEntity<ProductResponse> createProduct(@RequestBody CreateProductRequest request,
+                                                         @PathVariable (name = "brandId")Long brandId,
+                                                         @PathVariable (name = "categoryId") Long categoryId){
+        ProductResponse response = productService.createProduct(request, brandId, categoryId);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+}
