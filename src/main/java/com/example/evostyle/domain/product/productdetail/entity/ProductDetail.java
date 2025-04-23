@@ -22,4 +22,13 @@ public class ProductDetail extends BaseEntity {
 
     @Column(name = "product_stock")
     private Integer stock;
+
+    private ProductDetail(Product product, Integer stock){
+        this.product = product ;
+        this.stock = stock ;
+    }
+
+    public ProductDetail of(Product product, Integer stock){
+        return new ProductDetail(product, stock);
+    }
 }

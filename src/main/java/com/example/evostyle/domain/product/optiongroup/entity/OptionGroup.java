@@ -1,5 +1,6 @@
 package com.example.evostyle.domain.product.optiongroup.entity;
 
+import com.example.evostyle.domain.product.entity.Product;
 import com.example.evostyle.domain.product.productdetail.entity.ProductDetail;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -16,19 +17,20 @@ public class OptionGroup {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne
+    @JoinColumn(name = "option_group_id")
+    private Product product;
+
     @Column(length = 15, nullable = false)
     private String name;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_detail_id")
-    private ProductDetail productDetail;
 
-    private OptionGroup (String name, ProductDetail productDetail) {
-        this.name = name;
-        this.productDetail = productDetail;
+    private OptionGroup (String name, Product product) {
+        this.name = name ;
+        this.product = product ;
     }
 
-    public static OptionGroup of(String name, ProductDetail productDetail) {
-        return new OptionGroup(name, productDetail);
+    public static OptionGroup of(String name, Product product) {
+        return new OptionGroup(name, product);
     }
 }
