@@ -51,4 +51,10 @@ public class Product extends BaseEntity {
     public static Product of(Brand brand, Long categoryId, String name, Integer price, String description){
         return new Product(brand, categoryId, name, price, description);
     }
+
+    public void update(String name, String description, Integer price){
+        if(name != null && !name.isBlank()){this.name = name;}
+        if(description != null && !description.isBlank()){this.description = description;}
+        if(price != null){this.price = price ;}
+    }
 }

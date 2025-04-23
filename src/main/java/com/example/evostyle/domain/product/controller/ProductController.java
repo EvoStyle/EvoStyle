@@ -1,6 +1,7 @@
 package com.example.evostyle.domain.product.controller;
 
 import com.example.evostyle.domain.product.dto.request.CreateProductRequest;
+import com.example.evostyle.domain.product.dto.request.UpdateProductRequest;
 import com.example.evostyle.domain.product.dto.response.ProductResponse;
 import com.example.evostyle.domain.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,14 @@ public class ProductController {
                                                          @PathVariable (name = "brandId")Long brandId,
                                                          @PathVariable (name = "categoryId") Long categoryId){
         ProductResponse response = productService.createProduct(request, brandId, categoryId);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PatchMapping("/products/{productId}")
+    public ResponseEntity<ProductResponse> updateProduct(@RequestBody UpdateProductRequest request,
+                                                         @PathVariable (name = "productId") Long productId){
+
+        ProductResponse response = productService.updateProduct(request, productId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 

@@ -3,6 +3,7 @@ package com.example.evostyle.domain.product.service;
 import com.example.evostyle.domain.brand.entity.Brand;
 import com.example.evostyle.domain.brand.repository.BrandRepository;
 import com.example.evostyle.domain.product.dto.request.CreateProductRequest;
+import com.example.evostyle.domain.product.dto.request.UpdateProductRequest;
 import com.example.evostyle.domain.product.dto.response.ProductResponse;
 import com.example.evostyle.domain.product.entity.Product;
 import com.example.evostyle.domain.product.productcategory.entity.ProductCategory;
@@ -35,5 +36,19 @@ public class ProductService {
 
         return ProductResponse.from(savedProduct);
     }
+
+    @Transactional
+    public ProductResponse updateProduct(UpdateProductRequest request, Long productId){
+
+       Product product = productRepository.findById(productId)
+               .orElseThrow(()-> new RuntimeException("존재하지 않는 상품입니다"));
+
+       product.update(request.name(), request.description(), request.price());
+
+       return ProductResponse.from(product);
+    }
+
+
+
 
 }
