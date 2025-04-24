@@ -23,7 +23,7 @@ public class Member extends BaseEntity{
     private String password;
 
     @Column(length = 50, nullable = false)
-    private String name;
+    private String nickname;
 
     @Column(nullable = false)
     private Integer age;
@@ -40,12 +40,12 @@ public class Member extends BaseEntity{
     private GenderType genderType;
 
     private Member(
-        String email, String password, String name,
+        String email, String password, String nickname,
         Integer age, String phoneNumber, Authority authority, GenderType genderType
     ) {
         this.email = email;
         this.password = password;
-        this.name = name;
+        this.nickname = nickname;
         this.age = age;
         this.phoneNumber = phoneNumber;
         this.authority = authority;
@@ -53,9 +53,9 @@ public class Member extends BaseEntity{
     }
 
     public static Member of(
-        String email, String password, String name,
+        String email, String password, String nickname,
         Integer age, String phoneNumber, Authority authority, GenderType genderType
     ) {
-        return new Member(email, password, name, age, phoneNumber, authority, genderType);
+        return new Member(email, password, nickname, age, phoneNumber, authority, genderType);
     }
 }
