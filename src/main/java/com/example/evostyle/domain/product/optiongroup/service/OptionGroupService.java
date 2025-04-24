@@ -2,6 +2,8 @@ package com.example.evostyle.domain.product.optiongroup.service;
 
 import com.example.evostyle.domain.product.entity.Product;
 import com.example.evostyle.domain.product.optiongroup.dto.request.CreateOptionGroupRequest;
+import com.example.evostyle.domain.product.optiongroup.dto.request.UpdateOptionGroupRequest;
+import com.example.evostyle.domain.product.optiongroup.dto.response.CreateOptionGroupResponse;
 import com.example.evostyle.domain.product.optiongroup.dto.response.OptionGroupResponse;
 import com.example.evostyle.domain.product.optiongroup.dto.response.OptionResponse;
 import com.example.evostyle.domain.product.optiongroup.entity.Option;
@@ -25,7 +27,7 @@ public class OptionGroupService {
     private final OptionRepository optionRepository ;
     private final ProductRepository productRepository ;
 
-    public OptionGroupResponse createOptionGroupWithOptions(CreateOptionGroupRequest request, Long productId){
+    public CreateOptionGroupResponse createOptionGroupWithOptions(CreateOptionGroupRequest request, Long productId){
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND));
 
@@ -37,6 +39,18 @@ public class OptionGroupService {
                                                 .map(OptionResponse::from)
                                                 .toList();
 
-      return OptionGroupResponse.from(optionGroup, optionResponseList);
+      return CreateOptionGroupResponse.from(optionGroup, optionResponseList);
     }
+
+    public OptionGroupResponse updateOptionGroupName(UpdateOptionGroupRequest request, Long optionGroupId){
+
+      OptionGroup optionGroup = optionGroupRepository.findById(optionGroupId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.OPTION_GROUP_NOT_FOUND));
+
+
+      optionGroup.update(request.name());
+      return OptionGroupResponse.from(optionGroup);
+    }
+
+
 }

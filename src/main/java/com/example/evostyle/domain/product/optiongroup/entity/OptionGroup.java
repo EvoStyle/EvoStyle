@@ -32,4 +32,6 @@ public class OptionGroup {
     public static OptionGroup of(String name, Product product) {
         return new OptionGroup(name, product);
     }
+
+    public void update(String name){this.name = name ;}
 }
