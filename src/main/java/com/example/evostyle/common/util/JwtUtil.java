@@ -27,7 +27,7 @@ public class JwtUtil {
     public static final long TOKEN_TIME = 60 * 60 * 1000L;
     public static final Set<String> expiredTokenSet = new HashSet<>();
 
-    @Value("NDkxOWJkYzRmNTU3N2RjMGMyZDFlZmM5NDMxODk3ZTUxYjdkZDNkOGZmNzU2YTJiMmQ0ZmNlNzVmYzE1MTRhZA==")
+    @Value("${JWT_SECRET_KEY}")
     private String secretKey;
 
     private Key key;
