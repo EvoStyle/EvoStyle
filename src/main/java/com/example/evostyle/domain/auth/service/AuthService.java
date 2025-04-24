@@ -12,6 +12,7 @@ import com.example.evostyle.global.exception.ConflictException;
 import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.NotFoundException;
 import com.example.evostyle.global.exception.UnauthorizedException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
+    @Transactional
     public SignUpResponse signup(SignUpRequest request) {
         if (memberRepository.existsByEmail(request.email())) {
             throw new ConflictException(ErrorCode.DUPLICATE_EMAIL);

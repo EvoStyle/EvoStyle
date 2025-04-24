@@ -11,18 +11,18 @@ import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.ForbiddenException;
 import com.example.evostyle.global.exception.NotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class MemberService {
 
     private final MemberRepository memberRepository;
     private final JwtUtil jwtUtil;
 
-    @Transactional
     public MemberResponse readMember(Long memberId) {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
@@ -30,6 +30,7 @@ public class MemberService {
         return MemberResponse.from(member);
     }
 
+    @Transactional
     public MemberResponse updateMember(Long memberId, UpdateMemberRequest request) {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
@@ -39,6 +40,7 @@ public class MemberService {
         return MemberResponse.from(member);
     }
 
+    @Transactional
     public DeleteMemberResponse deleteMember(Long memberId, HttpServletRequest request) {
         Long loginMemberId = LoginMemberUtil.getMemberId(request, jwtUtil);
 
