@@ -1,5 +1,6 @@
 package com.example.evostyle.domain.auth.controller;
 
+import com.example.evostyle.domain.auth.dto.request.LoginRequest;
 import com.example.evostyle.domain.auth.dto.request.SignUpRequest;
 import com.example.evostyle.domain.auth.dto.response.LoginResponse;
 import com.example.evostyle.domain.auth.dto.response.SignUpResponse;
@@ -24,5 +25,12 @@ public class AuthController {
         SignUpResponse signup = authService.signup(request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(signup);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+        LoginResponse login = authService.login(request);
+
+        return ResponseEntity.status(HttpStatus.OK).body(login);
     }
 }
