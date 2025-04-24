@@ -12,18 +12,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/brands")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class BrandController {
 
     private final BrandService brandService;
 
-    @PostMapping
+    @PostMapping("/brands")
     public ResponseEntity<CreateBrandResponse> createBrand(
-            @RequestBody CreateBrandRequest requestDto
+            @RequestBody CreateBrandRequest request
     ) {
-        CreateBrandResponse responseDto = brandService.createBrand(requestDto);
+        CreateBrandResponse response = brandService.createBrand(request);
 
-        return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }
