@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class ProductService {
 
     private final ProductCategoryRepository productCategoryRepository;
@@ -27,7 +27,7 @@ public class ProductService {
     private final ProductRepository productRepository ;
     private final BrandRepository brandRepository;
 
-
+    @Transactional
     public ProductResponse createProduct(CreateProductRequest request){
         Brand brand = brandRepository.findById(request.brandId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.BRAND_NOT_FOUND));
@@ -43,7 +43,7 @@ public class ProductService {
         return ProductResponse.from(savedProduct);
     }
 
-    @Transactional(readOnly = true)
+
     public ProductResponse readProduct(Long productId){
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND));
@@ -51,6 +51,7 @@ public class ProductService {
         return ProductResponse.from(product);
     }
 
+    @Transactional
     public ProductResponse updateProduct(UpdateProductRequest request, Long productId){
 
         Product product = productRepository.findById(productId)
@@ -61,6 +62,7 @@ public class ProductService {
        return ProductResponse.from(product);
     }
 
+    @Transactional
    public void deleteProduct(Long productId){
         if(!productRepository.existsById(productId)){
             throw new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND);
