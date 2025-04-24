@@ -84,4 +84,9 @@ public class JwtUtil {
             throw new IllegalArgumentException("Invalid or expired JWT token");
         }
     }
+
+    public Long getMemberIdFromToken(String token) {
+        Claims claims = extractClaims(token);
+        return Long.parseLong(claims.getSubject());
+    }
 }
