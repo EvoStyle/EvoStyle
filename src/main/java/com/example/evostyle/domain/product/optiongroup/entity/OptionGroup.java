@@ -17,20 +17,15 @@ public class OptionGroup {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "option_group_id")
-    private Product product;
-
     @Column(length = 15, nullable = false)
     private String name;
 
 
-    private OptionGroup (String name, Product product) {
+    private OptionGroup (String name) {
         this.name = name ;
-        this.product = product ;
     }
 
-    public static OptionGroup of(String name, Product product) {
-        return new OptionGroup(name, product);
+    public static OptionGroup of(String name) {
+        return new OptionGroup(name);
     }
 }
