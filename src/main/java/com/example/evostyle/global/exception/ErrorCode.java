@@ -19,11 +19,12 @@ public enum ErrorCode {
 
     //브랜드 관련
     BRAND_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 브랜드입니다"),
+    CATEGORY_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "브랜드 카테고리는 최대 3개까지입니다."),
 
     //주문 관련
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "주문이 존재하지 않습니다."),
-    ORDER_GET_FORBIDDEN(HttpStatus.FORBIDDEN,"다른 사용자의 주문 내역은 조회할 수 없습니다."),
-    ORDER_CANCEL_FORBIDDEN(HttpStatus.FORBIDDEN,"이 주문을 취소할 권한이 없습니다."),
+    ORDER_GET_FORBIDDEN(HttpStatus.FORBIDDEN, "다른 사용자의 주문 내역은 조회할 수 없습니다."),
+    ORDER_CANCEL_FORBIDDEN(HttpStatus.FORBIDDEN, "이 주문을 취소할 권한이 없습니다."),
     ALREADY_CANCELLED_ORDER(HttpStatus.BAD_REQUEST, "이미 취소처리 된 주문입니다."),
 
     //상품 관련
@@ -31,8 +32,6 @@ public enum ErrorCode {
 
     //리뷰 관련
     REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 리뷰입니다");
-
-
 
     private final HttpStatus httpStatus;
     private final String message;
