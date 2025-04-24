@@ -38,6 +38,12 @@ public class ProductService {
         return ProductResponse.from(savedProduct);
     }
 
+    @Transactional(readOnly = true)
+    public ProductResponse readProduct(Long productId){
+        Product product = productRepository.findById(productId).orElseThrow(() -> new RuntimeException("존재하지 않는 상품입니다"));
+
+        return ProductResponse.from(product);
+    }
 
     public ProductResponse updateProduct(UpdateProductRequest request, Long productId){
 
@@ -47,13 +53,6 @@ public class ProductService {
        product.update(request.name(), request.description(), request.price());
 
        return ProductResponse.from(product);
-    }
-
-    @Transactional(readOnly = true)
-    public ProductResponse findProduct(Long productId){
-        Product product = productRepository.findById(productId).orElseThrow(() -> new RuntimeException("존재하지 않는 상품입니다"));
-
-        return ProductResponse.from(product);
     }
 
    public void deleteProduct(Long productId){

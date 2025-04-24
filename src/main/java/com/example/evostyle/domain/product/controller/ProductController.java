@@ -24,6 +24,13 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @GetMapping("/products/{productId}")
+    public ResponseEntity<ProductResponse> readProduct(@PathVariable(name = "productId") Long productId){
+        ProductResponse response = productService.readProduct(productId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
     @PatchMapping("/products/{productId}")
     public ResponseEntity<ProductResponse> updateProduct(@RequestBody UpdateProductRequest request,
                                                          @PathVariable (name = "productId") Long productId){
@@ -31,14 +38,6 @@ public class ProductController {
         ProductResponse response = productService.updateProduct(request, productId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
-
-    @GetMapping("/products/{productId}")
-    public ResponseEntity<ProductResponse> getProduct(@PathVariable(name = "productId") Long productId){
-        ProductResponse response = productService.findProduct(productId);
-
-        return ResponseEntity.status(HttpStatus.OK).body(response);
-    }
-
 
     @DeleteMapping("/products/{productId}")
     public ResponseEntity<Map<String, Long>> deleteProduct(@PathVariable(name = "productId") Long productId){
