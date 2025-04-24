@@ -24,7 +24,7 @@ public class ProductService {
 
     private final ProductCategoryRepository productCategoryRepository;
     private final ProductCategoryMappingRepository categoryMappingRepository;
-    private final ProductRepository productRepository ;
+    private final ProductRepository productRepository;
     private final BrandRepository brandRepository;
 
     @Transactional
@@ -36,11 +36,11 @@ public class ProductService {
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PRDUCT_CATEGORY_NOT_FOUND));
 
         Product product = Product.of(brand, request.name(), request.price(), request.description());
-        Product savedProduct = productRepository.save(product);
+
 
         categoryMappingRepository.save(ProductCategoryMapping.of(product, category));
 
-        return ProductResponse.from(savedProduct);
+        return ProductResponse.from(product);
     }
 
 
