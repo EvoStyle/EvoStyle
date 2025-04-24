@@ -5,6 +5,9 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -22,13 +25,13 @@ public class Member extends BaseEntity{
     @Column(nullable = false)
     private String password;
 
-    @Column(length = 50, nullable = false)
-    private String name;
+    @Column(length = 50, unique = true, nullable = false)
+    private String nickname;
 
     @Column(nullable = false)
     private Integer age;
 
-    @Column(length = 15, name = "phone_number", nullable = false)
+    @Column(length = 15, name = "phone_number", unique = true, nullable = false)
     private String phoneNumber;
 
     @Enumerated(EnumType.STRING)
@@ -39,13 +42,20 @@ public class Member extends BaseEntity{
     @Column(length = 5, name = "gender_type", nullable = false)
     private GenderType genderType;
 
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
+    @Column(name = "is_deleted")
+    @ColumnDefault("false")
+    private boolean isDeleted = false;
+
     private Member(
-        String email, String password, String name,
+        String email, String password, String nickname,
         Integer age, String phoneNumber, Authority authority, GenderType genderType
     ) {
         this.email = email;
         this.password = password;
-        this.name = name;
+        this.nickname = nickname;
         this.age = age;
         this.phoneNumber = phoneNumber;
         this.authority = authority;
@@ -53,9 +63,15 @@ public class Member extends BaseEntity{
     }
 
     public static Member of(
-        String email, String password, String name,
+        String email, String password, String nickname,
         Integer age, String phoneNumber, Authority authority, GenderType genderType
     ) {
-        return new Member(email, password, name, age, phoneNumber, authority, genderType);
+        return new Member(email, password, nickname, age, phoneNumber, authority, genderType);
+    }
+
+    public void updateMember(String nickname, Integer age, String phoneNumber) {
+        this.nickname = nickname;
+        this.age = age;
+        this.phoneNumber = phoneNumber;
     }
 }
