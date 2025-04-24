@@ -25,13 +25,13 @@ public class Member extends BaseEntity{
     @Column(nullable = false)
     private String password;
 
-    @Column(length = 50, nullable = false)
+    @Column(length = 50, unique = true, nullable = false)
     private String nickname;
 
     @Column(nullable = false)
     private Integer age;
 
-    @Column(length = 15, name = "phone_number", nullable = false)
+    @Column(length = 15, name = "phone_number", unique = true, nullable = false)
     private String phoneNumber;
 
     @Enumerated(EnumType.STRING)
