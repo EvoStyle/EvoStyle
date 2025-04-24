@@ -61,5 +61,14 @@ public class OptionGroupService {
       return OptionGroupResponse.from(optionGroup);
     }
 
+    public void deleteOptionGroup(Long optionGroupId){
+        if(!optionGroupRepository.existsById(optionGroupId)){
+            throw new NotFoundException(ErrorCode.OPTION_GROUP_NOT_FOUND);
+        }
 
+        List<Long> optionIdList = optionRepository.findIdByOptionGroupId(optionGroupId);
+        optionRepository.deleteAllById(optionIdList);
+
+        optionRepository.deleteById(optionGroupId);
+    }
 }

@@ -5,19 +5,23 @@ import com.example.evostyle.domain.product.optiongroup.dto.request.UpdateOptionG
 import com.example.evostyle.domain.product.optiongroup.dto.response.CreateOptionGroupResponse;
 import com.example.evostyle.domain.product.optiongroup.dto.response.OptionGroupResponse;
 import com.example.evostyle.domain.product.optiongroup.service.OptionGroupService;
+import com.example.evostyle.domain.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
-@RequestMapping("/api")
+
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api")
 public class OptionGroupController {
 
     private final OptionGroupService optionGroupService ;
+    private final ProductService productService;
 
     @PostMapping("/products/{productId}/optionGroups/options")
     public ResponseEntity<CreateOptionGroupResponse> createOptionGroup(@RequestBody CreateOptionGroupRequest request,
@@ -40,5 +44,13 @@ public class OptionGroupController {
 
         OptionGroupResponse response = optionGroupService.updateOptionGroupName(request, optionGroupId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @DeleteMapping("/optionGroups/{optionGroupId}")
+    public ResponseEntity<Map<String, Long>> deleteOptionGroup(@PathVariable(name = "optionGroupId")Long optionGroupId){
+
+        optionGroupService.deleteOptionGroup(optionGroupId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(Map.of("optionGroupId", optionGroupId));
     }
 }
