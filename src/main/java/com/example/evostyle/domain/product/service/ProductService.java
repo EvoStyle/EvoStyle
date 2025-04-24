@@ -12,13 +12,12 @@ import com.example.evostyle.domain.product.productcategory.repository.ProductCat
 import com.example.evostyle.domain.product.productcategory.repository.ProductCategoryRepository;
 import com.example.evostyle.domain.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class ProductService {
 
     private final ProductCategoryRepository productCategoryRepository;
@@ -26,12 +25,12 @@ public class ProductService {
     private final ProductRepository productRepository ;
     private final BrandRepository brandRepository;
 
-    @Transactional
-    public ProductResponse createProduct(CreateProductRequest request, Long brandId, Long categoryId){
-        Brand brand = brandRepository.findById(brandId).orElseThrow(()->new RuntimeException("브랜드가 존재하지 않습니다"));
-        ProductCategory category = productCategoryRepository.findById(categoryId).orElseThrow(()->new RuntimeException("카테고리가 존재하지 않습니다"));
 
-        Product product = Product.of(brand, categoryId, request.name(), request.price(), request.description());
+    public ProductResponse createProduct(CreateProductRequest request){
+        Brand brand = brandRepository.findById(request.brandId()).orElseThrow(()->new RuntimeException("브랜드가 존재하지 않습니다"));
+        ProductCategory category = productCategoryRepository.findById(request.categoryId()).orElseThrow(()->new RuntimeException("카테고리가 존재하지 않습니다"));
+
+        Product product = Product.of(brand, request.name(), request.price(), request.description());
         Product savedProduct = productRepository.save(product);
 
         categoryMappingRepository.save(ProductCategoryMapping.of(product, category));
@@ -39,7 +38,7 @@ public class ProductService {
         return ProductResponse.from(savedProduct);
     }
 
-    @Transactional
+
     public ProductResponse updateProduct(UpdateProductRequest request, Long productId){
 
        Product product = productRepository.findById(productId)
@@ -50,6 +49,7 @@ public class ProductService {
        return ProductResponse.from(product);
     }
 
+    @Transactional(readOnly = true)
     public ProductResponse findProduct(Long productId){
         Product product = productRepository.findById(productId).orElseThrow(() -> new RuntimeException("존재하지 않는 상품입니다"));
 

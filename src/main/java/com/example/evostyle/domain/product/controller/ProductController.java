@@ -18,11 +18,9 @@ public class ProductController {
 
     private final ProductService productService;
 
-    @PostMapping("brandes/{brandId}/categories/{categoryId}/products")
-    public ResponseEntity<ProductResponse> createProduct(@RequestBody CreateProductRequest request,
-                                                         @PathVariable (name = "brandId")Long brandId,
-                                                         @PathVariable (name = "categoryId") Long categoryId){
-        ProductResponse response = productService.createProduct(request, brandId, categoryId);
+    @PostMapping("/products")
+    public ResponseEntity<ProductResponse> createProduct(@RequestBody CreateProductRequest request){
+        ProductResponse response = productService.createProduct(request);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
