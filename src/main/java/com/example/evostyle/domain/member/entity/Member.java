@@ -5,6 +5,9 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -39,6 +42,13 @@ public class Member extends BaseEntity{
     @Column(length = 5, name = "gender_type", nullable = false)
     private GenderType genderType;
 
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
+    @Column(name = "is_deleted")
+    @ColumnDefault("false")
+    private boolean isDeleted = false;
+
     private Member(
         String email, String password, String nickname,
         Integer age, String phoneNumber, Authority authority, GenderType genderType
@@ -57,5 +67,11 @@ public class Member extends BaseEntity{
         Integer age, String phoneNumber, Authority authority, GenderType genderType
     ) {
         return new Member(email, password, nickname, age, phoneNumber, authority, genderType);
+    }
+
+    public void updateMember(String nickname, Integer age, String phoneNumber) {
+        this.nickname = nickname;
+        this.age = age;
+        this.phoneNumber = phoneNumber;
     }
 }
