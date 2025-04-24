@@ -33,7 +33,7 @@ public class ProductService {
                 .orElseThrow(() -> new NotFoundException(ErrorCode.BRAND_NOT_FOUND));
 
         ProductCategory category = productCategoryRepository.findById(request.categoryId())
-                .orElseThrow(()->new NotFoundException(ErrorCode.PRDUCT_CATEGORY_NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PRDUCT_CATEGORY_NOT_FOUND));
 
         Product product = Product.of(brand, request.name(), request.price(), request.description());
         Product savedProduct = productRepository.save(product);
