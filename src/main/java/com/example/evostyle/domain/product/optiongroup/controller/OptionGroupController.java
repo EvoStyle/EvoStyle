@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RequestMapping("/api")
 @RestController
 @RequiredArgsConstructor
@@ -17,12 +19,19 @@ public class OptionGroupController {
 
     private final OptionGroupService optionGroupService ;
 
-    @PostMapping("/products/{productId}/optionGroup/options")
+    @PostMapping("/products/{productId}/optionGroups/options")
     public ResponseEntity<CreateOptionGroupResponse> createOptionGroup(@RequestBody CreateOptionGroupRequest request,
                                                                        @PathVariable(name = "productId")Long productId){
 
         CreateOptionGroupResponse response = optionGroupService.createOptionGroupWithOptions(request, productId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping("/products/{productId}/optionGroups")
+    public ResponseEntity<List<OptionGroupResponse>> readOptionGroupByProduct(@PathVariable(name = "productId")Long productId){
+
+        List<OptionGroupResponse> responseList = optionGroupService.readOptionGroupByProduct(productId);
+        return ResponseEntity.status(HttpStatus.OK).body(responseList);
     }
 
     @PatchMapping("/optionGroups/{optionGroupId}")

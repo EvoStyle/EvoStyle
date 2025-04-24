@@ -42,6 +42,15 @@ public class OptionGroupService {
       return CreateOptionGroupResponse.from(optionGroup, optionResponseList);
     }
 
+    public List<OptionGroupResponse> readOptionGroupByProduct(Long productId){
+        if(!productRepository.existsById(productId)){
+            throw new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
+
+        return optionGroupRepository.findByProductId(productId)
+                                    .stream().map(OptionGroupResponse::from).toList();
+    }
+
     public OptionGroupResponse updateOptionGroupName(UpdateOptionGroupRequest request, Long optionGroupId){
 
       OptionGroup optionGroup = optionGroupRepository.findById(optionGroupId)
