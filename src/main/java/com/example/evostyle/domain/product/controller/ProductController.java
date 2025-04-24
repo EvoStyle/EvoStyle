@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RequestMapping("/api")
 @RestController
 @RequiredArgsConstructor
@@ -32,4 +34,18 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @GetMapping("/products/{productId}")
+    public ResponseEntity<ProductResponse> getProduct(@PathVariable(name = "productId") Long productId){
+        ProductResponse response = productService.findProduct(productId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+
+    @DeleteMapping("/products/{productId}")
+    public ResponseEntity<Map<String, Long>> deleteProduct(@PathVariable(name = "productId") Long productId){
+        productService.deleteProduct(productId);
+
+        return  ResponseEntity.status(HttpStatus.OK).body(Map.of("productId", productId));
+    }
 }

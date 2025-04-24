@@ -12,11 +12,13 @@ import com.example.evostyle.domain.product.productcategory.repository.ProductCat
 import com.example.evostyle.domain.product.productcategory.repository.ProductCategoryRepository;
 import com.example.evostyle.domain.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ProductService {
 
     private final ProductCategoryRepository productCategoryRepository;
@@ -48,7 +50,16 @@ public class ProductService {
        return ProductResponse.from(product);
     }
 
+    public ProductResponse findProduct(Long productId){
+        Product product = productRepository.findById(productId).orElseThrow(() -> new RuntimeException("존재하지 않는 상품입니다"));
 
+        return ProductResponse.from(product);
+    }
 
-
+   public void deleteProduct(Long productId){
+        if(!productRepository.existsById(productId)){
+            throw new RuntimeException("존재하지 않는 상품입니다");
+        }
+        productRepository.deleteById(productId);
+   }
 }
