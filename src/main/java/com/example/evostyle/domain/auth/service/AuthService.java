@@ -38,9 +38,9 @@ public class AuthService {
             request.genderType()
         );
 
-        Member saveMember = memberRepository.save(member);
+        memberRepository.save(member);
 
-        return SignUpResponse.from(saveMember);
+        return SignUpResponse.from(member);
     }
 
     public LoginResponse login(LoginRequest request) {
@@ -53,6 +53,6 @@ public class AuthService {
 
         String token = jwtUtil.createToken(member.getId(), member.getEmail(), member.getAuthority());
 
-        return LoginResponse.of(token);
+        return LoginResponse.from(token);
     }
 }
