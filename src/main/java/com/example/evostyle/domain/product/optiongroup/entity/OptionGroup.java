@@ -1,7 +1,6 @@
 package com.example.evostyle.domain.product.optiongroup.entity;
 
 import com.example.evostyle.domain.product.entity.Product;
-import com.example.evostyle.domain.product.productdetail.entity.ProductDetail;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -18,7 +17,7 @@ public class OptionGroup {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "option_group_id")
+    @JoinColumn(name = "product_id")
     private Product product;
 
     @Column(length = 15, nullable = false)
