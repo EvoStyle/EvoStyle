@@ -9,7 +9,11 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Table(name = "brand_category_mappings")
+@Table(
+        name = "brand_category_mappings",
+        uniqueConstraints = {@UniqueConstraint(
+                name = "uk_brand_category_combination",
+                columnNames = "brand_id, brand_category_id")})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class BrandCategoryMapping extends BaseEntity {
 
@@ -31,7 +35,7 @@ public class BrandCategoryMapping extends BaseEntity {
         this.brandCategory = brandCategory;
     }
 
-    public static BrandCategoryMapping of (Brand brand, BrandCategory brandCategory) {
+    public static BrandCategoryMapping of(Brand brand, BrandCategory brandCategory) {
         return new BrandCategoryMapping(brand, brandCategory);
     }
 }
