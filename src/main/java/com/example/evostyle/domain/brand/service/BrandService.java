@@ -1,7 +1,5 @@
 package com.example.evostyle.domain.brand.service;
 
-import com.example.evostyle.common.util.JwtUtil;
-import com.example.evostyle.common.util.LoginMemberUtil;
 import com.example.evostyle.domain.brand.brandcategory.BrandCategory;
 import com.example.evostyle.domain.brand.brandcategory.BrandCategoryMapping;
 import com.example.evostyle.domain.brand.brandcategory.BrandCategoryMappingRepository;
@@ -9,13 +7,13 @@ import com.example.evostyle.domain.brand.brandcategory.BrandCategoryRepository;
 import com.example.evostyle.domain.brand.dto.request.CreateBrandRequest;
 import com.example.evostyle.domain.brand.dto.response.CategoryInfo;
 import com.example.evostyle.domain.brand.dto.response.CreateBrandResponse;
+import com.example.evostyle.domain.brand.dto.response.ReadBrandResponse;
 import com.example.evostyle.domain.brand.entity.Brand;
 import com.example.evostyle.domain.brand.repository.BrandRepository;
 import com.example.evostyle.domain.member.entity.Member;
 import com.example.evostyle.domain.member.repository.MemberRepository;
 import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.NotFoundException;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,12 +28,11 @@ public class BrandService {
     private final MemberRepository memberRepository;
     private final BrandCategoryRepository brandCategoryRepository;
     private final BrandCategoryMappingRepository brandCategoryMappingRepository;
-    private final JwtUtil jwtUtil;
 
     @Transactional
-    public CreateBrandResponse createBrand(CreateBrandRequest request, HttpServletRequest httpServletRequest) {
+    public CreateBrandResponse createBrand(CreateBrandRequest request) {
 
-        Long memberId = LoginMemberUtil.getMemberId(httpServletRequest, jwtUtil);
+        Long memberId = 1L;
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
@@ -58,5 +55,20 @@ public class BrandService {
                 .toList();
 
         return CreateBrandResponse.from(brand, categoryInfoList);
+    }
+
+    public List<ReadBrandResponse> readAllBrands() {
+
+        List<Brand> brandList = brandRepository.findByIsDeletedFalse();
+
+        return brandList.stream().map(ReadBrandResponse::from).toList();
+    }
+
+    public ReadBrandResponse readBrandById(Long brandId) {
+
+        Brand brand = brandRepository.findByIdAndIsDeletedFalse(brandId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.BRAND_NOT_FOUND));
+
+        return ReadBrandResponse.from(brand);
     }
 }
