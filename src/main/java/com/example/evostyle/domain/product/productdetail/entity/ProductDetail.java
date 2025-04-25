@@ -28,7 +28,7 @@ public class ProductDetail extends BaseEntity {
         this.stock = stock ;
     }
 
-    public ProductDetail of(Product product, Integer stock){
+    public static ProductDetail of(Product product, Integer stock){
         return new ProductDetail(product, stock);
     }
 }
