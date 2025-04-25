@@ -21,8 +21,8 @@ public class OptionService {
     private final OptionGroupRepository optionGroupRepository;
     private final OptionRepository optionRepository;
 
-    public List<OptionResponse> readByOptionGroup(Long optionGroupId){
-        if(!optionGroupRepository.existsById(optionGroupId)){
+    public List<OptionResponse> readByOptionGroup(Long optionGroupId) {
+        if (!optionGroupRepository.existsById(optionGroupId)) {
             throw new NotFoundException(ErrorCode.OPTION_GROUP_NOT_FOUND);
         }
 
@@ -31,7 +31,7 @@ public class OptionService {
     }
 
     @Transactional
-    public OptionResponse updateOption(UpdateOptionRequest request, Long optionId){
+    public OptionResponse updateOption(UpdateOptionRequest request, Long optionId) {
         Option option = optionRepository.findById(optionId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.OPTION_NOT_FOUND));
 
@@ -41,8 +41,8 @@ public class OptionService {
     }
 
     @Transactional
-    public void deleteOption(Long optionId){
-        if(!optionRepository.existsById(optionId)){
+    public void deleteOption(Long optionId) {
+        if (!optionRepository.existsById(optionId)) {
             throw new NotFoundException(ErrorCode.OPTION_NOT_FOUND);
         }
 

@@ -16,6 +16,7 @@ import com.example.evostyle.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
 @Service
@@ -23,49 +24,49 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OptionGroupService {
 
-    private final OptionGroupRepository optionGroupRepository ;
-    private final OptionRepository optionRepository ;
-    private final ProductRepository productRepository ;
+    private final OptionGroupRepository optionGroupRepository;
+    private final OptionRepository optionRepository;
+    private final ProductRepository productRepository;
 
     @Transactional
-    public CreateOptionGroupResponse createOptionGroupWithOptions(CreateOptionGroupRequest request, Long productId){
+    public CreateOptionGroupResponse createOptionGroupWithOptions(CreateOptionGroupRequest request, Long productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND));
 
-       OptionGroup optionGroup = optionGroupRepository.save(OptionGroup.of(request.name(), product));
+        OptionGroup optionGroup = optionGroupRepository.save(OptionGroup.of(request.name(), product));
 
         List<OptionResponse> optionResponseList = request.optionRequestList().stream()
-                                                .map(r -> Option.of(optionGroup, r.type()))
-                                                .map(optionRepository::save)
-                                                .map(OptionResponse::from)
-                                                .toList();
+                .map(r -> Option.of(optionGroup, r.type()))
+                .map(optionRepository::save)
+                .map(OptionResponse::from)
+                .toList();
 
-      return CreateOptionGroupResponse.from(optionGroup, optionResponseList);
+        return CreateOptionGroupResponse.from(optionGroup, optionResponseList);
     }
 
-    public List<OptionGroupResponse> readOptionGroupByProduct(Long productId){
-        if(!productRepository.existsById(productId)){
+    public List<OptionGroupResponse> readOptionGroupByProduct(Long productId) {
+        if (!productRepository.existsById(productId)) {
             throw new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND);
         }
 
         return optionGroupRepository.findByProductId(productId)
-                                    .stream().map(OptionGroupResponse::from).toList();
+                .stream().map(OptionGroupResponse::from).toList();
     }
 
     @Transactional
-    public OptionGroupResponse updateOptionGroupName(UpdateOptionGroupRequest request, Long optionGroupId){
+    public OptionGroupResponse updateOptionGroupName(UpdateOptionGroupRequest request, Long optionGroupId) {
 
-      OptionGroup optionGroup = optionGroupRepository.findById(optionGroupId)
+        OptionGroup optionGroup = optionGroupRepository.findById(optionGroupId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.OPTION_GROUP_NOT_FOUND));
 
 
-      optionGroup.update(request.name());
-      return OptionGroupResponse.from(optionGroup);
+        optionGroup.update(request.name());
+        return OptionGroupResponse.from(optionGroup);
     }
 
     @Transactional
-    public void deleteOptionGroup(Long optionGroupId){
-        if(!optionGroupRepository.existsById(optionGroupId)){
+    public void deleteOptionGroup(Long optionGroupId) {
+        if (!optionGroupRepository.existsById(optionGroupId)) {
             throw new NotFoundException(ErrorCode.OPTION_GROUP_NOT_FOUND);
         }
 

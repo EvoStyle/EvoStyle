@@ -20,7 +20,7 @@ public class OptionController {
     public final OptionService optionService;
 
     @GetMapping("optionGroups/{optionGroupId}/options")
-    public ResponseEntity<List<OptionResponse>> readByOptionGroup(@PathVariable(name = "optionGroupId")Long optionGroupId){
+    public ResponseEntity<List<OptionResponse>> readByOptionGroup(@PathVariable(name = "optionGroupId") Long optionGroupId) {
 
         List<OptionResponse> responseList = optionService.readByOptionGroup(optionGroupId);
 
@@ -29,17 +29,17 @@ public class OptionController {
 
     @PatchMapping("/options/{optionId}")
     public ResponseEntity<OptionResponse> updateOption(@RequestBody UpdateOptionRequest request,
-                                                       @PathVariable Long optionId){
+                                                       @PathVariable Long optionId) {
 
         OptionResponse response = optionService.updateOption(request, optionId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @DeleteMapping("/options/{optionId}")
-    public ResponseEntity<Map<String, Long>> deleteOption(@PathVariable(name = "optionId")Long optionId){
+    public ResponseEntity<Map<String, Long>> deleteOption(@PathVariable(name = "optionId") Long optionId) {
 
         optionService.deleteOption(optionId);
 
-        return ResponseEntity.status(HttpStatus.OK).body(Map.of("optionId",optionId));
+        return ResponseEntity.status(HttpStatus.OK).body(Map.of("optionId", optionId));
     }
 }
