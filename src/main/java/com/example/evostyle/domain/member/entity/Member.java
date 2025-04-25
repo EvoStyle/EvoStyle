@@ -6,12 +6,17 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Table(name = "members")
+@FilterDef(name = "deletedFilter", parameters = @ParamDef(name = "is_deleted", type = Boolean.class))
+@Filter(name = "deletedFilter", condition = "is_deleted = :isDeleted")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member extends BaseEntity{
 
@@ -73,5 +78,10 @@ public class Member extends BaseEntity{
         this.nickname = nickname;
         this.age = age;
         this.phoneNumber = phoneNumber;
+    }
+
+    public void deleteMember() {
+        this.isDeleted = true;
+        this.deletedAt = LocalDateTime.now();
     }
 }
