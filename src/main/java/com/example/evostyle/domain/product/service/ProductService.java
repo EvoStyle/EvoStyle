@@ -35,6 +35,7 @@ public class ProductService {
         ProductCategory category = productCategoryRepository.findById(request.categoryId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PRDUCT_CATEGORY_NOT_FOUND));
 
+
         Product product = Product.of(brand, request.name(), request.price(), request.description());
 
 
