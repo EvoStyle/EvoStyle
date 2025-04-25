@@ -12,14 +12,17 @@ import com.example.evostyle.domain.brand.entity.Brand;
 import com.example.evostyle.domain.brand.repository.BrandRepository;
 import com.example.evostyle.domain.member.entity.Member;
 import com.example.evostyle.domain.member.repository.MemberRepository;
+import com.example.evostyle.global.exception.BadRequestException;
 import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -38,6 +41,10 @@ public class BrandService {
                 .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
         List<BrandCategory> brandCategoryList = brandCategoryRepository.findAllById(request.categoryIdList());
+
+        if (brandRepository.existsByName(request.name())) {
+            throw new BadRequestException(ErrorCode.BRAND_NAME_DUPLICATED);
+        }
 
         Brand brand = Brand.of(request.name(), member, brandCategoryList);
 
@@ -61,7 +68,15 @@ public class BrandService {
 
         List<Brand> brandList = brandRepository.findByIsDeletedFalse();
 
-        return brandList.stream().map(ReadBrandResponse::from).toList();
+        List<ReadBrandResponse> responseList = brandList.stream()
+                .map(brand -> {
+                    List<CategoryInfo> categoryInfoList = brandCategoryRepository.findCategoryInfoByBrand(brand);
+
+                    return ReadBrandResponse.from(brand, categoryInfoList);
+
+                }).toList();
+
+        return responseList;
     }
 
     public ReadBrandResponse readBrandById(Long brandId) {
@@ -69,6 +84,8 @@ public class BrandService {
         Brand brand = brandRepository.findByIdAndIsDeletedFalse(brandId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.BRAND_NOT_FOUND));
 
-        return ReadBrandResponse.from(brand);
+        List<CategoryInfo> categoryInfoList = brandCategoryRepository.findCategoryInfoByBrand(brand);
+
+        return ReadBrandResponse.from(brand, categoryInfoList);
     }
 }

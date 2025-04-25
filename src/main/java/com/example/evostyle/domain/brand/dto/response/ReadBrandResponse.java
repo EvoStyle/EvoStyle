@@ -2,12 +2,15 @@ package com.example.evostyle.domain.brand.dto.response;
 
 import com.example.evostyle.domain.brand.entity.Brand;
 
-public record ReadBrandResponse(Long id, String name) {
+import java.util.List;
 
-    public static ReadBrandResponse from(Brand brand) {
+public record ReadBrandResponse(Long id, String name, List<CategoryInfo> brandCategoryInfoList) {
+
+    public static ReadBrandResponse from(Brand brand, List<CategoryInfo> brandCategoryInfoList) {
         return new ReadBrandResponse(
                 brand.getId(),
-                brand.getName()
+                brand.getName(),
+                brandCategoryInfoList
         );
     }
 }
