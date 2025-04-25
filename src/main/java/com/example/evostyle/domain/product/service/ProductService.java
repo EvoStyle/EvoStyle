@@ -19,31 +19,32 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class ProductService {
 
     private final ProductCategoryRepository productCategoryRepository;
     private final ProductCategoryMappingRepository categoryMappingRepository;
-    private final ProductRepository productRepository ;
+    private final ProductRepository productRepository;
     private final BrandRepository brandRepository;
 
-
+    @Transactional
     public ProductResponse createProduct(CreateProductRequest request){
         Brand brand = brandRepository.findById(request.brandId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.BRAND_NOT_FOUND));
 
         ProductCategory category = productCategoryRepository.findById(request.categoryId())
-                .orElseThrow(()->new NotFoundException(ErrorCode.PRODUCT_CATEGORY_NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PRDUCT_CATEGORY_NOT_FOUND));
+
 
         Product product = Product.of(brand, request.name(), request.price(), request.description());
-        Product savedProduct = productRepository.save(product);
+
 
         categoryMappingRepository.save(ProductCategoryMapping.of(product, category));
 
-        return ProductResponse.from(savedProduct);
+        return ProductResponse.from(product);
     }
 
-    @Transactional(readOnly = true)
+
     public ProductResponse readProduct(Long productId){
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND));
@@ -51,6 +52,7 @@ public class ProductService {
         return ProductResponse.from(product);
     }
 
+    @Transactional
     public ProductResponse updateProduct(UpdateProductRequest request, Long productId){
 
         Product product = productRepository.findById(productId)
@@ -61,6 +63,7 @@ public class ProductService {
        return ProductResponse.from(product);
     }
 
+    @Transactional
    public void deleteProduct(Long productId){
         if(!productRepository.existsById(productId)){
             throw new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND);

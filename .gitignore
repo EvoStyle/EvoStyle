@@ -35,3 +35,7 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### yml ###
+/src/main/resources/application-secret.yml
+/src/main/resources/dummy-for-dev.sql
