@@ -35,7 +35,7 @@ public class OptionService {
         Option option = optionRepository.findById(optionId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.OPTION_NOT_FOUND));
 
-        option.update(request.type());
+        option.updateType(request.type());
 
         return OptionResponse.from(option);
     }

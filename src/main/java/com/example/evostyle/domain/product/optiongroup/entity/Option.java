@@ -31,7 +31,7 @@ public class Option {
         return new Option(optionGroup, type);
     }
 
-    public void update(String type){
+    public void updateType(String type){
         this.type = type;
     }
 
