@@ -9,7 +9,7 @@ public class CategoryInfo {
     private final Long id;
     private final String name;
 
-    public CategoryInfo( Long id, String name) {
+    public CategoryInfo(Long id, String name) {
         this.id = id;
         this.name = name;
     }

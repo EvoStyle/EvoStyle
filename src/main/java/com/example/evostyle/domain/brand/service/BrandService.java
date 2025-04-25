@@ -35,6 +35,7 @@ public class BrandService {
     @Transactional
     public CreateBrandResponse createBrand(CreateBrandRequest request) {
 
+        // todo 인증 인가 구현되면 수정 예정
         Long memberId = 1L;
 
         Member member = memberRepository.findById(memberId)
