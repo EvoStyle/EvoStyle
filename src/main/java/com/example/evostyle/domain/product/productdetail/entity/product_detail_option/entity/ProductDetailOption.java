@@ -2,7 +2,7 @@ package com.example.evostyle.domain.product.productdetail.entity.product_detail_
 
 
 import com.example.evostyle.domain.product.optiongroup.entity.OptionGroup;
-import com.example.evostyle.domain.product.optiongroup.option.entity.Option;
+import com.example.evostyle.domain.product.optiongroup.entity.Option;
 import com.example.evostyle.domain.product.productdetail.entity.ProductDetail;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
