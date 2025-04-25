@@ -1,5 +1,7 @@
 package com.example.evostyle.domain.brand.service;
 
+import com.example.evostyle.common.util.JwtUtil;
+import com.example.evostyle.common.util.LoginMemberUtil;
 import com.example.evostyle.domain.brand.brandcategory.BrandCategory;
 import com.example.evostyle.domain.brand.brandcategory.BrandCategoryMapping;
 import com.example.evostyle.domain.brand.brandcategory.BrandCategoryMappingRepository;
@@ -11,6 +13,9 @@ import com.example.evostyle.domain.brand.entity.Brand;
 import com.example.evostyle.domain.brand.repository.BrandRepository;
 import com.example.evostyle.domain.member.entity.Member;
 import com.example.evostyle.domain.member.repository.MemberRepository;
+import com.example.evostyle.global.exception.ErrorCode;
+import com.example.evostyle.global.exception.NotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,20 +24,25 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class BrandService {
     private final BrandRepository brandRepository;
     private final MemberRepository memberRepository;
     private final BrandCategoryRepository brandCategoryRepository;
     private final BrandCategoryMappingRepository brandCategoryMappingRepository;
+    private final JwtUtil jwtUtil;
 
     @Transactional
-    public CreateBrandResponse createBrand(CreateBrandRequest requestDto) {
+    public CreateBrandResponse createBrand(CreateBrandRequest request, HttpServletRequest httpServletRequest) {
 
-        Member member = memberRepository.findById(1L).orElseThrow();
+        Long memberId = LoginMemberUtil.getMemberId(httpServletRequest, jwtUtil);
 
-        List<BrandCategory> brandCategoryList = brandCategoryRepository.findAllById(requestDto.categoryIdList());
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
-        Brand brand = Brand.of(requestDto.name(), member, brandCategoryList);
+        List<BrandCategory> brandCategoryList = brandCategoryRepository.findAllById(request.categoryIdList());
+
+        Brand brand = Brand.of(request.name(), member, brandCategoryList);
 
         brandRepository.save(brand);
 
