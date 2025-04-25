@@ -18,8 +18,11 @@ public class MemberController {
     private final MemberService memberService;
 
     @GetMapping("/{memberId}")
-    public ResponseEntity<MemberResponse> readMember(@PathVariable(name = "memberId") Long memberId) {
-        MemberResponse memberResponse = memberService.readMember(memberId);
+    public ResponseEntity<MemberResponse> readMember(
+        @PathVariable(name = "memberId") Long memberId,
+        HttpServletRequest request
+    ) {
+        MemberResponse memberResponse = memberService.readMember(memberId, request);
 
         return ResponseEntity.status(HttpStatus.OK).body(memberResponse);
     }
@@ -27,9 +30,10 @@ public class MemberController {
     @PatchMapping("/{memberId}")
     public ResponseEntity<MemberResponse> updateMember(
         @PathVariable(name = "memberId") Long memberId,
-        @RequestBody UpdateMemberRequest request
+        @RequestBody UpdateMemberRequest request,
+        HttpServletRequest httpServletRequest
     ) {
-        MemberResponse memberResponse = memberService.updateMember(memberId, request);
+        MemberResponse memberResponse = memberService.updateMember(memberId, request, httpServletRequest);
 
         return ResponseEntity.status(HttpStatus.OK).body(memberResponse);
     }
