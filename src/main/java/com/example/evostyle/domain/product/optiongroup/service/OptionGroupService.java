@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class OptionGroupService {
 
@@ -27,6 +27,7 @@ public class OptionGroupService {
     private final OptionRepository optionRepository ;
     private final ProductRepository productRepository ;
 
+    @Transactional
     public CreateOptionGroupResponse createOptionGroupWithOptions(CreateOptionGroupRequest request, Long productId){
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND));
@@ -51,6 +52,7 @@ public class OptionGroupService {
                                     .stream().map(OptionGroupResponse::from).toList();
     }
 
+    @Transactional
     public OptionGroupResponse updateOptionGroupName(UpdateOptionGroupRequest request, Long optionGroupId){
 
       OptionGroup optionGroup = optionGroupRepository.findById(optionGroupId)
@@ -61,6 +63,7 @@ public class OptionGroupService {
       return OptionGroupResponse.from(optionGroup);
     }
 
+    @Transactional
     public void deleteOptionGroup(Long optionGroupId){
         if(!optionGroupRepository.existsById(optionGroupId)){
             throw new NotFoundException(ErrorCode.OPTION_GROUP_NOT_FOUND);

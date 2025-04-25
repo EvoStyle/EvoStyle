@@ -21,9 +21,8 @@ import java.util.Map;
 public class OptionGroupController {
 
     private final OptionGroupService optionGroupService ;
-    private final ProductService productService;
 
-    @PostMapping("/products/{productId}/optionGroups/options")
+    @PostMapping("/products/{productId}/optionGroups")
     public ResponseEntity<CreateOptionGroupResponse> createOptionGroup(@RequestBody CreateOptionGroupRequest request,
                                                                        @PathVariable(name = "productId")Long productId){
 
@@ -50,7 +49,6 @@ public class OptionGroupController {
     public ResponseEntity<Map<String, Long>> deleteOptionGroup(@PathVariable(name = "optionGroupId")Long optionGroupId){
 
         optionGroupService.deleteOptionGroup(optionGroupId);
-
         return ResponseEntity.status(HttpStatus.OK).body(Map.of("optionGroupId", optionGroupId));
     }
 }
