@@ -1,6 +1,5 @@
-package com.example.evostyle.domain.product.optiongroup.option.entity;
+package com.example.evostyle.domain.product.optiongroup.entity;
 
-import com.example.evostyle.domain.product.optiongroup.entity.OptionGroup;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -30,6 +29,10 @@ public class Option {
 
     public static Option of(OptionGroup optionGroup, String type){
         return new Option(optionGroup, type);
+    }
+
+    public void updateType(String type){
+        this.type = type;
     }
 
 }
