@@ -9,10 +9,12 @@ import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class OptionService {
 
@@ -28,6 +30,7 @@ public class OptionService {
                 .map(OptionResponse::from).toList();
     }
 
+    @Transactional
     public OptionResponse updateOption(UpdateOptionRequest request, Long optionId){
         Option option = optionRepository.findById(optionId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.OPTION_NOT_FOUND));
@@ -37,6 +40,7 @@ public class OptionService {
         return OptionResponse.from(option);
     }
 
+    @Transactional
     public void deleteOption(Long optionId){
         if(!optionRepository.existsById(optionId)){
             throw new NotFoundException(ErrorCode.OPTION_NOT_FOUND);
