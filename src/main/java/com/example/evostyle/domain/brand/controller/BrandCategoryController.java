@@ -1,6 +1,7 @@
 package com.example.evostyle.domain.brand.controller;
 
 import com.example.evostyle.domain.brand.dto.request.UpdateBrandCategoryRequest;
+import com.example.evostyle.domain.brand.dto.response.CategoryInfo;
 import com.example.evostyle.domain.brand.dto.response.UpdateBrandCategoryResponse;
 import com.example.evostyle.domain.brand.service.BrandCategoryService;
 import jakarta.validation.Valid;
@@ -19,6 +20,13 @@ public class BrandCategoryController {
 
     private final BrandCategoryService brandCategoryService;
 
+    @GetMapping("/brands/categories")
+    public ResponseEntity<List<CategoryInfo>> readAllBrandCategories () {
+
+        List<CategoryInfo> categoryInfoList = brandCategoryService.readAllBrandCategories();
+
+        return ResponseEntity.status(HttpStatus.OK).body(categoryInfoList);
+    }
 
     @PatchMapping("/brands/{brandId}/categories")
     public ResponseEntity<UpdateBrandCategoryResponse> updateBrandCategories(

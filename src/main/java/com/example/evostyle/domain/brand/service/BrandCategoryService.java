@@ -17,12 +17,19 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class BrandCategoryService {
 
     private final BrandCategoryRepository brandCategoryRepository;
     private final BrandCategoryMappingRepository brandCategoryMappingRepository;
     private final BrandRepository brandRepository;
+
+    public List<CategoryInfo> readAllBrandCategories() {
+
+        List<BrandCategory> brandCategoryList = brandCategoryRepository.findAll();
+
+        return brandCategoryList.stream().map(CategoryInfo::from).toList();
+    }
 
     @Transactional
     public UpdateBrandCategoryResponse updateBrandCategories(
