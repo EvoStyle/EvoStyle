@@ -25,6 +25,8 @@ public enum ErrorCode {
     NON_EXISTENT_BRAND_CATEGORY(HttpStatus.BAD_REQUEST, "요청한 카테고리 중 유효한 항목이 없습니다."),
     CATEGORY_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "브랜드 카테고리는 최대 3개까지입니다."),
     BRAND_CATEGORY_MAPPING_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 브랜드 카테고리 매핑입니다."),
+    BRAND_CATEGORY_MAPPING_DUPLICATED(HttpStatus.BAD_REQUEST, "이미 존재하는 브랜드 카테고리 매핑입니다."),
+    BRAND_CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 브랜드 카테고리입니다."),
 
     //주문 관련
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "주문이 존재하지 않습니다."),

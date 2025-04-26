@@ -38,4 +38,8 @@ public class BrandCategoryMapping extends BaseEntity {
     public static BrandCategoryMapping of(Brand brand, BrandCategory brandCategory) {
         return new BrandCategoryMapping(brand, brandCategory);
     }
+
+    public void update(BrandCategory brandCategory) {
+        this.brandCategory = brandCategory;
+    }
 }
