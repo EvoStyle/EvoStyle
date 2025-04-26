@@ -1,9 +1,6 @@
 package com.example.evostyle.domain.member.service;
 
-import com.example.evostyle.common.util.JwtUtil;
-import com.example.evostyle.common.util.LoginMemberUtil;
 import com.example.evostyle.domain.member.dto.request.UpdateMemberRequest;
-import com.example.evostyle.domain.member.dto.response.DeleteMemberResponse;
 import com.example.evostyle.domain.member.dto.response.MemberResponse;
 import com.example.evostyle.domain.member.entity.Member;
 import com.example.evostyle.domain.member.repository.MemberRepository;
@@ -11,10 +8,8 @@ import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.ForbiddenException;
 import com.example.evostyle.global.exception.NotFoundException;
 import com.example.evostyle.global.exception.UnauthorizedException;
-import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.Session;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,16 +18,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class MemberService {
 
-    private final EntityManager entityManager;
     private final MemberRepository memberRepository;
-    private final JwtUtil jwtUtil;
 
     public MemberResponse readMember(Long memberId, HttpServletRequest request) {
-        enableSoftDeleteFilter();
+        Long loginMemberId = (Long) request.getAttribute("memberId");
 
-        Long loginMemberId = LoginMemberUtil.getMemberId(request, jwtUtil);
-
-        Member member = memberRepository.findById(memberId)
+        Member member = memberRepository.findByIdAndIsDeletedFalse(memberId)
             .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
         if (!member.getId().equals(loginMemberId)) {
@@ -44,11 +35,9 @@ public class MemberService {
 
     @Transactional
     public MemberResponse updateMember(Long memberId, UpdateMemberRequest request, HttpServletRequest httpServletRequest) {
-        enableSoftDeleteFilter();
+        Long loginMemberId = (Long) httpServletRequest.getAttribute("memberId");
 
-        Long loginMemberId = LoginMemberUtil.getMemberId(httpServletRequest, jwtUtil);
-
-        Member member = memberRepository.findById(memberId)
+        Member member = memberRepository.findByIdAndIsDeletedFalse(memberId)
             .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
         if (!member.getId().equals(loginMemberId)) {
@@ -61,10 +50,8 @@ public class MemberService {
     }
 
     @Transactional
-    public DeleteMemberResponse deleteMember(Long memberId, HttpServletRequest request) {
-        enableSoftDeleteFilter();
-
-        Long loginMemberId = LoginMemberUtil.getMemberId(request, jwtUtil);
+    public void deleteMember(Long memberId, HttpServletRequest request) {
+        Long loginMemberId = (Long) request.getAttribute("memberId");
 
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
@@ -74,14 +61,5 @@ public class MemberService {
         }
 
         member.deleteMember();
-
-        return DeleteMemberResponse.from(member);
-    }
-
-    // soft delete 적용하는 filter
-    private void enableSoftDeleteFilter() {
-        entityManager.unwrap(Session.class)
-            .enableFilter("deletedFilter")
-            .setParameter("isDeleted", false);
     }
 }
