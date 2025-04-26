@@ -9,9 +9,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnDefault;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -32,19 +30,16 @@ public class Brand extends BaseEntity {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @Column(name = "is_deleted")
-    @ColumnDefault("false")
-    private boolean isDeleted = false;
-
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
-
     private Brand(String name, Member member) {
         this.name = name;
         this.member = member;
     }
 
-    public static Brand of(String name, Member member, List<BrandCategory> brandCategoryList) {
+    public static Brand of(
+            String name,
+            Member member,
+            List<BrandCategory> brandCategoryList
+    ) {
         validateBrandCategoryLimit(brandCategoryList);
         return new Brand(name, member);
     }
@@ -55,5 +50,13 @@ public class Brand extends BaseEntity {
         if (brandCategoryList.size() > BRAND_CATEGORY_LIMIT) {
             throw new BadRequestException(ErrorCode.CATEGORY_LIMIT_EXCEEDED);
         }
+
+        if (brandCategoryList.isEmpty()) {
+            throw new BadRequestException(ErrorCode.NON_EXISTENT_BRAND_CATEGORY);
+        }
+    }
+
+    public void updateName(String name) {
+        this.name = name;
     }
 }

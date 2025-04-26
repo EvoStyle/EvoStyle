@@ -1,9 +1,12 @@
 package com.example.evostyle.domain.brand.controller;
 
 import com.example.evostyle.domain.brand.dto.request.CreateBrandRequest;
+import com.example.evostyle.domain.brand.dto.request.UpdateBrandNameRequest;
 import com.example.evostyle.domain.brand.dto.response.CreateBrandResponse;
 import com.example.evostyle.domain.brand.dto.response.ReadBrandResponse;
+import com.example.evostyle.domain.brand.dto.response.UpdateBrandNameResponse;
 import com.example.evostyle.domain.brand.service.BrandService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,9 +36,19 @@ public class BrandController {
     }
 
     @GetMapping("/brands/{brandId}")
-    public ResponseEntity<ReadBrandResponse> readBrandById(@PathVariable(name = "brandId")Long brandId ) {
+    public ResponseEntity<ReadBrandResponse> readBrandById(@PathVariable(name = "brandId") Long brandId) {
 
         ReadBrandResponse response = brandService.readBrandById(brandId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PutMapping("/brands/{brandId}")
+    public ResponseEntity<UpdateBrandNameResponse> updateBrandName(
+            @RequestBody @Valid UpdateBrandNameRequest request,
+            @PathVariable(name = "brandId") Long brandId
+    ) {
+        UpdateBrandNameResponse response = brandService.updateBrandName(request, brandId);
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
