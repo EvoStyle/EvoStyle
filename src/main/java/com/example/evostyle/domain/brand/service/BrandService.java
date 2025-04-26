@@ -112,4 +112,16 @@ public class BrandService {
 
         return UpdateBrandNameResponse.from(brand, categoryInfoList);
     }
+
+    @Transactional
+    public void deleteBrand(Long brandId) {
+
+        if (!brandRepository.existsById(brandId)) {
+            throw new NotFoundException(ErrorCode.BRAND_NOT_FOUND);
+        }
+        brandCategoryMappingRepository.deleteByBrandId(brandId);
+
+        brandRepository.deleteById(brandId);
+
+    }
 }

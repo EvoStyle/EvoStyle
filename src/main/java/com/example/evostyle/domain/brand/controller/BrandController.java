@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -51,5 +52,12 @@ public class BrandController {
         UpdateBrandNameResponse response = brandService.updateBrandName(request, brandId);
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @DeleteMapping("/brands/{brandId}")
+    public ResponseEntity<Map<String, Long>> deleteBrand(@PathVariable(name = "brandId") Long brandId) {
+        brandService.deleteBrand(brandId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(Map.of("brandId", brandId));
     }
 }
