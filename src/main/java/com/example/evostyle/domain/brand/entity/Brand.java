@@ -2,6 +2,7 @@ package com.example.evostyle.domain.brand.entity;
 
 import com.example.evostyle.common.entity.BaseEntity;
 import com.example.evostyle.domain.brand.brandcategory.BrandCategory;
+import com.example.evostyle.domain.brand.brandcategory.BrandCategoryLimit;
 import com.example.evostyle.domain.member.entity.Member;
 import com.example.evostyle.global.exception.BadRequestException;
 import com.example.evostyle.global.exception.ErrorCode;
@@ -44,10 +45,8 @@ public class Brand extends BaseEntity {
         return new Brand(name, member);
     }
 
-    private static final int BRAND_CATEGORY_LIMIT = 3;
-
     public static void validateBrandCategoryLimit(List<BrandCategory> brandCategoryList) {
-        if (brandCategoryList.size() > BRAND_CATEGORY_LIMIT) {
+        if (brandCategoryList.size() > BrandCategoryLimit.MAX_CATEGORY_COUNT) {
             throw new BadRequestException(ErrorCode.CATEGORY_LIMIT_EXCEEDED);
         }
 
