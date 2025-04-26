@@ -53,7 +53,7 @@ public class AuthService {
             throw new UnauthorizedException(ErrorCode.INVALID_PASSWORD);
         }
 
-        String token = jwtUtil.createToken(member.getId(), member.getEmail(), member.getAuthority());
+        String token = jwtUtil.createToken(member.getId(), member.getEmail(), member.getNickname(), member.getAuthority());
 
         return LoginResponse.from(token);
     }
