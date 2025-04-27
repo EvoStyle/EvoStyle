@@ -10,10 +10,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@Table(name = "product_detail_options",
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"product_detail_id", "option_id"})
-})
+@Table(name = "product_detail_options")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ProductDetailOption {
 

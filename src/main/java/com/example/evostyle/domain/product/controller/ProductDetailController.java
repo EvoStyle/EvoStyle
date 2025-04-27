@@ -24,4 +24,12 @@ public class ProductDetailController {
         ProductDetailResponse response = productDetailService.createProductDetail(request, productId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @GetMapping("/productDetails/{productDetailId}")
+    public ResponseEntity<ProductDetailResponse> readProductDetail(@PathVariable(name = "productDetailId")Long productDetailId){
+
+        ProductDetailResponse response = productDetailService.readProductDetail(productDetailId);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
 }

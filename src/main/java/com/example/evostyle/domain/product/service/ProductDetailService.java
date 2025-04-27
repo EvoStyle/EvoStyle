@@ -38,14 +38,13 @@ public class ProductDetailService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND));
 
-
         List<Option> optionList = optionRepository.findAllById(request.optionListId());
         HashSet<Long> optionIdSet = new HashSet<>(optionList.stream().map(Option::getId).toList());
 
         //입력받은 옵션아이디가 db에 존재하는 지 확인한다
-       if(!optionIdSet.containsAll(request.optionListId())){
-           throw new NotFoundException(ErrorCode.OPTION_NOT_FOUND);
-       }
+        if (!optionIdSet.containsAll(request.optionListId())) {
+            throw new NotFoundException(ErrorCode.OPTION_NOT_FOUND);
+        }
 
         List<Long> optionGroupIdList = optionGroupRepository.findOptionGroupIdByProductId(productId);
         HashSet<Long> uniqueOptionGroupIdSet = new HashSet<>();
@@ -59,7 +58,7 @@ public class ProductDetailService {
             }
 
             //하나의 옵션그룹의 여러개의 값을 선택하지 않았는지 확인한다
-            if(!uniqueOptionGroupIdSet.add(optionGroupId)){
+            if (!uniqueOptionGroupIdSet.add(optionGroupId)) {
                 throw new InvalidException(ErrorCode.MULTIPLE_OPTION_SELECTED);
             }
         }
@@ -68,9 +67,22 @@ public class ProductDetailService {
         productDetailRepository.save(productDetail);
 
         optionList.stream().map(o -> ProductDetailOption.of(productDetail, o))
-                  .forEach(productDetailOptionRepository::save);
+                .forEach(productDetailOptionRepository::save);
 
         List<OptionResponse> optionResponseList = optionList.stream().map(OptionResponse::from).toList();
         return ProductDetailResponse.from(productDetail, optionResponseList);
     }
+
+    public ProductDetailResponse readProductDetail(Long productDetailId){
+        ProductDetail productDetail = productDetailRepository.findById(productDetailId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND));
+
+        List<OptionResponse> optionResponseList = productDetailOptionRepository.findByProductDetailId(productDetailId).stream()
+                .map(ProductDetailOption::getOption)
+                .map(OptionResponse::from).toList();
+
+        return ProductDetailResponse.from(productDetail, optionResponseList);
+    }
+
+
 }
