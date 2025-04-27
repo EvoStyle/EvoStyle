@@ -1,9 +1,6 @@
 package com.example.evostyle.domain.member.service;
 
-import com.example.evostyle.common.util.JwtUtil;
-import com.example.evostyle.common.util.LoginMemberUtil;
 import com.example.evostyle.domain.member.dto.request.UpdateMemberRequest;
-import com.example.evostyle.domain.member.dto.response.DeleteMemberResponse;
 import com.example.evostyle.domain.member.dto.response.MemberResponse;
 import com.example.evostyle.domain.member.entity.Member;
 import com.example.evostyle.domain.member.repository.MemberRepository;
@@ -21,18 +18,21 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberService {
 
     private final MemberRepository memberRepository;
-    private final JwtUtil jwtUtil;
 
-    public MemberResponse readMember(Long memberId) {
-        Member member = memberRepository.findById(memberId)
+    public MemberResponse readMember(HttpServletRequest request) {
+        Long loginMemberId = (Long) request.getAttribute("memberId");
+
+        Member member = memberRepository.findByIdAndIsDeletedFalse(loginMemberId)
             .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
         return MemberResponse.from(member);
     }
 
     @Transactional
-    public MemberResponse updateMember(Long memberId, UpdateMemberRequest request) {
-        Member member = memberRepository.findById(memberId)
+    public MemberResponse updateMember(UpdateMemberRequest request, HttpServletRequest httpServletRequest) {
+        Long loginMemberId = (Long) httpServletRequest.getAttribute("memberId");
+
+        Member member = memberRepository.findByIdAndIsDeletedFalse(loginMemberId)
             .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
         member.updateMember(request.nickname(), request.age(), request.phoneNumber());
@@ -41,8 +41,8 @@ public class MemberService {
     }
 
     @Transactional
-    public DeleteMemberResponse deleteMember(Long memberId, HttpServletRequest request) {
-        Long loginMemberId = LoginMemberUtil.getMemberId(request, jwtUtil);
+    public void deleteMember(Long memberId, HttpServletRequest request) {
+        Long loginMemberId = (Long) request.getAttribute("memberId");
 
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
@@ -51,8 +51,6 @@ public class MemberService {
             throw new ForbiddenException(ErrorCode.FORBIDDEN_MEMBER_OPERATION);
         }
 
-        memberRepository.delete(member);
-
-        return DeleteMemberResponse.from(member);
+        member.deleteMember();
     }
 }
