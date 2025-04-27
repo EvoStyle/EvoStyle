@@ -2,6 +2,7 @@ package com.example.evostyle.domain.address.service;
 
 import com.example.evostyle.domain.address.dto.request.CreateAddressRequest;
 import com.example.evostyle.domain.address.dto.response.CreateAddressResponse;
+import com.example.evostyle.domain.address.dto.response.ReadAddressResponse;
 import com.example.evostyle.domain.address.entity.Address;
 import com.example.evostyle.domain.address.repository.AddressRepository;
 import com.example.evostyle.domain.member.entity.Member;
@@ -11,6 +12,8 @@ import com.example.evostyle.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -33,5 +36,13 @@ public class AddressService {
         addressRepository.save(address);
 
         return CreateAddressResponse.from(address);
+    }
+
+    public List<ReadAddressResponse> readAllAddresses(Long memberId) {
+        List<Address> addressList = addressRepository.findByMemberId(memberId);
+
+        return addressList.stream()
+            .map(ReadAddressResponse::from)
+            .toList();
     }
 }

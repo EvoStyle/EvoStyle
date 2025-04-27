@@ -2,15 +2,15 @@ package com.example.evostyle.domain.address.controller;
 
 import com.example.evostyle.domain.address.dto.request.CreateAddressRequest;
 import com.example.evostyle.domain.address.dto.response.CreateAddressResponse;
+import com.example.evostyle.domain.address.dto.response.ReadAddressResponse;
 import com.example.evostyle.domain.address.service.AddressService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RequestMapping("/api")
 @RestController
@@ -29,5 +29,14 @@ public class AddressController {
         CreateAddressResponse addressResponse = addressService.createAddress(memberId, request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(addressResponse);
+    }
+
+    @GetMapping("/members/addresses")
+    public ResponseEntity<List<ReadAddressResponse>> readAllAddresses(HttpServletRequest request) {
+        Long memberId = (Long) request.getAttribute("memberId");
+
+        List<ReadAddressResponse> addressResponseList = addressService.readAllAddresses(memberId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(addressResponseList);
     }
 }
