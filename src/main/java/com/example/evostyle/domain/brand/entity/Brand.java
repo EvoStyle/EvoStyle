@@ -55,7 +55,7 @@ public class Brand extends BaseEntity {
         }
     }
 
-    public void updateName(String name) {
+    public void update(String name) {
         this.name = name;
     }
 }

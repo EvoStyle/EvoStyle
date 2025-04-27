@@ -97,7 +97,7 @@ public class BrandService {
     }
 
     @Transactional
-    public UpdateBrandNameResponse updateBrandName(UpdateBrandNameRequest request, Long brandId) {
+    public UpdateBrandNameResponse updateBrand(UpdateBrandNameRequest request, Long brandId) {
 
         Brand brand = brandRepository.findById(brandId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.BRAND_NOT_FOUND));
@@ -106,7 +106,7 @@ public class BrandService {
             throw new BadRequestException(ErrorCode.BRAND_NAME_DUPLICATED);
         }
 
-        brand.updateName(request.name());
+        brand.update(request.name());
 
         List<CategoryInfo> categoryInfoList = brandCategoryRepository.findCategoryInfoByBrand(brand);
 
