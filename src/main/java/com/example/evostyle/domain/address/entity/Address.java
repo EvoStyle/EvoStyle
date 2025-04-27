@@ -57,4 +57,28 @@ public class Address {
     ) {
         return new Address(postCode, siDo, siGunGu, roadNameAddress, detailAddress, extraAddress, member);
     }
+
+    public void update(
+        String postCode, String siDo, String siGunGu,
+        String roadNameAddress, String detailAddress, String extraAddress
+    ) {
+        if (postCode != null && !postCode.isBlank()) {
+            this.postCode = postCode;
+        }
+        if (siDo != null && !siDo.isBlank()) {
+            this.siDo = siDo;
+        }
+        if (siGunGu != null && !siGunGu.isBlank()) {
+            this.siGunGu = siGunGu;
+        }
+        if (roadNameAddress != null && !roadNameAddress.isBlank()) {
+            this.roadNameAddress = roadNameAddress;
+        }
+        if (detailAddress != null && !detailAddress.isBlank()) {
+            this.detailAddress = detailAddress;
+        }
+        if (extraAddress != null && !extraAddress.isBlank()) {
+            this.extraAddress = extraAddress;
+        }
+    }
 }

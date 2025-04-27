@@ -1,8 +1,10 @@
 package com.example.evostyle.domain.address.controller;
 
 import com.example.evostyle.domain.address.dto.request.CreateAddressRequest;
+import com.example.evostyle.domain.address.dto.request.UpdateAddressRequest;
 import com.example.evostyle.domain.address.dto.response.CreateAddressResponse;
 import com.example.evostyle.domain.address.dto.response.ReadAddressResponse;
+import com.example.evostyle.domain.address.dto.response.UpdateAddressResponse;
 import com.example.evostyle.domain.address.service.AddressService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -38,5 +40,18 @@ public class AddressController {
         List<ReadAddressResponse> addressResponseList = addressService.readAllAddresses(memberId);
 
         return ResponseEntity.status(HttpStatus.OK).body(addressResponseList);
+    }
+
+    @PatchMapping("members/addresses/{addressId}")
+    public ResponseEntity<UpdateAddressResponse> updateAddress(
+        @PathVariable(name = "addressId") Long addressId,
+        @RequestBody UpdateAddressRequest request,
+        HttpServletRequest servletRequest
+    ) {
+        Long memberId = (Long) servletRequest.getAttribute("memberId");
+
+        UpdateAddressResponse updateAddressResponse = addressService.updateAddress(memberId, addressId,request);
+
+        return ResponseEntity.status(HttpStatus.OK).body(updateAddressResponse);
     }
 }

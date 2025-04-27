@@ -1,8 +1,10 @@
 package com.example.evostyle.domain.address.service;
 
 import com.example.evostyle.domain.address.dto.request.CreateAddressRequest;
+import com.example.evostyle.domain.address.dto.request.UpdateAddressRequest;
 import com.example.evostyle.domain.address.dto.response.CreateAddressResponse;
 import com.example.evostyle.domain.address.dto.response.ReadAddressResponse;
+import com.example.evostyle.domain.address.dto.response.UpdateAddressResponse;
 import com.example.evostyle.domain.address.entity.Address;
 import com.example.evostyle.domain.address.repository.AddressRepository;
 import com.example.evostyle.domain.member.entity.Member;
@@ -44,5 +46,17 @@ public class AddressService {
         return addressList.stream()
             .map(ReadAddressResponse::from)
             .toList();
+    }
+
+    @Transactional
+    public UpdateAddressResponse updateAddress(Long memberId, Long addressId, UpdateAddressRequest request) {
+        Address address = addressRepository.findByIdAndMemberId(addressId, memberId)
+            .orElseThrow(() -> new NotFoundException(ErrorCode.ADDRESS_NOT_FOUND));
+
+        address.update(
+            request.postCode(), request.siDo(), request.siGunGu(),
+            request.roadNameAddress(), request.detailAddress(), request.extraAddress());
+
+        return UpdateAddressResponse.from(address);
     }
 }
