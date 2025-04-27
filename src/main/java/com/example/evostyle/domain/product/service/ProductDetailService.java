@@ -18,7 +18,6 @@ import com.example.evostyle.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.HashSet;
 import java.util.List;
 
@@ -39,12 +38,19 @@ public class ProductDetailService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND));
 
-        List<Long> optionGroupIdList = optionGroupRepository.findOptionGroupIdByProductId(productId);
+
         List<Option> optionList = optionRepository.findAllById(request.optionListId());
-        HashSet<Long> uniqueOptionGroupIds = new HashSet<>();
+        HashSet<Long> optionIdSet = new HashSet<>(optionList.stream().map(Option::getId).toList());
+
+        //입력받은 옵션아이디가 db에 존재하는 지 확인한다
+       if(!optionIdSet.containsAll(request.optionListId())){
+           throw new NotFoundException(ErrorCode.OPTION_NOT_FOUND);
+       }
+
+        List<Long> optionGroupIdList = optionGroupRepository.findOptionGroupIdByProductId(productId);
+        HashSet<Long> uniqueOptionGroupIdSet = new HashSet<>();
 
         for (Option op : optionList) {
-
             Long optionGroupId = op.getOptionGroup().getId();
 
             //선택한 옵션이 해당상품의 하위 옵션이 맞는지 확인한다
@@ -52,8 +58,8 @@ public class ProductDetailService {
                 throw new InvalidException(ErrorCode.INVALID_PRODUCT_OPTION);
             }
 
-            //하나의 옵션그룹의 여러개의 값을 선택했는지 확인한다
-            if(!uniqueOptionGroupIds.add(optionGroupId)){
+            //하나의 옵션그룹의 여러개의 값을 선택하지 않았는지 확인한다
+            if(!uniqueOptionGroupIdSet.add(optionGroupId)){
                 throw new InvalidException(ErrorCode.MULTIPLE_OPTION_SELECTED);
             }
         }
