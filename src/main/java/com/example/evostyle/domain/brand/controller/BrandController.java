@@ -44,12 +44,12 @@ public class BrandController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @PutMapping("/brands/{brandId}")
-    public ResponseEntity<UpdateBrandNameResponse> updateBrandName(
+    @PatchMapping("/brands/{brandId}")
+    public ResponseEntity<UpdateBrandNameResponse> updateBrand(
             @RequestBody @Valid UpdateBrandNameRequest request,
             @PathVariable(name = "brandId") Long brandId
     ) {
-        UpdateBrandNameResponse response = brandService.updateBrandName(request, brandId);
+        UpdateBrandNameResponse response = brandService.updateBrand(request, brandId);
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }

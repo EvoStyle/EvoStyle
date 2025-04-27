@@ -1,9 +1,8 @@
 package com.example.evostyle.common.util;
 
 import com.example.evostyle.domain.member.entity.Authority;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.example.evostyle.global.exception.*;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -15,78 +14,107 @@ import org.springframework.util.StringUtils;
 import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
 @Slf4j(topic = "JwtUtil")
 @Component
 @RequiredArgsConstructor
 public class JwtUtil {
 
-    public static final String BEARER_PREFIX = "Bearer ";
-    public static final long TOKEN_TIME = 60 * 60 * 1000L;
-    public static final Set<String> expiredTokenSet = new HashSet<>();
+    private static final String BEARER_PREFIX = "Bearer ";
+    private static final long ACCESS_TOKEN_EXPIRATION = 30 * 60 * 1000;  // 30분
 
-    @Value("${JWT_SECRET_KEY}")
+    @Value("${jwt.secret.key}")
     private String secretKey;
 
     private Key key;
-    private final SignatureAlgorithm  signatureAlgorithm = SignatureAlgorithm.HS256;
+    private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
 
     @PostConstruct
     public void init() {
         if (!StringUtils.hasText(secretKey)) {
-            log.error("JWT secret key is null or empty");
-            throw new IllegalArgumentException("JWT secret key must not be null or empty");
+            log.error("JWT secret key is null or empty.");
+            throw new BadRequestException(ErrorCode.MISSING_JWT_SECRET_KEY);
         }
-
         try {
             byte[] bytes = Base64.getDecoder().decode(secretKey);
             key = Keys.hmacShaKeyFor(bytes);
             log.info("JWT secret key initialized successfully");
         } catch (IllegalArgumentException e) {
             log.error("Failed to decode JWT secret key: {}", e.getMessage());
-            throw new IllegalArgumentException("Invalid JWT secret key");
+            throw new InternalServerException(ErrorCode.INVALID_JWT_SECRET_KEY);
         }
     }
 
-    public String createToken(Long memberId, String email, Authority authority) {
+    // Access Token 생성
+    public String createToken(Long memberId, String email, String nickname, Authority authority) {
         Date date = new Date();
 
         return BEARER_PREFIX + Jwts.builder()
             .setSubject(String.valueOf(memberId))
             .claim("email", email)
-            .claim("Authority", authority)
-            .setExpiration(new Date(date.getTime() + TOKEN_TIME))
-            .setIssuedAt(date)
-            .signWith(key, signatureAlgorithm).compact();
+            .claim("nickname", nickname)
+            .claim("authority", authority)
+            .setIssuedAt(new Date())
+            .setExpiration(new Date(date.getTime() + ACCESS_TOKEN_EXPIRATION))
+            .signWith(key, signatureAlgorithm)
+            .compact();
     }
 
-    public String substringTokens(String tokenValue) {
-        if (!StringUtils.hasText(tokenValue)) {
-            throw new IllegalArgumentException("Token must not be null or empty");
-        }
-        if (!tokenValue.startsWith(BEARER_PREFIX)) {
-            throw new IllegalArgumentException("Token does not start with Bearer");
-        }
-        if (StringUtils.hasText(tokenValue) && tokenValue.startsWith(BEARER_PREFIX)) {
-            return tokenValue.substring(7);
+    // 토큰 유효성 검증
+    public boolean validateToken(String token) {
+        try {
+            token = removeBearer(token);
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            return true;
+        } catch (SecurityException | MalformedJwtException e) {
+            log.error("Invalid JWT signature: {}", e.getMessage());
+        } catch (ExpiredJwtException e) {
+            log.error("Expired JWT token: {}", e.getMessage());
+        } catch (UnsupportedJwtException e) {
+            log.error("Unsupported JWT token: {}", e.getMessage());
+        } catch (IllegalArgumentException e) {
+            log.error("JWT claims string is empty: {}", e.getMessage());
         }
 
-        throw new IllegalArgumentException("Not found Token");
+        return false;
     }
 
-    public Claims extractClaims(String token) {
+    // 내부적으로 claim 파싱 처리
+    public Claims parseClaims(String token) {
         try {
             return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
-        } catch (Exception e) {
-            log.error("Failed to parse JWT token: {}", e.getMessage());
-            throw new IllegalArgumentException("Invalid or expired JWT token");
+        } catch (ExpiredJwtException e) {
+            throw new UnauthorizedException(ErrorCode.EXPIRED_JWT_TOKEN);
         }
     }
 
-    public Long getMemberIdFromToken(String token) {
-        Claims claims = extractClaims(token);
-        return Long.parseLong(claims.getSubject());
+    // 토큰에서 사용자 Id 추출
+    public Long getMemberId(String token) {
+        token = removeBearer(token);
+        Claims claims = parseClaims(token);
+        return Long.valueOf(claims.getSubject());
+    }
+
+    // 토큰에서 이메일 추출
+    public String getEmail(String token) {
+        token = removeBearer(token);
+        Claims claims = parseClaims(token);
+        return claims.get("email", String.class);
+    }
+
+    // 토큰에서 회원 권한 추출
+    public String getAuthority(String token) {
+        token = removeBearer(token);
+        Claims claims = parseClaims(token);
+        return claims.get("authority", String.class);
+    }
+
+    // "Bearer " 접두어 제거
+    private String removeBearer(String token) {
+        if (token != null && token.startsWith(BEARER_PREFIX)) {
+            return token.substring(BEARER_PREFIX.length());
+        }
+
+        return token;
     }
 }
