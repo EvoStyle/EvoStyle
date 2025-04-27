@@ -14,13 +14,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/brands")
 @RequiredArgsConstructor
 public class BrandCategoryController {
 
     private final BrandCategoryService brandCategoryService;
 
-    @GetMapping("/brands/categories")
+    @GetMapping("/categories")
     public ResponseEntity<List<CategoryInfo>> readAllBrandCategories () {
 
         List<CategoryInfo> categoryInfoList = brandCategoryService.readAllBrandCategories();
@@ -28,13 +28,13 @@ public class BrandCategoryController {
         return ResponseEntity.status(HttpStatus.OK).body(categoryInfoList);
     }
 
-    @PatchMapping("/brands/{brandId}/categories")
+    @PatchMapping("/{brandId}/categories")
     public ResponseEntity<UpdateBrandCategoryResponse> updateBrandCategories(
-            @RequestBody @Valid @NotEmpty List<@Valid UpdateBrandCategoryRequest> requestList,
+            @RequestBody @Valid UpdateBrandCategoryRequest request,
             @PathVariable(name = "brandId") Long brandId
     ) {
         UpdateBrandCategoryResponse response = brandCategoryService.updateBrandCategories(
-                requestList,
+                request,
                 brandId
         );
 

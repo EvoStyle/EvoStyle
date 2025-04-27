@@ -37,52 +37,32 @@ public class BrandCategoryService {
 
     @Transactional
     public UpdateBrandCategoryResponse updateBrandCategories(
-            List<UpdateBrandCategoryRequest> requestList,
+            UpdateBrandCategoryRequest request,
             Long brandId
     ) {
         Brand brand = brandRepository.findById(brandId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.BRAND_NOT_FOUND));
 
-        if (requestList.size() > BrandCategoryLimit.MAX_CATEGORY_COUNT) {
+        if (request.categoryIdList().size() > BrandCategoryLimit.MAX_CATEGORY_COUNT) {
             throw new BadRequestException(ErrorCode.CATEGORY_LIMIT_EXCEEDED);
         }
 
-        for (UpdateBrandCategoryRequest request : requestList) {
-            Long currentCategoryId = request.currentCategoryId();
-            Long newCategoryId = request.newCategoryId();
+        List<BrandCategoryMapping> currentBrandCategoryMappingList = brandCategoryMappingRepository.findAllByBrandId(brandId);
 
-            boolean currentExists = brandCategoryMappingRepository.existsByBrandIdAndBrandCategoryId(
-                    brandId,
-                    currentCategoryId
-            );
+        brandCategoryMappingRepository.deleteAll(currentBrandCategoryMappingList);
 
-            if (!currentExists) {
-                throw new NotFoundException(ErrorCode.BRAND_CATEGORY_MAPPING_NOT_FOUND);
-            }
+        List<BrandCategoryMapping> newBrandCategoryMappingList = request.categoryIdList()
+                .stream()
+                .map(categoryId -> {
+                    BrandCategory brandCategory = brandCategoryRepository.findById(categoryId)
+                            .orElseThrow(() -> new NotFoundException(ErrorCode.BRAND_CATEGORY_NOT_FOUND));
 
-            boolean newExists = brandCategoryMappingRepository.existsByBrandIdAndBrandCategoryId(
-                    brandId,
-                    newCategoryId
-            );
+                    return BrandCategoryMapping.of(brand, brandCategory);
+                }).toList();
 
-            if (newExists) {
-                throw new BadRequestException(ErrorCode.BRAND_CATEGORY_MAPPING_DUPLICATED);
-            }
+        brandCategoryMappingRepository.saveAll(newBrandCategoryMappingList);
 
-            BrandCategory newBrandCategory = brandCategoryRepository.findById(newCategoryId)
-                    .orElseThrow(() -> new NotFoundException(ErrorCode.BRAND_CATEGORY_NOT_FOUND));
-
-            BrandCategoryMapping brandCategoryMapping = brandCategoryMappingRepository.findByBrandIdAndBrandCategoryId(
-                    brandId,
-                    currentCategoryId
-            ).orElseThrow(() -> new NotFoundException(ErrorCode.BRAND_CATEGORY_MAPPING_NOT_FOUND));
-
-            brandCategoryMapping.update(newBrandCategory);
-        }
-
-        List<BrandCategoryMapping> brandCategoryMappingList = brandCategoryMappingRepository.findAllByBrandId(brandId);
-
-        List<CategoryInfo> categoryInfoList = brandCategoryMappingList.stream()
+        List<CategoryInfo> categoryInfoList = newBrandCategoryMappingList.stream()
                 .map(mapping -> CategoryInfo.from(mapping.getBrandCategory()))
                 .toList();
 
