@@ -59,4 +59,12 @@ public class AddressService {
 
         return UpdateAddressResponse.from(address);
     }
+
+    @Transactional
+    public void deleteAddress(Long addressId, Long memberId) {
+        Address address = addressRepository.findByIdAndMemberId(addressId, memberId)
+            .orElseThrow(() -> new NotFoundException(ErrorCode.ADDRESS_NOT_FOUND));
+
+        addressRepository.delete(address);
+    }
 }

@@ -13,15 +13,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
-@RequestMapping("/api")
+@RequestMapping("/api/members/addresses")
 @RestController
 @RequiredArgsConstructor
 public class AddressController {
 
     private final AddressService addressService;
 
-    @PostMapping("/members/addresses")
+    @PostMapping
     public ResponseEntity<CreateAddressResponse> createAddress(
         @RequestBody CreateAddressRequest request,
         HttpServletRequest servletRequest
@@ -33,7 +34,7 @@ public class AddressController {
         return ResponseEntity.status(HttpStatus.CREATED).body(addressResponse);
     }
 
-    @GetMapping("/members/addresses")
+    @GetMapping
     public ResponseEntity<List<ReadAddressResponse>> readAllAddresses(HttpServletRequest request) {
         Long memberId = (Long) request.getAttribute("memberId");
 
@@ -42,7 +43,7 @@ public class AddressController {
         return ResponseEntity.status(HttpStatus.OK).body(addressResponseList);
     }
 
-    @PatchMapping("members/addresses/{addressId}")
+    @PatchMapping("/{addressId}")
     public ResponseEntity<UpdateAddressResponse> updateAddress(
         @PathVariable(name = "addressId") Long addressId,
         @RequestBody UpdateAddressRequest request,
@@ -50,8 +51,20 @@ public class AddressController {
     ) {
         Long memberId = (Long) servletRequest.getAttribute("memberId");
 
-        UpdateAddressResponse updateAddressResponse = addressService.updateAddress(memberId, addressId,request);
+        UpdateAddressResponse updateAddressResponse = addressService.updateAddress(memberId, addressId, request);
 
         return ResponseEntity.status(HttpStatus.OK).body(updateAddressResponse);
+    }
+
+    @DeleteMapping("/{addressId}")
+    public ResponseEntity<Map<String, Long>> deleteAddress(
+        @PathVariable(name = "addressId") Long addressId,
+        HttpServletRequest request
+    ) {
+        Long memberId = (Long) request.getAttribute("memberId");
+
+        addressService.deleteAddress(addressId, memberId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(Map.of("addressId", addressId));
     }
 }
