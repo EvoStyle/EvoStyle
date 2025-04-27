@@ -11,7 +11,6 @@ import com.example.evostyle.domain.member.repository.MemberRepository;
 import com.example.evostyle.global.exception.ConflictException;
 import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.NotFoundException;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,16 +27,14 @@ public class BookmarkService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public CreateBookmarkResponse createBookmark(Long brandId, HttpServletRequest request) {
-        Long loginMemberId = (Long) request.getAttribute("memberId");
-
-        boolean isBookmarkExists = bookmarkRepository.existsByMemberIdAndBrandId(loginMemberId, brandId);
+    public CreateBookmarkResponse createBookmark(Long memberId, Long brandId) {
+        boolean isBookmarkExists = bookmarkRepository.existsByMemberIdAndBrandId(memberId, brandId);
 
         if (isBookmarkExists) {
             throw new ConflictException(ErrorCode.BOOKMARK_ALREADY_EXISTS);
         }
 
-        Member member = memberRepository.findByIdAndIsDeletedFalse(loginMemberId)
+        Member member = memberRepository.findByIdAndIsDeletedFalse(memberId)
             .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
         Brand brand = brandRepository.findByIdAndIsDeletedFalse(brandId)
@@ -50,10 +47,8 @@ public class BookmarkService {
         return CreateBookmarkResponse.from(bookmark);
     }
 
-    public List<ReadBookmarkResponse> readAllBookmarks(HttpServletRequest request) {
-        Long loginMemberId = (Long) request.getAttribute("memberId");
-
-        List<Bookmark> bookmarkList = bookmarkRepository.findByMemberId(loginMemberId);
+    public List<ReadBookmarkResponse> readAllBookmarks(Long memberId) {
+        List<Bookmark> bookmarkList = bookmarkRepository.findByMemberId(memberId);
 
         return bookmarkList.stream()
             .map(ReadBookmarkResponse::from)
@@ -61,12 +56,10 @@ public class BookmarkService {
     }
 
     @Transactional
-    public Long deleteBookmark(Long brandId, HttpServletRequest request) {
-        Long loginMemberId = (Long) request.getAttribute("memberId");
+    public Long deleteBookmark(Long memberId, Long brandId) {
+        bookmarkRepository.deleteByMemberIdAndBrandId(memberId, brandId);
 
-        bookmarkRepository.deleteByMemberIdAndBrandId(loginMemberId, brandId);
-
-        Bookmark bookmark = bookmarkRepository.findByMemberIdAndBrandId(loginMemberId, brandId)
+        Bookmark bookmark = bookmarkRepository.findByMemberIdAndBrandId(memberId, brandId)
             .orElseThrow(() -> new NotFoundException(ErrorCode.BOOKMARK_NOT_FOUND));
 
         return bookmark.getId();

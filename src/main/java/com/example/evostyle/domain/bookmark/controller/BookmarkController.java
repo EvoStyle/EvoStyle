@@ -24,14 +24,18 @@ public class BookmarkController {
         @RequestParam Long brandId,
         HttpServletRequest request
     ) {
-        CreateBookmarkResponse bookmarkResponse = bookmarkService.createBookmark(brandId, request);
+        Long memberId = (Long) request.getAttribute("memberId");
+
+        CreateBookmarkResponse bookmarkResponse = bookmarkService.createBookmark(memberId, brandId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(bookmarkResponse);
     }
 
     @GetMapping
     public ResponseEntity<List<ReadBookmarkResponse>> readAllBookmarks(HttpServletRequest request) {
-        List<ReadBookmarkResponse> bookmarkResponseList = bookmarkService.readAllBookmarks(request);
+        Long memberId = (Long) request.getAttribute("memberId");
+
+        List<ReadBookmarkResponse> bookmarkResponseList = bookmarkService.readAllBookmarks(memberId);
 
         return ResponseEntity.status(HttpStatus.OK).body(bookmarkResponseList);
     }
@@ -41,7 +45,9 @@ public class BookmarkController {
         @RequestParam Long brandId,
         HttpServletRequest request
     ) {
-        Long deleteBookmarkId = bookmarkService.deleteBookmark(brandId, request);
+        Long memberId = (Long) request.getAttribute("memberId");
+
+        Long deleteBookmarkId = bookmarkService.deleteBookmark(memberId, brandId);
 
         return ResponseEntity.status(HttpStatus.OK).body(Map.of("bookmarkId", deleteBookmarkId));
     }
