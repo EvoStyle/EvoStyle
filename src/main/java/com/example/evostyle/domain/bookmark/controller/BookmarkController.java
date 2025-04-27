@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RequestMapping("/api/bookmarks")
 @RestController
@@ -33,5 +34,15 @@ public class BookmarkController {
         List<ReadBookmarkResponse> bookmarkResponseList = bookmarkService.readAllBookmarks(request);
 
         return ResponseEntity.status(HttpStatus.OK).body(bookmarkResponseList);
+    }
+
+    @DeleteMapping
+    public ResponseEntity<Map<String, Long>> deleteBookmark(
+        @RequestParam Long brandId,
+        HttpServletRequest request
+    ) {
+        Long deleteBookmarkId = bookmarkService.deleteBookmark(brandId, request);
+
+        return ResponseEntity.status(HttpStatus.OK).body(Map.of("bookmarkId", deleteBookmarkId));
     }
 }

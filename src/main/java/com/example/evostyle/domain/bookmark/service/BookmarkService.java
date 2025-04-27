@@ -59,4 +59,16 @@ public class BookmarkService {
             .map(ReadBookmarkResponse::from)
             .toList();
     }
+
+    @Transactional
+    public Long deleteBookmark(Long brandId, HttpServletRequest request) {
+        Long loginMemberId = (Long) request.getAttribute("memberId");
+
+        bookmarkRepository.deleteByMemberIdAndBrandId(loginMemberId, brandId);
+
+        Bookmark bookmark = bookmarkRepository.findByMemberIdAndBrandId(loginMemberId, brandId)
+            .orElseThrow(() -> new NotFoundException(ErrorCode.BOOKMARK_NOT_FOUND));
+
+        return bookmark.getId();
+    }
 }
