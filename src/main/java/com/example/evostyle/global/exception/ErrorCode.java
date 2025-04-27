@@ -50,7 +50,10 @@ public enum ErrorCode {
 
 
     //리뷰 관련
-    REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 리뷰입니다");
+    REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 리뷰입니다"),
+
+    // 즐겨찾기 관련
+    BOOKMARK_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 등록된 즐겨찾기입니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
