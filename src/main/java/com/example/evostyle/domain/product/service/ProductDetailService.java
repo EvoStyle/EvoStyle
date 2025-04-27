@@ -77,6 +77,10 @@ public class ProductDetailService {
         ProductDetail productDetail = productDetailRepository.findById(productDetailId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND));
 
+        if(productDetail.isDeleted()){
+            throw new NotFoundException(ErrorCode.PRODUCT_DETAIL_ALREADY_DELETED);
+        }
+
         List<OptionResponse> optionResponseList = productDetailOptionRepository.findByProductDetailId(productDetailId).stream()
                 .map(ProductDetailOption::getOption)
                 .map(OptionResponse::from).toList();
@@ -84,5 +88,14 @@ public class ProductDetailService {
         return ProductDetailResponse.from(productDetail, optionResponseList);
     }
 
+    public void deleteProductDetail(Long productDetailId){
+        ProductDetail productDetail = productDetailRepository.findById(productDetailId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND));
 
+        if(productDetail.isDeleted()){
+            throw new NotFoundException(ErrorCode.PRODUCT_DETAIL_ALREADY_DELETED);
+        }
+
+        productDetail.delete();
+    }
 }

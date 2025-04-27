@@ -5,10 +5,13 @@ import com.example.evostyle.domain.product.dto.request.CreateProductDetailReques
 
 import com.example.evostyle.domain.product.dto.response.ProductDetailResponse;
 import com.example.evostyle.domain.product.service.ProductDetailService;
+import com.example.evostyle.domain.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -30,6 +33,13 @@ public class ProductDetailController {
 
         ProductDetailResponse response = productDetailService.readProductDetail(productDetailId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @DeleteMapping("/productDetails/{productDetailId}")
+    public ResponseEntity<Map<String, Long>> deleteProductDetail(@PathVariable(name = "productDetailId")Long productDetailId){
+
+        productDetailService.deleteProductDetail(productDetailId);
+        return ResponseEntity.status(HttpStatus.OK).body(Map.of("productDetailId", productDetailId));
     }
 
 }

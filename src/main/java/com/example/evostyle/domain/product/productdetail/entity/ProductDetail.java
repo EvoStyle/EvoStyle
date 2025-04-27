@@ -5,6 +5,9 @@ import com.example.evostyle.domain.product.entity.Product;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -23,6 +26,11 @@ public class ProductDetail extends BaseEntity {
     @Column(name = "product_stock")
     private Integer stock;
 
+    @ColumnDefault("false")
+    private boolean isDeleted = false;
+
+    private LocalDateTime deleted_at;
+
     private ProductDetail(Product product, Integer stock){
         this.product = product ;
         this.stock = stock ;
@@ -30,5 +38,10 @@ public class ProductDetail extends BaseEntity {
 
     public static ProductDetail of(Product product, Integer stock){
         return new ProductDetail(product, stock);
+    }
+
+    public void delete(){
+        this.isDeleted = true;
+        this.deleted_at = LocalDateTime.now();
     }
 }
