@@ -42,6 +42,8 @@ public enum ErrorCode {
     INVALID_PRODUCT_OPTION(HttpStatus.BAD_REQUEST, "해당 상품의 옵션이 아닙니다"),
     MULTIPLE_OPTION_SELECTED(HttpStatus.BAD_REQUEST, "하나의 옵션그룹에서는 하나의 옵션만 선택할 수 있습니다."),
 
+    //상품디테일 옵션 관련
+    PRODUCT_DETAIL_NOT_FOUND(HttpStatus.NOT_FOUND, "상품 상세옵션이 존재하지 않습니다"),
 
     //리뷰 관련
     REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 리뷰입니다");
