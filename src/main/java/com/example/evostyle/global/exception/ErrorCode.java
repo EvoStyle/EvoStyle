@@ -37,8 +37,10 @@ public enum ErrorCode {
 
     //상품 옵션그룹 관련
     OPTION_GROUP_NOT_FOUND(HttpStatus.NOT_FOUND, "옵션 그룹이 존재하지 않습니다"),
-
+    //상품옵션 관련
     OPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "옵션이 존재하지 않습니다"),
+    INVALID_PRODUCT_OPTION(HttpStatus.BAD_REQUEST, "해당 상품의 옵션이 아닙니다"),
+    MULTIPLE_OPTION_SELECTED(HttpStatus.BAD_REQUEST, "하나의 옵션그룹에서는 하나의 옵션만 선택할 수 있습니다."),
 
 
     //리뷰 관련

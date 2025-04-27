@@ -10,7 +10,10 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@Table(name = "product_detail_options")
+@Table(name = "product_detail_options",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"product_detail_id", "option_id"})
+})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ProductDetailOption {
 
@@ -22,21 +25,17 @@ public class ProductDetailOption {
     @JoinColumn(name = "product_detail_id")
     private ProductDetail productDetail;
 
-    @ManyToOne
-    @JoinColumn(name = "product_option_group_id")
-    private OptionGroup optionGroup;
 
     @ManyToOne
     @JoinColumn(name = "product_option_id")
     private Option option ;
 
-    private ProductDetailOption(ProductDetail productDetail, OptionGroup optionGroup, Option option){
+    private ProductDetailOption(ProductDetail productDetail, Option option){
         this.productDetail = productDetail ;
-        this.optionGroup = optionGroup ;
         this.option = option ;
     }
 
-    public static ProductDetailOption of(ProductDetail productDetail, OptionGroup optionGroup, Option option){
-        return new ProductDetailOption(productDetail, optionGroup, option);
+    public static ProductDetailOption of(ProductDetail productDetail,  Option option){
+        return new ProductDetailOption(productDetail,  option);
     }
 }

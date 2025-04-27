@@ -37,7 +37,7 @@ public class ProductService {
 
 
         Product product = Product.of(brand, request.name(), request.price(), request.description());
-
+        productRepository.save(product);
 
         categoryMappingRepository.save(ProductCategoryMapping.of(product, category));
 
