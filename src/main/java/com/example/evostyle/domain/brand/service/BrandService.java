@@ -5,9 +5,11 @@ import com.example.evostyle.domain.brand.brandcategory.BrandCategoryMapping;
 import com.example.evostyle.domain.brand.brandcategory.BrandCategoryMappingRepository;
 import com.example.evostyle.domain.brand.brandcategory.BrandCategoryRepository;
 import com.example.evostyle.domain.brand.dto.request.CreateBrandRequest;
+import com.example.evostyle.domain.brand.dto.request.UpdateBrandNameRequest;
 import com.example.evostyle.domain.brand.dto.response.CategoryInfo;
 import com.example.evostyle.domain.brand.dto.response.CreateBrandResponse;
 import com.example.evostyle.domain.brand.dto.response.ReadBrandResponse;
+import com.example.evostyle.domain.brand.dto.response.UpdateBrandNameResponse;
 import com.example.evostyle.domain.brand.entity.Brand;
 import com.example.evostyle.domain.brand.repository.BrandRepository;
 import com.example.evostyle.domain.member.entity.Member;
@@ -52,7 +54,11 @@ public class BrandService {
         brandRepository.save(brand);
 
         List<BrandCategoryMapping> brandCategoryMappingList = brandCategoryList.stream()
-                .map(brandCategory -> BrandCategoryMapping.of(brand, brandCategory))
+                .map(brandCategory ->
+                        BrandCategoryMapping.of(
+                                brand,
+                                brandCategory
+                        ))
                 .toList();
 
         brandCategoryMappingRepository.saveAll(brandCategoryMappingList);
@@ -67,26 +73,54 @@ public class BrandService {
 
     public List<ReadBrandResponse> readAllBrands() {
 
-        List<Brand> brandList = brandRepository.findByIsDeletedFalse();
+        List<Brand> brandList = brandRepository.findAll();
 
         List<ReadBrandResponse> responseList = brandList.stream()
                 .map(brand -> {
                     List<CategoryInfo> categoryInfoList = brandCategoryRepository.findCategoryInfoByBrand(brand);
 
                     return ReadBrandResponse.from(brand, categoryInfoList);
-
-                }).toList();
+                })
+                .toList();
 
         return responseList;
     }
 
     public ReadBrandResponse readBrandById(Long brandId) {
 
-        Brand brand = brandRepository.findByIdAndIsDeletedFalse(brandId)
+        Brand brand = brandRepository.findById(brandId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.BRAND_NOT_FOUND));
 
         List<CategoryInfo> categoryInfoList = brandCategoryRepository.findCategoryInfoByBrand(brand);
 
         return ReadBrandResponse.from(brand, categoryInfoList);
+    }
+
+    @Transactional
+    public UpdateBrandNameResponse updateBrand(UpdateBrandNameRequest request, Long brandId) {
+
+        Brand brand = brandRepository.findById(brandId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.BRAND_NOT_FOUND));
+
+        if (brandRepository.existsByName(request.name())) {
+            throw new BadRequestException(ErrorCode.BRAND_NAME_DUPLICATED);
+        }
+
+        brand.update(request.name());
+
+        List<CategoryInfo> categoryInfoList = brandCategoryRepository.findCategoryInfoByBrand(brand);
+
+        return UpdateBrandNameResponse.from(brand, categoryInfoList);
+    }
+
+    @Transactional
+    public void deleteBrand(Long brandId) {
+
+        if (!brandRepository.existsById(brandId)) {
+            throw new NotFoundException(ErrorCode.BRAND_NOT_FOUND);
+        }
+        brandCategoryMappingRepository.deleteByBrandId(brandId);
+
+        brandRepository.deleteById(brandId);
     }
 }
