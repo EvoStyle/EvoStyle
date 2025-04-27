@@ -1,6 +1,7 @@
 package com.example.evostyle.domain.bookmark.service;
 
 import com.example.evostyle.domain.bookmark.dto.response.CreateBookmarkResponse;
+import com.example.evostyle.domain.bookmark.dto.response.ReadBookmarkResponse;
 import com.example.evostyle.domain.bookmark.entity.Bookmark;
 import com.example.evostyle.domain.bookmark.repository.BookmarkRepository;
 import com.example.evostyle.domain.brand.entity.Brand;
@@ -14,6 +15,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -45,5 +48,15 @@ public class BookmarkService {
         bookmarkRepository.save(bookmark);
 
         return CreateBookmarkResponse.from(bookmark);
+    }
+
+    public List<ReadBookmarkResponse> readAllBookmarks(HttpServletRequest request) {
+        Long loginMemberId = (Long) request.getAttribute("memberId");
+
+        List<Bookmark> bookmarkList = bookmarkRepository.findByMemberId(loginMemberId);
+
+        return bookmarkList.stream()
+            .map(ReadBookmarkResponse::from)
+            .toList();
     }
 }
