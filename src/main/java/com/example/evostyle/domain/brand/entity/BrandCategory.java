@@ -1,4 +1,4 @@
-package com.example.evostyle.domain.brand.brandcategory;
+package com.example.evostyle.domain.brand.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

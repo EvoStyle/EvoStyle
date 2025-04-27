@@ -1,7 +1,6 @@
-package com.example.evostyle.domain.brand.brandcategory;
+package com.example.evostyle.domain.brand.entity;
 
 import com.example.evostyle.common.entity.BaseEntity;
-import com.example.evostyle.domain.brand.entity.Brand;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

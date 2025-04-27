@@ -1,10 +1,14 @@
 package com.example.evostyle.domain.brand.service;
 
-import com.example.evostyle.domain.brand.brandcategory.*;
 import com.example.evostyle.domain.brand.dto.request.UpdateBrandCategoryRequest;
 import com.example.evostyle.domain.brand.dto.response.CategoryInfo;
 import com.example.evostyle.domain.brand.dto.response.UpdateBrandCategoryResponse;
 import com.example.evostyle.domain.brand.entity.Brand;
+import com.example.evostyle.domain.brand.entity.BrandCategory;
+import com.example.evostyle.domain.brand.entity.BrandCategoryLimit;
+import com.example.evostyle.domain.brand.entity.BrandCategoryMapping;
+import com.example.evostyle.domain.brand.repository.BrandCategoryMappingRepository;
+import com.example.evostyle.domain.brand.repository.BrandCategoryRepository;
 import com.example.evostyle.domain.brand.repository.BrandRepository;
 import com.example.evostyle.global.exception.BadRequestException;
 import com.example.evostyle.global.exception.ErrorCode;

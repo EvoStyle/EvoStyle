@@ -1,5 +1,6 @@
-package com.example.evostyle.domain.brand.brandcategory;
+package com.example.evostyle.domain.brand.repository;
 
+import com.example.evostyle.domain.brand.entity.BrandCategoryMapping;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

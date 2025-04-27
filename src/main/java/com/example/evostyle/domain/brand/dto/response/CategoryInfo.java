@@ -1,6 +1,6 @@
 package com.example.evostyle.domain.brand.dto.response;
 
-import com.example.evostyle.domain.brand.brandcategory.BrandCategory;
+import com.example.evostyle.domain.brand.entity.BrandCategory;
 import lombok.Getter;
 
 @Getter
