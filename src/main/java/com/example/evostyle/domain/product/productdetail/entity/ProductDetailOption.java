@@ -16,7 +16,7 @@ public class ProductDetailOption {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id ;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "product_detail_id")
@@ -25,14 +25,14 @@ public class ProductDetailOption {
 
     @ManyToOne
     @JoinColumn(name = "product_option_id")
-    private Option option ;
+    private Option option;
 
-    private ProductDetailOption(ProductDetail productDetail, Option option){
-        this.productDetail = productDetail ;
-        this.option = option ;
+    private ProductDetailOption(ProductDetail productDetail, Option option) {
+        this.productDetail = productDetail;
+        this.option = option;
     }
 
-    public static ProductDetailOption of(ProductDetail productDetail,  Option option){
-        return new ProductDetailOption(productDetail,  option);
+    public static ProductDetailOption of(ProductDetail productDetail, Option option) {
+        return new ProductDetailOption(productDetail, option);
     }
 }
