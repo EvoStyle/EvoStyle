@@ -32,6 +32,10 @@ public enum ErrorCode {
     //상품 관련
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 상품입니다"),
 
+    //상품 디테일 관련
+    STOCK_MODIFICATION_NOT_ALLOWED(HttpStatus.CONFLICT, "재고를 수정할수 없는 상태입니다"),
+    PRODUCT_DETAIL_MISMATCH(HttpStatus.CONFLICT, "해당 상품에 속하지 않는 상품 디테일입니다"),
+
     //상품 카테고리 관련
     PRODUCT_CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "상품 카테고리가 존재하지 않습니다"),
 
@@ -41,6 +45,7 @@ public enum ErrorCode {
     OPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "옵션이 존재하지 않습니다"),
     INVALID_PRODUCT_OPTION(HttpStatus.BAD_REQUEST, "해당 상품의 옵션이 아닙니다"),
     MULTIPLE_OPTION_SELECTED(HttpStatus.BAD_REQUEST, "하나의 옵션그룹에서는 하나의 옵션만 선택할 수 있습니다."),
+
 
     //상품디테일 옵션 관련
     PRODUCT_DETAIL_NOT_FOUND(HttpStatus.NOT_FOUND, "상품 상세옵션이 존재하지 않습니다"),

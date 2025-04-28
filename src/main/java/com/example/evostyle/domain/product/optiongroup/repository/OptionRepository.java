@@ -16,4 +16,5 @@ public interface OptionRepository extends JpaRepository<Option, Long> {
     List<Long> findIdByOptionGroupId(@Param("optionGroupId") Long optionGroupId);
 
     List<Option> findOptionByOptionGroupId(Long optionGroupId);
+
 }
