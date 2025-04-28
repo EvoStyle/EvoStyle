@@ -1,7 +1,6 @@
-package com.example.evostyle.domain.brand.brandcategory;
+package com.example.evostyle.domain.brand.entity;
 
 import com.example.evostyle.common.entity.BaseEntity;
-import com.example.evostyle.domain.brand.entity.Brand;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -37,5 +36,9 @@ public class BrandCategoryMapping extends BaseEntity {
 
     public static BrandCategoryMapping of(Brand brand, BrandCategory brandCategory) {
         return new BrandCategoryMapping(brand, brandCategory);
+    }
+
+    public void update(BrandCategory brandCategory) {
+        this.brandCategory = brandCategory;
     }
 }
