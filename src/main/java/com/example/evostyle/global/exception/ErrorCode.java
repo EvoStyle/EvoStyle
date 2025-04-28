@@ -33,7 +33,7 @@ public enum ErrorCode {
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 상품입니다"),
 
     //상품 디테일 관련
-    STOCK_MODIFICATION_NOT_ALLOWED(HttpStatus.CONFLICT, "재고를 수정할수 없는 상태입니다"),
+    STOCK_MODIFICATION_NOT_ALLOWED(HttpStatus.CONFLICT, "재고를 수정할 수 없는 상태입니다"),
     PRODUCT_DETAIL_MISMATCH(HttpStatus.CONFLICT, "해당 상품에 속하지 않는 상품 디테일입니다"),
 
     //상품 카테고리 관련
