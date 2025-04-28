@@ -56,11 +56,11 @@ public class ProductDetailService {
 
     //싱픔이 가지는 옵션의 모든 조합을 만들어 저장한다
     @Transactional
-    public void AllOptionCombination(List<List<Long>> allOptions, int depth, List<Long> combination, Product product) {
-        if (depth == allOptions.size()) {
+    public void AllOptionCombination(List<List<Long>> allOptionList, int depth, List<Long> combinationList, Product product) {
+        if (depth == allOptionList.size()) {
             ProductDetail productDetail = productDetailRepository.save(ProductDetail.of(product));
 
-            for (Long optionId : combination) {
+            for (Long optionId : combinationList) {
                 Option option = optionRepository.findById(optionId)
                         .orElseThrow(() -> new NotFoundException(ErrorCode.OPTION_NOT_FOUND));
 
@@ -69,19 +69,19 @@ public class ProductDetailService {
             return;
         }
 
-        for (Long optionId : allOptions.get(depth)) {
-            combination.add(optionId);
-            AllOptionCombination(allOptions, depth + 1, combination, product);
-            combination.remove(combination.size() - 1);
+        for (Long optionId : allOptionList.get(depth)) {
+            combinationList.add(optionId);
+            AllOptionCombination(allOptionList, depth + 1, combinationList, product);
+            combinationList.remove(combinationList.size() - 1);
         }
     }
 
     public List<ProductDetailResponse> readByProduct(Long productId) {
 
-        List<ProductDetail> productDetails = productDetailRepository.findByProductId(productId);
+        List<ProductDetail> productDetailList = productDetailRepository.findByProductId(productId);
         List<ProductDetailResponse> responses = new ArrayList<>();
 
-        for (ProductDetail productDetail : productDetails) {
+        for (ProductDetail productDetail : productDetailList) {
             List<ProductDetailOption> productDetailOptionList = productDetailOptionRepository
                     .findByProductDetailId(productDetail.getId());
 

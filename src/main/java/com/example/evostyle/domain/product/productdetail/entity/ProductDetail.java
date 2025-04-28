@@ -18,7 +18,7 @@ public class ProductDetail extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id ;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "product_id")
@@ -27,16 +27,16 @@ public class ProductDetail extends BaseEntity {
     @Setter
     @Column(name = "product_stock")
     @ColumnDefault("0")
-    private Integer stock = 0 ;
+    private Integer stock = 0;
 
     @ColumnDefault("false")
     private boolean isDeleted = false;
 
-    private ProductDetail(Product product){
-        this.product = product ;
+    private ProductDetail(Product product) {
+        this.product = product;
     }
 
-    public static ProductDetail of(Product product){
+    public static ProductDetail of(Product product) {
         return new ProductDetail(product);
     }
 
