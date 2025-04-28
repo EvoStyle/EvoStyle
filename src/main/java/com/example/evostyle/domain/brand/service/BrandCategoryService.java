@@ -5,19 +5,19 @@ import com.example.evostyle.domain.brand.dto.response.CategoryInfo;
 import com.example.evostyle.domain.brand.dto.response.UpdateBrandCategoryResponse;
 import com.example.evostyle.domain.brand.entity.Brand;
 import com.example.evostyle.domain.brand.entity.BrandCategory;
-import com.example.evostyle.domain.brand.entity.BrandCategoryLimit;
 import com.example.evostyle.domain.brand.entity.BrandCategoryMapping;
 import com.example.evostyle.domain.brand.repository.BrandCategoryMappingRepository;
 import com.example.evostyle.domain.brand.repository.BrandCategoryRepository;
-import com.example.evostyle.domain.brand.repository.BrandRepository;
-import com.example.evostyle.global.exception.BadRequestException;
 import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,7 +26,6 @@ public class BrandCategoryService {
 
     private final BrandCategoryRepository brandCategoryRepository;
     private final BrandCategoryMappingRepository brandCategoryMappingRepository;
-    private final BrandRepository brandRepository;
 
     public List<CategoryInfo> readAllBrandCategories() {
 
@@ -40,29 +39,50 @@ public class BrandCategoryService {
             UpdateBrandCategoryRequest request,
             Long brandId
     ) {
-        Brand brand = brandRepository.findById(brandId)
+        // Set 형식으로 기존 브랜드 카테고리 매핑 집합 조회
+        Set<BrandCategoryMapping> currentBrandCategoryMappingSet = brandCategoryMappingRepository.findAllByBrandId(brandId);
+
+        Brand brand = currentBrandCategoryMappingSet.stream()
+                .findFirst()
+                .map(BrandCategoryMapping::getBrand)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.BRAND_NOT_FOUND));
 
-        if (request.categoryIdList().size() > BrandCategoryLimit.MAX_CATEGORY_COUNT) {
-            throw new BadRequestException(ErrorCode.CATEGORY_LIMIT_EXCEEDED);
-        }
+        // 매핑 집합에서 기존 카테고리 Id 집합 추출
+        Set<Long> currentBrandCategoryIdSet = currentBrandCategoryMappingSet.stream()
+                .map(mapping -> mapping.getBrandCategory().getId())
+                .collect(Collectors.toSet());
 
-        List<BrandCategoryMapping> currentBrandCategoryMappingList = brandCategoryMappingRepository.findAllByBrandId(brandId);
+        // 새로운 카테고리 Id 집합 선언
+        Set<Long> newBrandCategoryIdSet = new HashSet<>(request.categoryIdList());
 
-        brandCategoryMappingRepository.deleteAll(currentBrandCategoryMappingList);
+        // 기존에는 있으나 새로운 카테고리에 없는 항목 삭제 (예시) 기존 1,2,3 / 새로운 카테고리 2,3,4 → 1 빼고 2,3 삭제)
+        currentBrandCategoryIdSet.removeAll(newBrandCategoryIdSet);
 
-        List<BrandCategoryMapping> newBrandCategoryMappingList = request.categoryIdList()
-                .stream()
+        // 새로운 카테고리에는 있으나 기존에는 없는 항목 삭제 (예시) 기존 1,2,3 / 새로운 카테고리 2,3,4 → 4 빼고 2,3 삭제)
+        newBrandCategoryIdSet.removeAll(currentBrandCategoryIdSet);
+
+        // 5. 삭제할 카테고리 매핑 리스트 만들기 (기존 카테고리에서 삭제할 항목)
+        List<BrandCategoryMapping> brandCategoryMappingListToDelete = currentBrandCategoryMappingSet.stream()
+                .filter(mapping -> currentBrandCategoryIdSet.contains(mapping.getBrandCategory().getId()))
+                .toList();
+
+        // 6. 삭제 실행
+        brandCategoryMappingRepository.deleteAll(brandCategoryMappingListToDelete);
+
+        // 7. 새로운 카테고리 추가
+        List<BrandCategoryMapping> brandCategoryMappingListToAdd = newBrandCategoryIdSet.stream()
                 .map(categoryId -> {
                     BrandCategory brandCategory = brandCategoryRepository.findById(categoryId)
                             .orElseThrow(() -> new NotFoundException(ErrorCode.BRAND_CATEGORY_NOT_FOUND));
-
                     return BrandCategoryMapping.of(brand, brandCategory);
-                }).toList();
+                })
+                .toList();
 
-        brandCategoryMappingRepository.saveAll(newBrandCategoryMappingList);
+        // 8. 추가 실행
+        brandCategoryMappingRepository.saveAll(brandCategoryMappingListToAdd);
 
-        List<CategoryInfo> categoryInfoList = newBrandCategoryMappingList.stream()
+        // 9. 카테고리 정보 목록 생성
+        List<CategoryInfo> categoryInfoList = brandCategoryMappingListToAdd.stream()
                 .map(mapping -> CategoryInfo.from(mapping.getBrandCategory()))
                 .toList();
 
