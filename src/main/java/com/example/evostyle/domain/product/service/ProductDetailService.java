@@ -49,14 +49,14 @@ public class ProductDetailService {
             allOptionList.add(optionIdList);
         }
 
-        AllOptionCombination(allOptionList, 0, new ArrayList<>(), product);
+        generateCombinations(allOptionList, 0, new ArrayList<>(), product);
 
         return readByProduct(productId);
     }
 
     //싱픔이 가지는 옵션의 모든 조합을 만들어 저장한다
     @Transactional
-    public void AllOptionCombination(List<List<Long>> allOptionList, int depth, List<Long> combinationList, Product product) {
+    public void generateCombinations(List<List<Long>> allOptionList, int depth, List<Long> combinationList, Product product) {
         if (depth == allOptionList.size()) {
             ProductDetail productDetail = productDetailRepository.save(ProductDetail.of(product));
 
@@ -71,7 +71,7 @@ public class ProductDetailService {
 
         for (Long optionId : allOptionList.get(depth)) {
             combinationList.add(optionId);
-            AllOptionCombination(allOptionList, depth + 1, combinationList, product);
+            generateCombinations(allOptionList, depth + 1, combinationList, product);
             combinationList.remove(combinationList.size() - 1);
         }
     }
@@ -96,7 +96,7 @@ public class ProductDetailService {
     }
 
 
-    public ProductDetailResponse readProductDetail(Long productDetailId) {
+    public ProductDetailResponse readProductDetailId(Long productDetailId) {
         ProductDetail productDetail = productDetailRepository.findById(productDetailId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND));
 
