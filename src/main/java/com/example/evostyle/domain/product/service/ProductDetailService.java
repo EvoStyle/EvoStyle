@@ -51,7 +51,7 @@ public class ProductDetailService {
 
         generateCombinations(allOptionList, 0, new ArrayList<>(), product);
 
-        return readByProduct(productId);
+        return readByProductId(productId);
     }
 
     //싱픔이 가지는 옵션의 모든 조합을 만들어 저장한다
@@ -76,7 +76,7 @@ public class ProductDetailService {
         }
     }
 
-    public List<ProductDetailResponse> readByProduct(Long productId) {
+    public List<ProductDetailResponse> readByProductId(Long productId) {
 
         List<ProductDetail> productDetailList = productDetailRepository.findByProductId(productId);
         List<ProductDetailResponse> responses = new ArrayList<>();
@@ -96,7 +96,7 @@ public class ProductDetailService {
     }
 
 
-    public ProductDetailResponse readProductDetailId(Long productDetailId) {
+    public ProductDetailResponse readProductDetailById(Long productDetailId) {
         ProductDetail productDetail = productDetailRepository.findById(productDetailId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND));
 
@@ -125,6 +125,6 @@ public class ProductDetailService {
             }
         }
 
-        return readByProduct(productId);
+        return readByProductId(productId);
     }
 }

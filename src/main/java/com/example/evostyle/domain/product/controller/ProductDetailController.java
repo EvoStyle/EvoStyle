@@ -27,16 +27,16 @@ public class ProductDetailController {
     }
 
     @GetMapping("/products/{productId}/product-details")
-    public ResponseEntity<List<ProductDetailResponse>> readByProduct(@PathVariable(name = "productId")Long productId){
+    public ResponseEntity<List<ProductDetailResponse>> readByProductId(@PathVariable(name = "productId")Long productId){
 
-        List<ProductDetailResponse> responseList = productDetailService.readByProduct(productId);
+        List<ProductDetailResponse> responseList = productDetailService.readByProductId(productId);
         return ResponseEntity.status(HttpStatus.OK).body(responseList);
     }
 
     @GetMapping("/product-details/{productDetailId}")
-    public ResponseEntity<ProductDetailResponse> readProductDetail(@PathVariable(name = "productDetailId")Long productDetailId){
+    public ResponseEntity<ProductDetailResponse> readProductDetailById(@PathVariable(name = "productDetailId")Long productDetailId){
 
-        ProductDetailResponse response = productDetailService.readProductDetailId(productDetailId);
+        ProductDetailResponse response = productDetailService.readProductDetailById(productDetailId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
