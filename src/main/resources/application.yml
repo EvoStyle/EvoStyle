@@ -1,9 +1,10 @@
 spring:
+  config:
+    import: optional:application-secret.yml
   datasource:
-    url: jdbc:mysql://localhost:3306/${DB_NAME}?serverTimezone=Asia/Seoul
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-
+    url: jdbc:mysql://localhost:3306/${db.name}?serverTimezone=Asia/Seoul
+    username: ${db.username}
+    password: ${db.password}
   jpa:
     hibernate:
       ddl-auto: update
@@ -12,9 +13,6 @@ spring:
       hibernate:
         format_sql: true
     open-in-view: false
-
-  config:
-    import: optional:application-secret.yml
 
 logging:
   level:
@@ -26,4 +24,4 @@ server:
 
 jwt:
   secret:
-    key: ${JWT_SECRET_KEY}
+    key: ${jwt.secret.key}

@@ -11,7 +11,8 @@ import com.example.evostyle.domain.order.entity.OrderStatus;
 import com.example.evostyle.domain.order.repository.OrderItemRepository;
 import com.example.evostyle.domain.order.repository.OrderRepository;
 import com.example.evostyle.domain.product.entity.Product;
-import com.example.evostyle.domain.product.repository.ProductRepository;
+import com.example.evostyle.domain.product.productdetail.entity.ProductDetail;
+import com.example.evostyle.domain.product.repository.ProductDetailRepository;
 import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -29,25 +30,28 @@ import java.util.stream.Collectors;
 public class OrderService {
 
     private final OrderItemRepository orderItemRepository;
-    private final ProductRepository productRepository;
+    private final ProductDetailRepository productDetailRepository;
     private final MemberRepository memberRepository;
     private final OrderRepository orderRepository;
 
     @Transactional
     public CreateOrderItemWrapper createOrder(List<CreateOrderItemRequest> requestList) {
 
-        List<Long> productIdList = requestList.stream()
-                .map(CreateOrderItemRequest::productId)
+        List<Long> productDetailIdList = requestList.stream()
+                .map(CreateOrderItemRequest::productDetailId)
                 .toList();
 
-        List<Product> productList = productRepository.findByIdList(productIdList);
+        List<ProductDetail> productDetailList = productDetailRepository.findAllById(productDetailIdList);
 
-        Map<Long, Product> productIdToProduct = productList.stream()
-                .collect(Collectors.toMap(Product::getId, product -> product));
-
-        if (productIdList.size() != productIdToProduct.size()) {
-            throw new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND);
+        if (productDetailIdList.size() != productDetailList.size()) {
+            throw new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND);
         }
+
+        Map<Long, ProductDetail> idToProductDetail = productDetailList.stream()
+                .collect(Collectors.toMap(
+                        ProductDetail::getId,
+                        productDetail -> productDetail
+                ));
 
         // todo 인증/인가 적용 후 수정 예정
         Member member = memberRepository.findById(1L)
@@ -59,10 +63,10 @@ public class OrderService {
         Order order = Order.of(member, totalAmountSum, totalPriceSum);
 
         List<OrderItem> orderItemList = new ArrayList<>();
-        List<CreateOrderItemResponse> orderItemResponseList = new ArrayList<>();
 
         for (CreateOrderItemRequest request : requestList) {
-            Product product = productIdToProduct.get(request.productId());
+            ProductDetail productDetail = idToProductDetail.get(request.productDetailId());
+            Product product = productDetail.getProduct();
             totalAmountSum += request.eachAmount();
 
             int totalPrice = product.getPrice() * request.eachAmount();
@@ -73,28 +77,28 @@ public class OrderService {
                     totalPrice,
                     order,
                     OrderStatus.PENDING,
+                    productDetail,
                     product.getName(),
                     product.getPrice(),
                     product.getDescription()
             );
 
             orderItemList.add(orderItem);
-
-            CreateOrderItemResponse response = CreateOrderItemResponse.from(
-                    orderItem,
-                    product.getId()
-            );
-
-            orderItemResponseList.add(response);
         }
 
         orderRepository.save(order);
 
         orderItemRepository.saveAll(orderItemList);
 
+        List<CreateOrderItemResponse> responseList = orderItemList.stream()
+                .map(orderItem -> CreateOrderItemResponse.from(
+                        orderItem,
+                        orderItem.getProductDetail().getId()
+                )).toList();
+
         return CreateOrderItemWrapper.from(
                 order.getId(),
-                orderItemResponseList,
+                responseList,
                 totalAmountSum,
                 totalPriceSum
         );

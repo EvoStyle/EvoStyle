@@ -48,7 +48,7 @@ public class OrderItem {
             Integer totalPrice,
             Order order,
             OrderStatus orderStatus,
-//            ProductDetail productDetail,
+            ProductDetail productDetail,
             String productName,
             Integer productPrice,
             String productDescription
@@ -57,7 +57,7 @@ public class OrderItem {
         this.totalPrice = totalPrice;
         this.order = order;
         this.orderStatus = orderStatus;
-//        this.productDetail = productDetail;
+        this.productDetail = productDetail;
         this.productName = productName;
         this.productPrice = productPrice;
         this.productDescription = productDescription;
@@ -68,7 +68,7 @@ public class OrderItem {
             Integer totalPrice,
             Order order,
             OrderStatus orderStatus,
-//            ProductDetail productDetail,
+            ProductDetail productDetail,
             String productName,
             Integer productPrice,
             String productDescription
@@ -78,7 +78,7 @@ public class OrderItem {
                 totalPrice,
                 order,
                 orderStatus,
-//                productDetail,
+                productDetail,
                 productName,
                 productPrice,
                 productDescription
