@@ -12,16 +12,16 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-@RequestMapping("/api/bookmarks")
+@RequestMapping("/api/brands")
 @RestController
 @RequiredArgsConstructor
 public class BookmarkController {
 
     private final BookmarkService bookmarkService;
 
-    @PostMapping
+    @PostMapping("/{brandId}/bookmarks")
     public ResponseEntity<CreateBookmarkResponse> createBookmark(
-        @RequestParam Long brandId,
+        @PathVariable(name = "brandId") Long brandId,
         HttpServletRequest request
     ) {
         Long memberId = (Long) request.getAttribute("memberId");
@@ -31,7 +31,7 @@ public class BookmarkController {
         return ResponseEntity.status(HttpStatus.CREATED).body(bookmarkResponse);
     }
 
-    @GetMapping
+    @GetMapping("/bookmarks")
     public ResponseEntity<List<ReadBookmarkResponse>> readAllBookmarks(HttpServletRequest request) {
         Long memberId = (Long) request.getAttribute("memberId");
 
@@ -40,9 +40,9 @@ public class BookmarkController {
         return ResponseEntity.status(HttpStatus.OK).body(bookmarkResponseList);
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{brandId}/bookmarks")
     public ResponseEntity<Map<String, Long>> deleteBookmark(
-        @RequestParam Long brandId,
+        @PathVariable(name = "brandId") Long brandId,
         HttpServletRequest request
     ) {
         Long memberId = (Long) request.getAttribute("memberId");
