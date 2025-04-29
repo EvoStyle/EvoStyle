@@ -72,6 +72,9 @@ public class OrderService {
             int totalPrice = product.getPrice() * request.eachAmount();
             totalPriceSum += totalPrice;
 
+//            // 재고 차감
+            productDetail.decreaseStock(request.eachAmount());
+
             OrderItem orderItem = OrderItem.of(
                     request.eachAmount(),
                     totalPrice,

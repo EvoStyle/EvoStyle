@@ -48,9 +48,11 @@ public enum ErrorCode {
 
     //상품 옵션그룹 관련
     OPTION_GROUP_NOT_FOUND(HttpStatus.NOT_FOUND, "옵션 그룹이 존재하지 않습니다"),
-
     OPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "옵션이 존재하지 않습니다"),
 
+    // 주문 관련
+    INVALID_STOCK_DECREASE_AMOUNT(HttpStatus.BAD_REQUEST, "재고 차감 수량은 0보다 커야 합니다"),
+    OUT_OF_STOCK(HttpStatus.BAD_REQUEST, "재고가 부족합니다"),
 
     //리뷰 관련
     REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 리뷰입니다");
