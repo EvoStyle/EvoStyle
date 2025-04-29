@@ -1,9 +1,9 @@
 package com.example.evostyle.domain.brand.service;
 
-import com.example.evostyle.domain.brand.brandcategory.BrandCategory;
-import com.example.evostyle.domain.brand.brandcategory.BrandCategoryMapping;
-import com.example.evostyle.domain.brand.brandcategory.BrandCategoryMappingRepository;
-import com.example.evostyle.domain.brand.brandcategory.BrandCategoryRepository;
+import com.example.evostyle.domain.brand.entity.BrandCategory;
+import com.example.evostyle.domain.brand.entity.BrandCategoryMapping;
+import com.example.evostyle.domain.brand.repository.BrandCategoryMappingRepository;
+import com.example.evostyle.domain.brand.repository.BrandCategoryRepository;
 import com.example.evostyle.domain.brand.dto.request.CreateBrandRequest;
 import com.example.evostyle.domain.brand.dto.request.UpdateBrandNameRequest;
 import com.example.evostyle.domain.brand.dto.response.CategoryInfo;

@@ -16,27 +16,27 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/brands")
 @RequiredArgsConstructor
 public class BrandController {
 
     private final BrandService brandService;
 
-    @PostMapping("/brands")
+    @PostMapping
     public ResponseEntity<CreateBrandResponse> createBrand(@RequestBody CreateBrandRequest request) {
         CreateBrandResponse response = brandService.createBrand(request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/brands")
+    @GetMapping
     public ResponseEntity<List<ReadBrandResponse>> readAllBrands() {
         List<ReadBrandResponse> responseList = brandService.readAllBrands();
 
         return ResponseEntity.status(HttpStatus.OK).body(responseList);
     }
 
-    @GetMapping("/brands/{brandId}")
+    @GetMapping("/{brandId}")
     public ResponseEntity<ReadBrandResponse> readBrandById(@PathVariable(name = "brandId") Long brandId) {
 
         ReadBrandResponse response = brandService.readBrandById(brandId);
@@ -44,7 +44,7 @@ public class BrandController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @PatchMapping("/brands/{brandId}")
+    @PatchMapping("/{brandId}")
     public ResponseEntity<UpdateBrandNameResponse> updateBrand(
             @RequestBody @Valid UpdateBrandNameRequest request,
             @PathVariable(name = "brandId") Long brandId
@@ -54,7 +54,7 @@ public class BrandController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @DeleteMapping("/brands/{brandId}")
+    @DeleteMapping("/{brandId}")
     public ResponseEntity<Map<String, Long>> deleteBrand(@PathVariable(name = "brandId") Long brandId) {
         brandService.deleteBrand(brandId);
 

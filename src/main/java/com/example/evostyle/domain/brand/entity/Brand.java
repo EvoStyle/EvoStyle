@@ -1,8 +1,6 @@
 package com.example.evostyle.domain.brand.entity;
 
 import com.example.evostyle.common.entity.BaseEntity;
-import com.example.evostyle.domain.brand.brandcategory.BrandCategory;
-import com.example.evostyle.domain.brand.brandcategory.BrandCategoryLimit;
 import com.example.evostyle.domain.member.entity.Member;
 import com.example.evostyle.global.exception.BadRequestException;
 import com.example.evostyle.global.exception.ErrorCode;
