@@ -18,4 +18,6 @@ public record ProductDetailResponse(
                                         productDetail.getStock());
     }
 
+
+
 }

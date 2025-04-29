@@ -1,5 +1,6 @@
 package com.example.evostyle.domain.product.optiongroup.repository;
 
+import com.example.evostyle.domain.product.optiongroup.dto.response.OptionQueryDto;
 import com.example.evostyle.domain.product.optiongroup.entity.Option;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,5 +17,15 @@ public interface OptionRepository extends JpaRepository<Option, Long> {
     List<Long> findIdByOptionGroupId(@Param("optionGroupId") Long optionGroupId);
 
     List<Option> findOptionByOptionGroupId(Long optionGroupId);
+
+    @Query("""
+                SELECT new com.example.evostyle.domain.product.optiongroup.dto.response.OptionQueryDto(
+                                pdo.productDetail.id , o.id, o.optionGroup.id , o.type
+                )
+                FROM ProductDetailOption pdo JOIN Option o
+                ON pdo.option.id = o.id
+                where pdo.productDetail.id in (:productDetailIdList)
+                                    """)
+    List<OptionQueryDto> findOptionByProductDetailId(@Param("productDetailIdList") List<Long> productDetailIdList);
 
 }

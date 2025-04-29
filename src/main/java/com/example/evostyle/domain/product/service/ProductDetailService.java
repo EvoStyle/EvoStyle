@@ -4,6 +4,7 @@ import com.example.evostyle.domain.product.dto.request.UpdateProductDetailReques
 import com.example.evostyle.domain.product.dto.response.ProductDetailResponse;
 import com.example.evostyle.domain.product.entity.Product;
 import com.example.evostyle.domain.product.optiongroup.dto.response.OptionResponse;
+import com.example.evostyle.domain.product.optiongroup.dto.response.OptionQueryDto;
 import com.example.evostyle.domain.product.optiongroup.entity.Option;
 import com.example.evostyle.domain.product.optiongroup.entity.OptionGroup;
 import com.example.evostyle.domain.product.optiongroup.repository.OptionGroupRepository;
@@ -17,13 +18,19 @@ import com.example.evostyle.global.exception.ConflictException;
 import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.groupingBy;
 
 @Service
+@Slf4j
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ProductDetailService {
@@ -77,20 +84,28 @@ public class ProductDetailService {
     }
 
     public List<ProductDetailResponse> readByProductId(Long productId) {
-
-        List<ProductDetail> productDetailList = productDetailRepository.findByProductId(productId);
         List<ProductDetailResponse> responses = new ArrayList<>();
 
-        for (ProductDetail productDetail : productDetailList) {
-            List<ProductDetailOption> productDetailOptionList = productDetailOptionRepository
-                    .findByProductDetailId(productDetail.getId());
+        List<ProductDetail> productDetailList = productDetailRepository.findByProductId(productId);
+        List<Long> productDetailIdList = productDetailList.stream().mapToLong(ProductDetail::getId).boxed().toList();
 
-            List<Long> optionIds = productDetailOptionList.stream().map(o -> o.getOption().getId()).toList();
 
-            List<OptionResponse> optionList = optionRepository.findAllById(optionIds)
-                    .stream().map(OptionResponse::from).toList();
+        Map<Long, List<OptionQueryDto>> map = optionRepository.findOptionByProductDetailId(productDetailIdList)
+                                                                    .stream()
+                                                                    .collect(groupingBy(OptionQueryDto::productDetailId));
 
-            responses.add(ProductDetailResponse.from(productDetail, optionList));
+        for(Long productDetailId : productDetailIdList){
+            ProductDetail productDetail = productDetailList.stream()
+                    .filter( p -> p.getId().equals(productDetailId))
+                    .findFirst()
+                    .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND));
+
+
+           List<OptionResponse> optionResponseList = Optional.ofNullable(map.get(productDetailId))
+                   .orElseThrow(() -> new NotFoundException(ErrorCode.OPTION_NOT_FOUND))
+                   .stream().map(OptionResponse::from).toList();
+
+           responses.add(ProductDetailResponse.from(productDetail, optionResponseList));
         }
         return responses;
     }
@@ -110,20 +125,27 @@ public class ProductDetailService {
     @Transactional
     public List<ProductDetailResponse> updateProductDetailStock(List<UpdateProductDetailRequest> requestList, Long productId) {
 
-        for (UpdateProductDetailRequest request : requestList) {
-            ProductDetail productDetail = productDetailRepository.findById(request.productDetailId())
-                    .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND));
+        Map<Long, Integer> requestMap = requestList.stream().collect(Collectors.toMap(UpdateProductDetailRequest::productDetailId,
+                UpdateProductDetailRequest::stock));
 
-            if (productDetail.getProduct().getId() != productId) {
-              throw new ConflictException(ErrorCode.PRODUCT_DETAIL_MISMATCH);
-            }
+        List<ProductDetail> productDetailList = productDetailRepository.findAllById(requestMap.keySet());
 
-            if (productDetail.getStock() != 0) {// 상품의 재고를 처음 설정하거나, 0이 아닌경우 수정불가
-                throw new ConflictException(ErrorCode.STOCK_MODIFICATION_NOT_ALLOWED);
-            } else {
-                productDetail.setStock(request.stock());
-            }
+        if(requestList.size() != productDetailList.size()){
+            throw new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND);
         }
+
+        productDetailList.forEach(p -> {
+            if(p.getStock() != 0) {
+                throw new ConflictException(ErrorCode.STOCK_MODIFICATION_NOT_ALLOWED );
+            }
+
+            if(!p.getProduct().getId().equals(productId)){
+                throw new ConflictException(ErrorCode.PRODUCT_DETAIL_MISMATCH
+                );
+            }
+
+            p.setStock(requestMap.get(p.getId()));
+        });
 
         return readByProductId(productId);
     }
