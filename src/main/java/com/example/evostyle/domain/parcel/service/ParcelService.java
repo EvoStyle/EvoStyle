@@ -20,8 +20,6 @@ import java.util.UUID;
 public class ParcelService {
 
     private final ParcelRepository parcelRepository;
-    private final SenderRepository senderRepository;
-    private final ReceiverRepository receiverRepository;
 
     @Transactional
     public ParcelResponse createParcel(ParcelRequest parcelRequest) {

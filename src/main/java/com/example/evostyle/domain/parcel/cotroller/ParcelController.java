@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping
+@RequestMapping("/api/auth/parcel")
 @RequiredArgsConstructor
 public class ParcelController {
 
@@ -23,4 +23,6 @@ public class ParcelController {
         ParcelResponse parcel = parcelService.createParcel(parcelRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(parcel);
     }
+
+
 }
