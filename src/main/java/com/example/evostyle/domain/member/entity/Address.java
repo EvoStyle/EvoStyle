@@ -1,6 +1,5 @@
-package com.example.evostyle.domain.address.entity;
+package com.example.evostyle.domain.member.entity;
 
-import com.example.evostyle.domain.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
