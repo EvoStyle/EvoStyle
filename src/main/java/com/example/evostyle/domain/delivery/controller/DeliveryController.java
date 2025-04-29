@@ -15,12 +15,13 @@ public class DeliveryController {
 
     private final DeliveryService deliveryService;
 
-    @PostMapping("/member/{memberId}")
+    @PostMapping("/member/{memberId}/address/{addressId}/order-items/{orderItemId}")
     public ResponseEntity<DeliveryResponse> createDelivery(
-            @RequestBody DeliveryRequest deliveryRequest,
-            @PathVariable Long memberId
+            @PathVariable Long addressId,
+            @PathVariable Long memberId,
+            @PathVariable Long orderItemId
     ) {
-        DeliveryResponse deliveryResponse = deliveryService.createDelivery(deliveryRequest, memberId);
+        DeliveryResponse deliveryResponse = deliveryService.createDelivery(addressId, memberId,orderItemId);
         return ResponseEntity.status(HttpStatus.CREATED).body(deliveryResponse);
     }
 }

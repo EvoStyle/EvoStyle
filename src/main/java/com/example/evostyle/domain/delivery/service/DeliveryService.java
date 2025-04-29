@@ -13,9 +13,11 @@ public class DeliveryService {
 
     private final DeliveryRepository deliveryRepository;
     private final MemberRepository memberRepository;
+    private final AddressRepository addressRepository;
+    private final OrderItemsRepository orderItemsRepository;
 
+    public DeliveryResponse createDelivery(Long addressId, Long memberId, Long orderItemId) {
 
-    public DeliveryResponse createDelivery(DeliveryRequest deliveryRequest, Long memberId) {
         return null;
     }
 }
