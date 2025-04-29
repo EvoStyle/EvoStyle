@@ -22,6 +22,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class DeliveryService {
 
     private final DeliveryRepository deliveryRepository;
@@ -40,7 +41,7 @@ public class DeliveryService {
         return DeliveryResponse.from(savedDelivery);
     }
 
-    @Transactional(readOnly = true)
+
     public List<DeliveryResponse> getAllDeliveryByMember(Long memberId) {
         List<Delivery> allByMemberId = deliveryRepository.findAllByMemberId(memberId);
         return allByMemberId.stream().map(DeliveryResponse::from).toList();
@@ -70,6 +71,7 @@ public class DeliveryService {
         return DeliveryResponse.from(savedDelivery);
     }
 
+    @Transactional
     public void deleteDelivery(Long deliveryId) {
         Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(() -> new NotFoundException(ErrorCode.DELIVERY_NOT_FOUND));
         delivery.changeStatus(DeliveryStatus.CANCLE);
