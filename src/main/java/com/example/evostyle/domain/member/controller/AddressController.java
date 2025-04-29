@@ -56,6 +56,18 @@ public class AddressController {
         return ResponseEntity.status(HttpStatus.OK).body(updateAddressResponse);
     }
 
+    @PatchMapping("/{addressId}/isBasecamp")
+    public ResponseEntity<UpdateAddressResponse> updateIsBasecamp(
+        @PathVariable(name = "addressId") Long addressId,
+        HttpServletRequest request
+    ) {
+        Long memberId = (Long) request.getAttribute("memberId");
+
+        UpdateAddressResponse updateAddressResponse = addressService.updateIsBasecamp(memberId, addressId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(updateAddressResponse);
+    }
+
     @DeleteMapping("/{addressId}")
     public ResponseEntity<Map<String, Long>> deleteAddress(
         @PathVariable(name = "addressId") Long addressId,

@@ -31,9 +31,8 @@ public class AddressService {
             .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
         Address address = Address.of(
-            request.postCode(), request.siDo(),
-            request.siGunGu(), request.roadNameAddress(),
-            request.detailAddress(), request.extraAddress(), member);
+            request.postCode(), request.fullAddress(),
+            request.detailAddress(), request.memo(), member);
 
         addressRepository.save(address);
 
@@ -53,9 +52,20 @@ public class AddressService {
         Address address = addressRepository.findByIdAndMemberId(addressId, memberId)
             .orElseThrow(() -> new NotFoundException(ErrorCode.ADDRESS_NOT_FOUND));
 
-        address.update(
-            request.postCode(), request.siDo(), request.siGunGu(),
-            request.roadNameAddress(), request.detailAddress(), request.extraAddress());
+        address.updateAddress(
+            request.postCode(), request.fullAddress(), request.detailAddress(), request.memo());
+
+        return UpdateAddressResponse.from(address);
+    }
+
+    @Transactional
+    public UpdateAddressResponse updateIsBasecamp(Long memberId, Long addressId) {
+        addressRepository.updateAllBasecampFalse(memberId);
+
+        Address address = addressRepository.findByIdAndMemberId(addressId, memberId)
+            .orElseThrow(() -> new NotFoundException(ErrorCode.ADDRESS_NOT_FOUND));
+
+        address.updateIsBasecamp();
 
         return UpdateAddressResponse.from(address);
     }
