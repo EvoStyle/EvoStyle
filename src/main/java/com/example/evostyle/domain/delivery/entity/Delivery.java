@@ -1,6 +1,5 @@
 package com.example.evostyle.domain.delivery.entity;
 
-import com.example.evostyle.domain.member.entity.Address;
 import com.example.evostyle.domain.member.entity.Member;
 import com.example.evostyle.domain.orderitem.entity.OrderItem;
 import jakarta.persistence.*;
@@ -53,4 +52,13 @@ public class Delivery {
     }
 
 
+    public void update(String deliveryRequest, String siDo, String detailAddress) {
+        this.deliveryRequest = deliveryRequest;
+        this.deliveryAddress = siDo;
+        this.deliveryAddressAssistant = detailAddress;
+    }
+
+    public void changeStatus(DeliveryStatus deliveryStatus) {
+        this.deliveryStatus = deliveryStatus;
+    }
 }

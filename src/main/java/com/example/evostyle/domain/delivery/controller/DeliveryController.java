@@ -34,15 +34,21 @@ public class DeliveryController {
         return ResponseEntity.status(HttpStatus.OK).body(deliveryResponses);
     }
 
-    @PatchMapping("/address/{addressId}/order-items/{orderItemId}/delivery")
-    public ResponseEntity<DeliveryResponse> updateDelivery(@RequestBody DeliveryRequest deliveryRequest) {
-        DeliveryResponse deliveryResponse = deliveryService.updateDelivery(deliveryRequest);
+    @PatchMapping("/address/{addressId}/delivery/{deliveryId}")
+    public ResponseEntity<DeliveryResponse> updateDelivery(
+            @RequestBody DeliveryRequest deliveryRequest,
+            @PathVariable Long addressId,
+            @PathVariable Long deliveryId
+    ) {
+        DeliveryResponse deliveryResponse = deliveryService.updateDelivery(deliveryRequest,addressId,deliveryId);
         return ResponseEntity.status(HttpStatus.OK).body(deliveryResponse);
     }
 
-    @DeleteMapping("/delivery/{deliveryId}")
-    public ResponseEntity<Void> deleteDelivery(@PathVariable Long deliveryId) {
-        deliveryService.deleteDelivery(deliveryId);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+
+    // 권한설정필요 관리자용
+    @PatchMapping("/delivery/{deliveryId}")
+    public ResponseEntity<DeliveryResponse> changeDeliveryStatusToShipped(@PathVariable Long deliveryId) {
+        DeliveryResponse deliveryResponse = deliveryService.changeDeliveryStatusToShipped(deliveryId);
+        return ResponseEntity.status(HttpStatus.OK).body(deliveryResponse);
     }
 }

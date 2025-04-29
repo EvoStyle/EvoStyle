@@ -3,6 +3,7 @@ package com.example.evostyle.domain.delivery.service;
 import com.example.evostyle.domain.delivery.dto.request.DeliveryRequest;
 import com.example.evostyle.domain.delivery.dto.response.DeliveryResponse;
 import com.example.evostyle.domain.delivery.entity.Delivery;
+import com.example.evostyle.domain.delivery.entity.DeliveryStatus;
 import com.example.evostyle.domain.delivery.repository.DeliveryRepository;
 import com.example.evostyle.domain.member.entity.Address;
 import com.example.evostyle.domain.member.entity.Member;
@@ -10,10 +11,12 @@ import com.example.evostyle.domain.member.repository.AddressRepository;
 import com.example.evostyle.domain.member.repository.MemberRepository;
 import com.example.evostyle.domain.orderitem.entity.OrderItem;
 import com.example.evostyle.domain.orderitem.repository.OrderItemsRepository;
+import com.example.evostyle.global.exception.BadRequestException;
 import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -26,6 +29,7 @@ public class DeliveryService {
     private final OrderItemsRepository orderItemsRepository;
     private final MemberRepository memberRepository;
 
+    @Transactional
     public DeliveryResponse createDelivery(Long addressId, Long orderItemId, Long memberId, DeliveryRequest deliveryRequest) {
         Address address = addressRepository.findById(addressId).orElseThrow(() -> new NotFoundException(ErrorCode.ADDRESS_NOT_FOUND));
         OrderItem orderItem = orderItemsRepository.findById(orderItemId).orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_NOT_FOUND));
@@ -36,16 +40,38 @@ public class DeliveryService {
         return DeliveryResponse.from(savedDelivery);
     }
 
-
+    @Transactional(readOnly = true)
     public List<DeliveryResponse> getAllDeliveryByMember(Long memberId) {
-        return null;
+        List<Delivery> allByMemberId = deliveryRepository.findAllByMemberId(memberId);
+        return allByMemberId.stream().map(DeliveryResponse::from).toList();
     }
 
-    public DeliveryResponse updateDelivery(DeliveryRequest deliveryRequest) {
-        return null;
+    @Transactional
+    public DeliveryResponse updateDelivery(DeliveryRequest deliveryRequest, Long addressId, Long deliveryId) {
+        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(() -> new NotFoundException(ErrorCode.DELIVERY_NOT_FOUND));
+
+        if (!delivery.getDeliveryStatus().equals(DeliveryStatus.READY)) {
+            throw new BadRequestException(ErrorCode.DELIVERY_NOT_READY);
+        }
+        Address address = addressRepository.findById(addressId).orElseThrow(() -> new NotFoundException(ErrorCode.ADDRESS_NOT_FOUND));
+        delivery.update(deliveryRequest.deliveryRequest(), address.getSiDo(), address.getDetailAddress());
+        Delivery savedDelivery = deliveryRepository.save(delivery);
+        return DeliveryResponse.from(savedDelivery);
+    }
+
+    @Transactional
+    public DeliveryResponse changeDeliveryStatusToShipped(Long deliveryId) {
+        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(() -> new NotFoundException(ErrorCode.DELIVERY_NOT_FOUND));
+        if (!delivery.getDeliveryStatus().equals(DeliveryStatus.READY)) {
+            throw new BadRequestException(ErrorCode.DELIVERY_NOT_READY);
+        }
+        delivery.changeStatus(DeliveryStatus.SHIPPED);
+        Delivery savedDelivery = deliveryRepository.save(delivery);
+        return DeliveryResponse.from(savedDelivery);
     }
 
     public void deleteDelivery(Long deliveryId) {
-
+        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(() -> new NotFoundException(ErrorCode.DELIVERY_NOT_FOUND));
+        delivery.changeStatus(DeliveryStatus.CANCLE);
     }
 }
