@@ -26,7 +26,7 @@ public class OrderItem {
     @Column(name = "order_status", nullable = false)
     private OrderStatus orderStatus;
 
-    @Column(name = "product_name", nullable = false)
+    @Column(name = "product_name", nullable = false, length = 10)
     private String productName;
 
     @Column(name = "product_price", nullable = false)

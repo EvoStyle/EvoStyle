@@ -4,7 +4,7 @@ import com.example.evostyle.domain.member.entity.Member;
 import com.example.evostyle.domain.member.repository.MemberRepository;
 import com.example.evostyle.domain.order.dto.request.CreateOrderItemRequest;
 import com.example.evostyle.domain.order.dto.response.CreateOrderItemResponse;
-import com.example.evostyle.domain.order.dto.response.CreateOrderItemWrapper;
+import com.example.evostyle.domain.order.dto.response.CreateOrderResponse;
 import com.example.evostyle.domain.order.entity.Order;
 import com.example.evostyle.domain.order.entity.OrderItem;
 import com.example.evostyle.domain.order.entity.OrderStatus;
@@ -35,7 +35,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
 
     @Transactional
-    public CreateOrderItemWrapper createOrder(List<CreateOrderItemRequest> requestList) {
+    public CreateOrderResponse createOrder(List<CreateOrderItemRequest> requestList) {
 
         List<Long> productDetailIdList = requestList.stream()
                 .map(CreateOrderItemRequest::productDetailId)
@@ -99,7 +99,7 @@ public class OrderService {
                         orderItem.getProductDetail().getId()
                 )).toList();
 
-        return CreateOrderItemWrapper.from(
+        return CreateOrderResponse.from(
                 order.getId(),
                 responseList,
                 totalAmountSum,

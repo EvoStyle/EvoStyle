@@ -2,19 +2,19 @@ package com.example.evostyle.domain.order.dto.response;
 
 import java.util.List;
 
-public record CreateOrderItemWrapper(
+public record CreateOrderResponse(
         Long orderId,
         List<CreateOrderItemResponse> orderItemResponseList,
         Integer totalAmountSum,
         Integer totalPriceSum
 ) {
-    public static CreateOrderItemWrapper from(
+    public static CreateOrderResponse from(
             Long orderId,
             List<CreateOrderItemResponse> orderItemResponseList,
             Integer totalAmountSum,
             Integer totalPriceSum
     ) {
-        return new CreateOrderItemWrapper(
+        return new CreateOrderResponse(
                 orderId,
                 orderItemResponseList,
                 totalAmountSum,
