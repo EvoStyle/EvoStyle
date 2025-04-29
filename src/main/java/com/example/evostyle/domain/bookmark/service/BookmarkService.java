@@ -57,10 +57,10 @@ public class BookmarkService {
 
     @Transactional
     public Long deleteBookmark(Long memberId, Long brandId) {
-        bookmarkRepository.deleteByMemberIdAndBrandId(memberId, brandId);
-
         Bookmark bookmark = bookmarkRepository.findByMemberIdAndBrandId(memberId, brandId)
             .orElseThrow(() -> new NotFoundException(ErrorCode.BOOKMARK_NOT_FOUND));
+
+        bookmarkRepository.deleteByMemberIdAndBrandId(bookmark.getMember().getId(), bookmark.getBrand().getId());
 
         return bookmark.getId();
     }
