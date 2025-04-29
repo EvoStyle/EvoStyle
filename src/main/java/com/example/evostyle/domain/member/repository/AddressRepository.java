@@ -1,6 +1,6 @@
-package com.example.evostyle.domain.address.repository;
+package com.example.evostyle.domain.member.repository;
 
-import com.example.evostyle.domain.address.entity.Address;
+import com.example.evostyle.domain.member.entity.Address;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

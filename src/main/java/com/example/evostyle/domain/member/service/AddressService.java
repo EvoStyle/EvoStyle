@@ -1,12 +1,12 @@
-package com.example.evostyle.domain.address.service;
+package com.example.evostyle.domain.member.service;
 
-import com.example.evostyle.domain.address.dto.request.CreateAddressRequest;
-import com.example.evostyle.domain.address.dto.request.UpdateAddressRequest;
-import com.example.evostyle.domain.address.dto.response.CreateAddressResponse;
-import com.example.evostyle.domain.address.dto.response.ReadAddressResponse;
-import com.example.evostyle.domain.address.dto.response.UpdateAddressResponse;
-import com.example.evostyle.domain.address.entity.Address;
-import com.example.evostyle.domain.address.repository.AddressRepository;
+import com.example.evostyle.domain.member.dto.request.CreateAddressRequest;
+import com.example.evostyle.domain.member.dto.request.UpdateAddressRequest;
+import com.example.evostyle.domain.member.dto.response.CreateAddressResponse;
+import com.example.evostyle.domain.member.dto.response.ReadAddressResponse;
+import com.example.evostyle.domain.member.dto.response.UpdateAddressResponse;
+import com.example.evostyle.domain.member.entity.Address;
+import com.example.evostyle.domain.member.repository.AddressRepository;
 import com.example.evostyle.domain.member.entity.Member;
 import com.example.evostyle.domain.member.repository.MemberRepository;
 import com.example.evostyle.global.exception.ErrorCode;

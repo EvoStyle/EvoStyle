@@ -1,6 +1,6 @@
-package com.example.evostyle.domain.address.dto.request;
+package com.example.evostyle.domain.member.dto.request;
 
-public record CreateAddressRequest(
+public record UpdateAddressRequest(
     String postCode,  // 우편번호 (ex: 12345)
     String siDo,  // 시/도 (ex: 서울특별시)
     String siGunGu,  // 시/군/구 (ex: 강남구)

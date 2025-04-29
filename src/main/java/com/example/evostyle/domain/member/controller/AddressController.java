@@ -1,11 +1,11 @@
-package com.example.evostyle.domain.address.controller;
+package com.example.evostyle.domain.member.controller;
 
-import com.example.evostyle.domain.address.dto.request.CreateAddressRequest;
-import com.example.evostyle.domain.address.dto.request.UpdateAddressRequest;
-import com.example.evostyle.domain.address.dto.response.CreateAddressResponse;
-import com.example.evostyle.domain.address.dto.response.ReadAddressResponse;
-import com.example.evostyle.domain.address.dto.response.UpdateAddressResponse;
-import com.example.evostyle.domain.address.service.AddressService;
+import com.example.evostyle.domain.member.dto.request.CreateAddressRequest;
+import com.example.evostyle.domain.member.dto.request.UpdateAddressRequest;
+import com.example.evostyle.domain.member.dto.response.CreateAddressResponse;
+import com.example.evostyle.domain.member.dto.response.ReadAddressResponse;
+import com.example.evostyle.domain.member.dto.response.UpdateAddressResponse;
+import com.example.evostyle.domain.member.service.AddressService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

@@ -1,6 +1,6 @@
-package com.example.evostyle.domain.address.dto.response;
+package com.example.evostyle.domain.member.dto.response;
 
-import com.example.evostyle.domain.address.entity.Address;
+import com.example.evostyle.domain.member.entity.Address;
 
 public record CreateAddressResponse(
     Long id,
