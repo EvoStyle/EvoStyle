@@ -31,8 +31,6 @@ public enum ErrorCode {
     BRAND_NAME_DUPLICATED(HttpStatus.BAD_REQUEST, "이미 존재하는 브랜드 이름입니다."),
     NON_EXISTENT_BRAND_CATEGORY(HttpStatus.BAD_REQUEST, "요청한 카테고리 중 유효한 항목이 없습니다."),
     CATEGORY_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "브랜드 카테고리는 최대 3개까지입니다."),
-    BRAND_CATEGORY_MAPPING_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 브랜드 카테고리 매핑입니다."),
-    BRAND_CATEGORY_MAPPING_DUPLICATED(HttpStatus.BAD_REQUEST, "이미 존재하는 브랜드 카테고리 매핑입니다."),
     BRAND_CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 브랜드 카테고리입니다."),
 
     //주문 관련
@@ -59,6 +57,10 @@ public enum ErrorCode {
     //딜리버리 관련
     DELIVERY_NOT_READY(HttpStatus.BAD_REQUEST,"배송이 준비상태가 아닙니다."),
     DELIVERY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 배송입니다.");
+  
+    // 즐겨찾기 관련
+    BOOKMARK_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 등록된 즐겨찾기입니다."),
+    BOOKMARK_NOT_FOUND(HttpStatus.NOT_FOUND, "즐겨찾기가 존재하지 않습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
