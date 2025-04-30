@@ -167,19 +167,13 @@ public class OrderService {
             Long orderId,
             Long orderItemId
     ) {
-        OrderItem orderItem = orderItemRepository.findById(orderItemId)
+        OrderItem orderItem = orderItemRepository.findByIdAndOrderStatus(orderItemId, OrderStatus.PENDING)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_ITEM_NOT_FOUND));
 
         Order order = orderItem.getOrder();
 
         if (!order.getId().equals(orderId)) {
             throw new NotFoundException(ErrorCode.ORDER_NOT_FOUND);
-        }
-
-        boolean isNotPending = !orderItem.getOrderStatus().equals(OrderStatus.PENDING);
-
-        if (isNotPending) {
-            throw new BadRequestException(ErrorCode.NOT_PENDING_STATUS);
         }
 
         ProductDetail productDetail = orderItem.getProductDetail();
