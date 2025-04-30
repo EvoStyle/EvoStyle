@@ -10,10 +10,12 @@ import java.util.List;
 
 public interface OptionGroupRepository extends JpaRepository<OptionGroup, Long> {
 
+    @Query("""
+            SELECT o.id
+            FROM OptionGroup o
+            WHERE o.product.id = :productId
+            """)
+    List<Long> findIdByProductId(Long productId);
+
     List<OptionGroup> findByProductId(Long productId);
-
-
-    @Query("SELECT o.id FROM OptionGroup o WHERE o.product.id = :productId")
-    List<Long> findOptionGroupIdByProductId(@Param("productId") Long productId);
-
 }

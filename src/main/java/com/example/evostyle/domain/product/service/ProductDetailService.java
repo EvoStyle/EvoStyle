@@ -3,10 +3,9 @@ package com.example.evostyle.domain.product.service;
 import com.example.evostyle.domain.product.dto.request.UpdateProductDetailRequest;
 import com.example.evostyle.domain.product.dto.response.ProductDetailResponse;
 import com.example.evostyle.domain.product.entity.Product;
-import com.example.evostyle.domain.product.optiongroup.dto.response.OptionResponse;
 import com.example.evostyle.domain.product.optiongroup.dto.response.OptionQueryDto;
+import com.example.evostyle.domain.product.optiongroup.dto.response.OptionResponse;
 import com.example.evostyle.domain.product.optiongroup.entity.Option;
-import com.example.evostyle.domain.product.optiongroup.entity.OptionGroup;
 import com.example.evostyle.domain.product.optiongroup.repository.OptionGroupRepository;
 import com.example.evostyle.domain.product.optiongroup.repository.OptionRepository;
 import com.example.evostyle.domain.product.productdetail.entity.ProductDetail;
@@ -21,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -46,42 +46,58 @@ public class ProductDetailService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND));
 
-        List<OptionGroup> optionGroupList = optionGroupRepository.findByProductId(productId);
-        List<List<Long>> allOptionList = new ArrayList<>();
+        List<Long> optionGroupIdList = optionGroupRepository.findIdByProductId(productId);
 
-        for (OptionGroup optionGroup : optionGroupList) {
-            List<Long> optionIdList = optionRepository.findOptionByOptionGroupId(optionGroup.getId())
-                    .stream().map(Option::getId).toList();
 
-            allOptionList.add(optionIdList);
-        }
+       Map<Long, List<Option>> allOptionMap= optionRepository.findByOptionGroupIdIn(optionGroupIdList)
+                .stream()
+                .collect(groupingBy(o -> o.getOptionGroup().getId()));
 
-        generateCombinations(allOptionList, 0, new ArrayList<>(), product);
+        List<ProductDetail> productDetailList = new ArrayList<>();
+        List<ProductDetailOption> productDetailOptionList = new ArrayList<>();
+
+        generateCombinations(allOptionMap, 0, new ArrayList<>(), product, productDetailList, productDetailOptionList);
+
+        productDetailRepository.saveAll(productDetailList);
+        productDetailOptionRepository.saveAll(productDetailOptionList);
 
         return readByProductId(productId);
     }
 
     //싱픔이 가지는 옵션의 모든 조합을 만들어 저장한다
     @Transactional
-    public void generateCombinations(List<List<Long>> allOptionList, int depth, List<Long> combinationList, Product product) {
-        if (depth == allOptionList.size()) {
-            ProductDetail productDetail = productDetailRepository.save(ProductDetail.of(product));
+    public void generateCombinations(Map<Long, List<Option>> allOptionMap, int depth, List<Long> combinationList, Product product,
+                                     List<ProductDetail> productDetailList, List<ProductDetailOption> productDetailOptionList) {
+
+        List<Long> optionGroupIds = new ArrayList<>(allOptionMap.keySet());
+
+        if (depth == allOptionMap.size()) {
+
+            ProductDetail productDetail = ProductDetail.of(product);
+            productDetailList.add(productDetail);
+
 
             for (Long optionId : combinationList) {
                 Option option = optionRepository.findById(optionId)
                         .orElseThrow(() -> new NotFoundException(ErrorCode.OPTION_NOT_FOUND));
 
-                productDetailOptionRepository.save(ProductDetailOption.of(productDetail, option));
+                productDetailOptionList.add(ProductDetailOption.of(productDetail, option));
             }
+
             return;
         }
 
-        for (Long optionId : allOptionList.get(depth)) {
-            combinationList.add(optionId);
-            generateCombinations(allOptionList, depth + 1, combinationList, product);
+        Long currentOptionGroupId = optionGroupIds.get(depth);
+        List<Option> options = allOptionMap.get(currentOptionGroupId);
+
+        for (Option option : options) {
+            combinationList.add(option.getId());
+            generateCombinations(allOptionMap, depth + 1, combinationList, product, productDetailList, productDetailOptionList);
             combinationList.remove(combinationList.size() - 1);
         }
     }
+
+
 
     public List<ProductDetailResponse> readByProductId(Long productId) {
         List<ProductDetailResponse> responses = new ArrayList<>();
@@ -91,21 +107,21 @@ public class ProductDetailService {
 
 
         Map<Long, List<OptionQueryDto>> map = optionRepository.findOptionByProductDetailId(productDetailIdList)
-                                                                    .stream()
-                                                                    .collect(groupingBy(OptionQueryDto::productDetailId));
+                .stream()
+                .collect(groupingBy(OptionQueryDto::productDetailId));
 
-        for(Long productDetailId : productDetailIdList){
+        for (Long productDetailId : productDetailIdList) {
             ProductDetail productDetail = productDetailList.stream()
-                    .filter( p -> p.getId().equals(productDetailId))
+                    .filter(p -> p.getId().equals(productDetailId))
                     .findFirst()
                     .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND));
 
 
-           List<OptionResponse> optionResponseList = Optional.ofNullable(map.get(productDetailId))
-                   .orElseThrow(() -> new NotFoundException(ErrorCode.OPTION_NOT_FOUND))
-                   .stream().map(OptionResponse::from).toList();
+            List<OptionResponse> optionResponseList = Optional.ofNullable(map.get(productDetailId))
+                    .orElseThrow(() -> new NotFoundException(ErrorCode.OPTION_NOT_FOUND))
+                    .stream().map(OptionResponse::from).toList();
 
-           responses.add(ProductDetailResponse.from(productDetail, optionResponseList));
+            responses.add(ProductDetailResponse.from(productDetail, optionResponseList));
         }
         return responses;
     }
@@ -122,6 +138,7 @@ public class ProductDetailService {
         return ProductDetailResponse.from(productDetail, optionResponseList);
     }
 
+
     @Transactional
     public List<ProductDetailResponse> updateProductDetailStock(List<UpdateProductDetailRequest> requestList, Long productId) {
 
@@ -130,18 +147,17 @@ public class ProductDetailService {
 
         List<ProductDetail> productDetailList = productDetailRepository.findAllById(requestMap.keySet());
 
-        if(requestList.size() != productDetailList.size()){
+        if (requestList.size() != productDetailList.size()) {
             throw new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND);
         }
 
         productDetailList.forEach(p -> {
-            if(p.getStock() != 0) {
-                throw new ConflictException(ErrorCode.STOCK_MODIFICATION_NOT_ALLOWED );
+            if (p.getStock() != 0) {
+                throw new ConflictException(ErrorCode.STOCK_MODIFICATION_NOT_ALLOWED);
             }
 
-            if(!p.getProduct().getId().equals(productId)){
-                throw new ConflictException(ErrorCode.PRODUCT_DETAIL_MISMATCH
-                );
+            if (!p.getProduct().getId().equals(productId)) {
+                throw new ConflictException(ErrorCode.PRODUCT_DETAIL_MISMATCH);
             }
 
             p.setStock(requestMap.get(p.getId()));

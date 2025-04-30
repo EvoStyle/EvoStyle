@@ -19,13 +19,16 @@ public interface OptionRepository extends JpaRepository<Option, Long> {
     List<Option> findOptionByOptionGroupId(Long optionGroupId);
 
     @Query("""
-                SELECT new com.example.evostyle.domain.product.optiongroup.dto.response.OptionQueryDto(
-                                pdo.productDetail.id , o.id, o.optionGroup.id , o.type
-                )
-                FROM ProductDetailOption pdo JOIN Option o
-                ON pdo.option.id = o.id
-                where pdo.productDetail.id in (:productDetailIdList)
-                                    """)
+            SELECT new com.example.evostyle.domain.product.optiongroup.dto.response.OptionQueryDto(
+                            pdo.productDetail.id , o.id, o.optionGroup.id , o.type
+            )
+            FROM ProductDetailOption pdo JOIN Option o
+            ON pdo.option.id = o.id
+            where pdo.productDetail.id in (:productDetailIdList)
+            """)
     List<OptionQueryDto> findOptionByProductDetailId(@Param("productDetailIdList") List<Long> productDetailIdList);
+
+
+    List<Option> findByOptionGroupIdIn(@Param("optionGroupId") List<Long> optionGroupId);
 
 }
