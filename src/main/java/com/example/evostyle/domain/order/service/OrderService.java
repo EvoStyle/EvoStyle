@@ -18,6 +18,7 @@ import com.example.evostyle.global.exception.BadRequestException;
 import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -188,11 +190,25 @@ public class OrderService {
             throw new BadRequestException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND);
         }
 
-        productDetail.increaseStock(orderItem.getEachAmount());
+        // 이전 수량만큼 재고 복원
+        int previousAmount = orderItem.getEachAmount();
+        int previousTotalPrice = orderItem.getTotalPrice();
 
-        orderItem.update(request.newAmount());
+        productDetail.increaseStock(previousAmount);
 
-        productDetail.decreaseStock(request.newAmount());
+        int newAmount = request.newAmount();
+
+        // 새로운 수량 업데이트
+        orderItem.update(newAmount);
+
+        // 새로운 수량만큼 재고 차감
+        productDetail.decreaseStock(newAmount);
+
+        // Order 총 수량 및 총 가격 갱신
+        int newTotalAmountSum = order.getTotalAmountSum() - previousAmount + newAmount;
+        int newTotalPriceSum = order.getTotalPriceSum() - previousTotalPrice + (orderItem.getProductPrice() * newAmount);
+
+        order.updateAmountAndPrice(newTotalAmountSum, newTotalPriceSum);
 
         return UpdateOrderItemResponse.from(orderItem);
     }
