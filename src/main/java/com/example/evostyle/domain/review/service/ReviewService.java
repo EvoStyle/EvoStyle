@@ -12,6 +12,7 @@ import com.example.evostyle.domain.review.dto.response.ReadReviewResponse;
 import com.example.evostyle.domain.review.dto.response.UpdateReviewResponse;
 import com.example.evostyle.domain.review.entity.Review;
 import com.example.evostyle.domain.review.repository.ReviewRepository;
+import com.example.evostyle.global.exception.BadRequestException;
 import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.ForbiddenException;
 import com.example.evostyle.global.exception.NotFoundException;
@@ -44,6 +45,10 @@ public class ReviewService {
 
         if (!orderItem.getOrderStatus().equals(OrderStatus.DELIVERED)) {
             throw new ForbiddenException(ErrorCode.REVIEW_NOT_ALLOWED);
+        }
+
+        if (reviewRepository.existsByMemberIdAndOrderItemIdAndIsDeletedFalse(member.getId(), orderItem.getId())) {
+            throw new BadRequestException(ErrorCode.REVIEW_ALREADY_EXISTS);
         }
 
         Review review = Review.of(request.title(), request.rating(), request.contents(), member, orderItem);
