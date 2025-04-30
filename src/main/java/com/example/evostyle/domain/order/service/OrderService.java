@@ -77,7 +77,7 @@ public class OrderService {
             int totalPrice = product.getPrice() * request.eachAmount();
             totalPriceSum += totalPrice;
 
-//            // 재고 차감
+            // 재고 차감
             productDetail.decreaseStock(request.eachAmount());
 
             OrderItem orderItem = OrderItem.of(
@@ -129,30 +129,31 @@ public class OrderService {
 
         List<ReadOrderResponse> orderResponseList = new ArrayList<>();
 
-        orderResponseList = orderIdList.stream().map(orderId -> {
+        orderResponseList = orderIdList.stream()
+                .map(orderId -> {
 
-            List<ReadOrderItemResponse> readOrderItemResponseList = idToOrderItemList.get(orderId)
-                    .stream()
-                    .map(orderItem -> ReadOrderItemResponse.from(
-                            orderItem,
-                            orderItem.getProductDetail().getId())
-                    ).toList();
+                    List<ReadOrderItemResponse> readOrderItemResponseList = idToOrderItemList.get(orderId)
+                            .stream()
+                            .map(orderItem -> ReadOrderItemResponse.from(
+                                    orderItem,
+                                    orderItem.getProductDetail().getId())
+                            ).toList();
 
-            int totalAmountSum = readOrderItemResponseList.stream()
-                    .mapToInt(ReadOrderItemResponse::eachAmount)
-                    .sum();
+                    int totalAmountSum = readOrderItemResponseList.stream()
+                            .mapToInt(ReadOrderItemResponse::eachAmount)
+                            .sum();
 
-            int totalPriceSum = readOrderItemResponseList.stream()
-                    .mapToInt(ReadOrderItemResponse::totalPrice)
-                    .sum();
+                    int totalPriceSum = readOrderItemResponseList.stream()
+                            .mapToInt(ReadOrderItemResponse::totalPrice)
+                            .sum();
 
-            return ReadOrderResponse.from(
-                    orderId,
-                    readOrderItemResponseList,
-                    totalAmountSum,
-                    totalPriceSum
-            );
-        }).toList();
+                    return ReadOrderResponse.from(
+                            orderId,
+                            readOrderItemResponseList,
+                            totalAmountSum,
+                            totalPriceSum
+                    );
+                }).toList();
 
         return orderResponseList;
     }
