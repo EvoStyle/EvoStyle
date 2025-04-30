@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -49,5 +50,15 @@ public class OrderController {
         );
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @DeleteMapping("/{orderId}/order-items/{orderItemId}")
+    public ResponseEntity<Map<String, Long>> deleteOrderItem(
+            @PathVariable(name = "orderId") Long orderId,
+            @PathVariable(name = "orderItemId") Long orderItemId
+    ) {
+        orderService.deleteOrderItem(orderId, orderItemId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(Map.of("orderItemId", orderItemId));
     }
 }

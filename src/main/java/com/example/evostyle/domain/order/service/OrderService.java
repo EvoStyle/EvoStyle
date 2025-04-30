@@ -212,4 +212,32 @@ public class OrderService {
 
         return UpdateOrderItemResponse.from(orderItem);
     }
+
+    @Transactional
+    public void deleteOrderItem(
+            Long orderId,
+            Long orderItemId
+    ) {
+        OrderItem orderItem = orderItemRepository.findByIdAndOrderStatus(orderItemId, OrderStatus.PENDING)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_ITEM_NOT_FOUND));
+
+        Order order = orderItem.getOrder();
+
+        boolean isOrderIdDifferent = !order.getId().equals(orderId);
+
+        if(isOrderIdDifferent) {
+            throw new NotFoundException(ErrorCode.ORDER_NOT_FOUND);
+        }
+
+        int updatedTotalAmountSum = order.getTotalAmountSum() - orderItem.getEachAmount();
+        int updatedTotalPriceSum = order.getTotalPriceSum() - orderItem.getTotalPrice();
+
+        order.updateAmountAndPrice(updatedTotalAmountSum, updatedTotalPriceSum);
+
+        orderItem.markAsCancelled();
+
+        if(!orderItemRepository.existsByOrderIdAndIsCancelledFalse(orderId)) {
+            order.markAsCancelled();
+        }
+    }
 }

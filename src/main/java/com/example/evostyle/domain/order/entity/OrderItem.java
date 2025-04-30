@@ -6,6 +6,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Table(name = "order_items")
@@ -34,6 +36,12 @@ public class OrderItem {
 
     @Column(name = "product_description", nullable = false)
     private String productDescription;
+
+    @Column(name = "cancelled_at")
+    private LocalDateTime cancelledAt;
+
+    @Column(name = "is_cancelled", nullable = false)
+    private boolean isCancelled;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
@@ -85,8 +93,14 @@ public class OrderItem {
         );
     }
 
-    public void update(Integer newAmount) {
+    public void update(int newAmount) {
         this.eachAmount = newAmount;
         this.totalPrice = this.productPrice * newAmount;
     };
+
+    public void markAsCancelled() {
+        this.isCancelled = true;
+        this.cancelledAt = LocalDateTime.now();
+        this.orderStatus = OrderStatus.CANCELED;
+    }
 }

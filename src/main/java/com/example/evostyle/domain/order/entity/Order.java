@@ -7,6 +7,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Table(name = "orders")
@@ -23,6 +25,12 @@ public class Order extends BaseEntity {
 
     @Column(name = "total_price_sum", nullable = false)
     private int totalPriceSum;
+
+    @Column(name = "cancelled_at")
+    private LocalDateTime cancelledAt;
+
+    @Column(name = "is_cancelled", nullable = false)
+    private boolean isCancelled;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
@@ -56,5 +64,10 @@ public class Order extends BaseEntity {
     ) {
         this.totalAmountSum = totalAmountSum;
         this.totalPriceSum = totalPriceSum;
+    }
+
+    public void markAsCancelled() {
+        this.isCancelled = true;
+        this.cancelledAt = LocalDateTime.now();
     }
 }
