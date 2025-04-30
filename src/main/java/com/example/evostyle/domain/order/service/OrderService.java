@@ -4,10 +4,8 @@ import com.example.evostyle.domain.brand.repository.BrandRepository;
 import com.example.evostyle.domain.member.entity.Member;
 import com.example.evostyle.domain.member.repository.MemberRepository;
 import com.example.evostyle.domain.order.dto.request.CreateOrderItemRequest;
-import com.example.evostyle.domain.order.dto.response.CreateOrderItemResponse;
-import com.example.evostyle.domain.order.dto.response.CreateOrderResponse;
-import com.example.evostyle.domain.order.dto.response.ReadOrderItemResponse;
-import com.example.evostyle.domain.order.dto.response.ReadOrderResponse;
+import com.example.evostyle.domain.order.dto.request.UpdateOrderItemRequest;
+import com.example.evostyle.domain.order.dto.response.*;
 import com.example.evostyle.domain.order.entity.Order;
 import com.example.evostyle.domain.order.entity.OrderItem;
 import com.example.evostyle.domain.order.entity.OrderStatus;
@@ -16,6 +14,7 @@ import com.example.evostyle.domain.order.repository.OrderRepository;
 import com.example.evostyle.domain.product.entity.Product;
 import com.example.evostyle.domain.product.productdetail.entity.ProductDetail;
 import com.example.evostyle.domain.product.repository.ProductDetailRepository;
+import com.example.evostyle.global.exception.BadRequestException;
 import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -156,5 +155,32 @@ public class OrderService {
                 }).toList();
 
         return orderResponseList;
+    }
+
+    @Transactional
+    public UpdateOrderItemResponse updateOrderItem(
+            UpdateOrderItemRequest request,
+            Long orderItemId
+    ) {
+
+        OrderItem orderItem = orderItemRepository.findById(orderItemId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_ITEM_NOT_FOUND));
+
+        boolean isNotPending = !orderItem.getOrderStatus().equals(OrderStatus.PENDING);
+
+        if (isNotPending) {
+            throw new BadRequestException(ErrorCode.NOT_PENDING_STATUS);
+        }
+
+        ProductDetail productDetail = productDetailRepository.findById(request.productDetailId())
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND));
+
+        productDetail.increaseStock(orderItem.getEachAmount());
+
+        orderItem.update(request.eachAmount());
+
+        productDetail.decreaseStock(request.eachAmount());
+
+        return UpdateOrderItemResponse.from(orderItem);
     }
 }

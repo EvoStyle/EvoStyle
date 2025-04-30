@@ -16,7 +16,7 @@ public class ProductDetail extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id ;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "product_id")
@@ -25,24 +25,28 @@ public class ProductDetail extends BaseEntity {
     @Column(name = "product_stock")
     private Integer stock;
 
-    private ProductDetail(Product product, Integer stock){
-        this.product = product ;
-        this.stock = stock ;
+    private ProductDetail(Product product, Integer stock) {
+        this.product = product;
+        this.stock = stock;
     }
 
-    public ProductDetail of(Product product, Integer stock){
+    public ProductDetail of(Product product, Integer stock) {
         return new ProductDetail(product, stock);
     }
 
     public void decreaseStock(int amount) {
-        if(amount <= 0) {
+        if (amount <= 0) {
             throw new BadRequestException(ErrorCode.INVALID_STOCK_DECREASE_AMOUNT);
         }
 
-        if(this.stock < amount) {
+        if (this.stock < amount) {
             throw new BadRequestException(ErrorCode.OUT_OF_STOCK);
         }
 
         this.stock -= amount;
+    }
+
+    public void increaseStock(int amount) {
+        this.stock += amount;
     }
 }

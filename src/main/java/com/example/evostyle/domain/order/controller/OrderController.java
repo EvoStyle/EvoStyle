@@ -1,8 +1,10 @@
 package com.example.evostyle.domain.order.controller;
 
 import com.example.evostyle.domain.order.dto.request.CreateOrderItemRequest;
+import com.example.evostyle.domain.order.dto.request.UpdateOrderItemRequest;
 import com.example.evostyle.domain.order.dto.response.CreateOrderResponse;
 import com.example.evostyle.domain.order.dto.response.ReadOrderResponse;
+import com.example.evostyle.domain.order.dto.response.UpdateOrderItemResponse;
 import com.example.evostyle.domain.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -32,5 +34,15 @@ public class OrderController {
         List<ReadOrderResponse> orderResponseList = orderService.readAllOrders();
 
         return ResponseEntity.status(HttpStatus.OK).body(orderResponseList);
+    }
+
+    @PatchMapping("{orderItemId}")
+    public ResponseEntity<UpdateOrderItemResponse> updateOrderItem(
+            @RequestBody UpdateOrderItemRequest request,
+            @PathVariable(name = "orderItemId") Long orderItemId
+    ) {
+        UpdateOrderItemResponse response = orderService.updateOrderItem(request, orderItemId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

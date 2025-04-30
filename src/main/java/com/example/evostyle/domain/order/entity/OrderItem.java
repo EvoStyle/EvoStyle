@@ -84,4 +84,8 @@ public class OrderItem {
                 productDescription
         );
     }
+
+    public void update(Integer eachAmount) {
+        this.eachAmount = eachAmount;
+    };
 }
