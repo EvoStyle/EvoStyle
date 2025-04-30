@@ -1,7 +1,6 @@
 package com.example.evostyle.domain.order.entity;
 
 import com.example.evostyle.common.entity.BaseEntity;
-import com.example.evostyle.domain.brand.entity.Brand;
 import com.example.evostyle.domain.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -51,7 +50,10 @@ public class Order extends BaseEntity {
         );
     }
 
-    public void updateAmountAndPrice(int totalAmountSum, int totalPriceSum) {
+    public void updateAmountAndPrice(
+            int totalAmountSum,
+            int totalPriceSum
+    ) {
         this.totalAmountSum = totalAmountSum;
         this.totalPriceSum = totalPriceSum;
     }
