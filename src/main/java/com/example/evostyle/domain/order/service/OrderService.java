@@ -1,5 +1,6 @@
 package com.example.evostyle.domain.order.service;
 
+import com.example.evostyle.domain.brand.entity.Brand;
 import com.example.evostyle.domain.brand.repository.BrandRepository;
 import com.example.evostyle.domain.member.entity.Member;
 import com.example.evostyle.domain.member.repository.MemberRepository;
@@ -73,6 +74,7 @@ public class OrderService {
         for (CreateOrderItemRequest request : requestList) {
             ProductDetail productDetail = idToProductDetail.get(request.productDetailId());
             Product product = productDetail.getProduct();
+            Brand brand = product.getBrand();
             totalAmountSum += request.eachAmount();
 
             int totalPrice = product.getPrice() * request.eachAmount();
@@ -85,6 +87,7 @@ public class OrderService {
                     request.eachAmount(),
                     totalPrice,
                     order,
+                    brand,
                     OrderStatus.PENDING,
                     productDetail,
                     product.getName(),

@@ -15,7 +15,7 @@ public record ReadOrderItemResponse(
     public static ReadOrderItemResponse from(OrderItem orderItem) {
         return new ReadOrderItemResponse(
                 orderItem.getId(),
-                orderItem.getProductDetail().getProduct().getBrand().getId(),
+                orderItem.getBrand().getId(),
                 orderItem.getProductDetail().getId(),
                 orderItem.getProductName(),
                 orderItem.getEachAmount(),
