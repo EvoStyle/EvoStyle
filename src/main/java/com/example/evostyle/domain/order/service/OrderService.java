@@ -162,11 +162,17 @@ public class OrderService {
     @Transactional
     public UpdateOrderItemResponse updateOrderItem(
             UpdateOrderItemRequest request,
+            Long orderId,
             Long orderItemId
     ) {
-
         OrderItem orderItem = orderItemRepository.findById(orderItemId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_ITEM_NOT_FOUND));
+
+        Order order = orderItem.getOrder();
+
+        if (!order.getId().equals(orderId)) {
+            throw new NotFoundException(ErrorCode.ORDER_NOT_FOUND);
+        }
 
         boolean isNotPending = !orderItem.getOrderStatus().equals(OrderStatus.PENDING);
 
@@ -174,14 +180,19 @@ public class OrderService {
             throw new BadRequestException(ErrorCode.NOT_PENDING_STATUS);
         }
 
-        ProductDetail productDetail = productDetailRepository.findById(request.productDetailId())
-                .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND));
+        ProductDetail productDetail = orderItem.getProductDetail();
+
+        boolean isProductDetailIdDifferent = !productDetail.getId().equals(request.productDetailId());
+
+        if (isProductDetailIdDifferent) {
+            throw new BadRequestException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND);
+        }
 
         productDetail.increaseStock(orderItem.getEachAmount());
 
-        orderItem.update(request.eachAmount());
+        orderItem.update(request.newAmount());
 
-        productDetail.decreaseStock(request.eachAmount());
+        productDetail.decreaseStock(request.newAmount());
 
         return UpdateOrderItemResponse.from(orderItem);
     }

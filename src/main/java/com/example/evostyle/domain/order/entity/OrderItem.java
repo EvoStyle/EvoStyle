@@ -85,7 +85,8 @@ public class OrderItem {
         );
     }
 
-    public void update(Integer eachAmount) {
-        this.eachAmount = eachAmount;
+    public void update(Integer newAmount) {
+        this.eachAmount = newAmount;
+        this.totalPrice = this.productPrice * newAmount;
     };
 }

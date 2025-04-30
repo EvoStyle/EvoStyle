@@ -36,12 +36,17 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.OK).body(orderResponseList);
     }
 
-    @PatchMapping("{orderItemId}")
+    @PatchMapping("/{orderId}/order-items/{orderItemId}")
     public ResponseEntity<UpdateOrderItemResponse> updateOrderItem(
             @RequestBody UpdateOrderItemRequest request,
+            @PathVariable(name = "orderId") Long orderId,
             @PathVariable(name = "orderItemId") Long orderItemId
     ) {
-        UpdateOrderItemResponse response = orderService.updateOrderItem(request, orderItemId);
+        UpdateOrderItemResponse response = orderService.updateOrderItem(
+                request,
+                orderId,
+                orderItemId
+        );
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
