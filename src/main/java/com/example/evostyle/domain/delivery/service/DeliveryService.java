@@ -74,6 +74,6 @@ public class DeliveryService {
     @Transactional
     public void deleteDelivery(Long deliveryId) {
         Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(() -> new NotFoundException(ErrorCode.DELIVERY_NOT_FOUND));
-        delivery.changeStatus(DeliveryStatus.CANCLE);
+        delivery.changeStatus(DeliveryStatus.CANCELLED);
     }
 }

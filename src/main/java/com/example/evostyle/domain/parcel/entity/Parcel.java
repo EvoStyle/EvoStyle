@@ -30,8 +30,8 @@ public class Parcel extends BaseEntity {
 
     private LocalDateTime estimatedDeliveryDate;
 
-    private Parcel(String tracking_number, Sender sender, Receiver receiver, ParcelStatus parcelStatus) {
-        this.trackingNumber = tracking_number;
+    private Parcel(String trackingNumber, Sender sender, Receiver receiver, ParcelStatus parcelStatus) {
+        this.trackingNumber = trackingNumber;
         this.sender = sender;
         this.receiver = receiver;
         this.parcelStatus = parcelStatus;

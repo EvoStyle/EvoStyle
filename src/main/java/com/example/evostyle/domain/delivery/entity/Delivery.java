@@ -22,7 +22,7 @@ public class Delivery {
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_items_id", nullable = false)
+    @JoinColumn(name = "order_item_id", nullable = false)
     private OrderItem orderItem;
 
     @Enumerated(EnumType.STRING)
