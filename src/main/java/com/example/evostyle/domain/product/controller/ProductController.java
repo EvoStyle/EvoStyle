@@ -43,6 +43,6 @@ public class ProductController {
     public ResponseEntity<Map<String, Long>> deleteProduct(@PathVariable(name = "productId") Long productId){
         productService.deleteProduct(productId);
 
-        return  ResponseEntity.status(HttpStatus.OK).body(Map.of("productId", productId));
+        return  ResponseEntity.status(HttpStatus.OK).body(Map.of("productDetailId", productId));
     }
 }

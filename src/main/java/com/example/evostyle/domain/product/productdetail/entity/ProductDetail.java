@@ -2,6 +2,8 @@ package com.example.evostyle.domain.product.productdetail.entity;
 
 import com.example.evostyle.common.entity.BaseEntity;
 import com.example.evostyle.domain.product.entity.Product;
+import com.example.evostyle.global.exception.BadRequestException;
+import com.example.evostyle.global.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,5 +32,17 @@ public class ProductDetail extends BaseEntity {
 
     public ProductDetail of(Product product, Integer stock){
         return new ProductDetail(product, stock);
+    }
+
+    public void decreaseStock(int amount) {
+        if(amount <= 0) {
+            throw new BadRequestException(ErrorCode.INVALID_STOCK_DECREASE_AMOUNT);
+        }
+
+        if(this.stock < amount) {
+            throw new BadRequestException(ErrorCode.OUT_OF_STOCK);
+        }
+
+        this.stock -= amount;
     }
 }

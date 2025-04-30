@@ -2,7 +2,7 @@ package com.example.evostyle.domain.review.entity;
 
 import com.example.evostyle.common.entity.BaseEntity;
 import com.example.evostyle.domain.member.entity.Member;
-import com.example.evostyle.domain.orderitem.entity.OrderItem;
+import com.example.evostyle.domain.order.entity.OrderItem;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

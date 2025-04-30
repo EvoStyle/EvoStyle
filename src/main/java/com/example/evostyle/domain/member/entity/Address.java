@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Getter
@@ -18,42 +19,57 @@ public class Address {
     @Column(length = 10, name = "post_code", nullable = false)
     private String postCode;
 
-    @Column(length = 15, name = "si_do", nullable = false)
-    private String siDo;
-
-    @Column(length = 30, name = "si_gun_gu", nullable = false)
-    private String siGunGu;
-
-    @Column(length = 50, name = "road_name_address", nullable = false)
-    private String roadNameAddress;
+    @Column(length = 100, name = "full_address", nullable = false)
+    private String fullAddress;
 
     @Column(length = 50, name = "detail_address", nullable = false)
     private String detailAddress;
 
-    @Column(length = 50, name = "extra_address")
-    private String extraAddress;
+    @Column(length = 100)
+    private String memo;
+
+    @Column(name = "is_basecamp", nullable = false)
+    @ColumnDefault("false")
+    private boolean isBasecamp;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
     private Address(
-        String postCode, String siDo, String siGunGu,
-        String roadNameAddress, String detailAddress, String extraAddress, Member member
+        String postCode, String fullAddress, String detailAddress, String memo, Member member
     ) {
         this.postCode = postCode;
-        this.siDo = siDo;
-        this.siGunGu = siGunGu;
-        this.roadNameAddress = roadNameAddress;
+        this.fullAddress = fullAddress;
         this.detailAddress = detailAddress;
-        this.extraAddress = extraAddress;
+        this.memo = memo;
         this.member = member;
     }
 
     public static Address of(
-        String postCode, String siDo, String siGunGu,
-        String roadNameAddress, String detailAddress, String extraAddress, Member member
+        String postCode, String fullAddress, String detailAddress, String memo, Member member
     ) {
-        return new Address(postCode, siDo, siGunGu, roadNameAddress, detailAddress, extraAddress, member);
+        return new Address(postCode, fullAddress, detailAddress, memo, member);
+    }
+
+    public void updateAddress(
+        String postCode, String fullAddress, String detailAddress, String memo
+    ) {
+        if (postCode != null && !postCode.isBlank()) {
+            this.postCode = postCode;
+        }
+        if (fullAddress != null && !fullAddress.isBlank()) {
+            this.fullAddress = fullAddress;
+        }
+        if (detailAddress != null && !detailAddress.isBlank()) {
+            this.detailAddress = detailAddress;
+        }
+        if (memo != null && !memo.isBlank()) {
+            this.memo = memo;
+        }
+    }
+
+    public void updateIsBasecamp() {
+        this.isBasecamp = true;
     }
 }

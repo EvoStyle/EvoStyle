@@ -19,10 +19,6 @@ public class Order extends BaseEntity {
     @Column(columnDefinition = "BIGINT")
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "order_status", nullable = false)
-    private OrderStatus orderStatus;
-
     @Column(name = "total_amount_sum", nullable = false)
     private int totalAmountSum;
 
@@ -33,19 +29,25 @@ public class Order extends BaseEntity {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "brand_id", nullable = false)
-    private Brand brand;
-
-    private Order(Member member, Brand brand, OrderStatus orderStatus, int totalAmountSum, int totalPriceSum) {
+    private Order(
+            Member member,
+            int totalAmountSum,
+            int totalPriceSum
+    ) {
         this.member = member;
-        this.brand = brand;
-        this.orderStatus = orderStatus;
         this.totalAmountSum = totalAmountSum;
         this.totalPriceSum = totalPriceSum;
     }
 
-    public static Order of(Member member, Brand brand, OrderStatus orderStatus, int totalAmountSum, int totalPriceSum) {
-        return new Order(member, brand, orderStatus, totalAmountSum, totalPriceSum);
+    public static Order of(
+            Member member,
+            int totalAmountSum,
+            int totalPriceSum
+    ) {
+        return new Order(
+                member,
+                totalAmountSum,
+                totalPriceSum
+        );
     }
 }
