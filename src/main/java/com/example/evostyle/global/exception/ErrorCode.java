@@ -39,6 +39,9 @@ public enum ErrorCode {
     ORDER_CANCEL_FORBIDDEN(HttpStatus.FORBIDDEN, "이 주문을 취소할 권한이 없습니다."),
     ALREADY_CANCELLED_ORDER(HttpStatus.BAD_REQUEST, "이미 취소처리 된 주문입니다."),
 
+    //주문세부사항 관련
+    ORDER_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "주문 세부사항이 존재하지 않습니다."),
+
     //상품 관련
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 상품입니다"),
     PRODUCT_DETAIL_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 상품 세부사항입니다"),
