@@ -41,7 +41,9 @@ public class OrderService {
     @Transactional
     public CreateOrderResponse createOrder(List<CreateOrderItemRequest> requestList) {
 
-        List<Long> productDetailIdList = requestList.stream().map(CreateOrderItemRequest::productDetailId).toList();
+        List<Long> productDetailIdList = requestList.stream()
+                .map(CreateOrderItemRequest::productDetailId)
+                .toList();
 
         List<ProductDetail> productDetailList = productDetailRepository.findAllById(productDetailIdList);
 
@@ -49,15 +51,21 @@ public class OrderService {
             throw new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND);
         }
 
-        Map<Long, ProductDetail> idToProductDetail = productDetailList.stream().collect(Collectors.toMap(ProductDetail::getId, productDetail -> productDetail));
+        Map<Long, ProductDetail> idToProductDetail = productDetailList.stream()
+                .collect(Collectors.toMap(ProductDetail::getId, productDetail -> productDetail));
 
         // todo 인증/인가 적용 후 수정 예정
-        Member member = memberRepository.findById(1L).orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
+        Member member = memberRepository.findById(1L)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
         int totalAmountSum = 0;
         int totalPriceSum = 0;
 
-        Order order = Order.of(member, totalAmountSum, totalPriceSum);
+        Order order = Order.of(
+                member,
+                totalAmountSum,
+                totalPriceSum
+        );
 
         List<OrderItem> orderItemList = new ArrayList<>();
 
@@ -72,7 +80,16 @@ public class OrderService {
 //            // 재고 차감
             productDetail.decreaseStock(request.eachAmount());
 
-            OrderItem orderItem = OrderItem.of(request.eachAmount(), totalPrice, order, OrderStatus.PENDING, productDetail, product.getName(), product.getPrice(), product.getDescription());
+            OrderItem orderItem = OrderItem.of(
+                    request.eachAmount(),
+                    totalPrice,
+                    order,
+                    OrderStatus.PENDING,
+                    productDetail,
+                    product.getName(),
+                    product.getPrice(),
+                    product.getDescription()
+            );
 
             orderItemList.add(orderItem);
         }
@@ -81,15 +98,23 @@ public class OrderService {
 
         orderItemRepository.saveAll(orderItemList);
 
-        List<CreateOrderItemResponse> responseList = orderItemList.stream().map(orderItem -> CreateOrderItemResponse.from(orderItem, orderItem.getProductDetail().getId())).toList();
+        List<CreateOrderItemResponse> responseList = orderItemList.stream()
+                .map(CreateOrderItemResponse::from)
+                .toList();
 
-        return CreateOrderResponse.from(order.getId(), responseList, totalAmountSum, totalPriceSum);
+        return CreateOrderResponse.from(
+                order.getId(),
+                responseList,
+                totalAmountSum,
+                totalPriceSum
+        );
     }
 
     public List<ReadOrderResponse> readAllOrders() {
 
         // todo 인증/인가 적용 후 수정 예정
-        memberRepository.findById(1L).orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
+        memberRepository.findById(1L)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
         // 사장님이 소유한 브랜드 ID 목록 조회
         List<Long> brandIdList = brandRepository.findBrandIdsByMemberId(1L);

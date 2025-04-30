@@ -9,13 +9,10 @@ public record CreateOrderItemResponse(
         Integer eachAmount,
         Integer totalPrice
 ) {
-    public static CreateOrderItemResponse from(
-            OrderItem orderItem,
-            Long productDetailId
-    ) {
+    public static CreateOrderItemResponse from(OrderItem orderItem) {
         return new CreateOrderItemResponse(
                 orderItem.getId(),
-                productDetailId,
+                orderItem.getProductDetail().getId(),
                 orderItem.getProductName(),
                 orderItem.getEachAmount(),
                 orderItem.getTotalPrice()
