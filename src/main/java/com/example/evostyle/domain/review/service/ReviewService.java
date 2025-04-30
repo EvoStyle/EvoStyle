@@ -3,6 +3,7 @@ package com.example.evostyle.domain.review.service;
 import com.example.evostyle.domain.member.entity.Member;
 import com.example.evostyle.domain.member.repository.MemberRepository;
 import com.example.evostyle.domain.order.entity.OrderItem;
+import com.example.evostyle.domain.order.entity.OrderStatus;
 import com.example.evostyle.domain.order.repository.OrderItemRepository;
 import com.example.evostyle.domain.review.dto.request.CreateReviewRequest;
 import com.example.evostyle.domain.review.dto.request.UpdateReviewRequest;
@@ -12,6 +13,7 @@ import com.example.evostyle.domain.review.dto.response.UpdateReviewResponse;
 import com.example.evostyle.domain.review.entity.Review;
 import com.example.evostyle.domain.review.repository.ReviewRepository;
 import com.example.evostyle.global.exception.ErrorCode;
+import com.example.evostyle.global.exception.ForbiddenException;
 import com.example.evostyle.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -35,6 +37,14 @@ public class ReviewService {
 
         OrderItem orderItem = orderItemRepository.findById(orderItemId)
             .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_ITEM_NOT_FOUND));
+
+        if (!orderItem.getOrder().getMember().getId().equals(memberId)) {
+            throw new ForbiddenException(ErrorCode.NOT_OWNER_OF_ORDER);
+        }
+
+        if (!orderItem.getOrderStatus().equals(OrderStatus.DELIVERED)) {
+            throw new ForbiddenException(ErrorCode.REVIEW_NOT_ALLOWED);
+        }
 
         Review review = Review.of(request.title(), request.rating(), request.contents(), member, orderItem);
 
