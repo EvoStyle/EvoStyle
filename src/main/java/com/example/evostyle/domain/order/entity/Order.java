@@ -50,4 +50,9 @@ public class Order extends BaseEntity {
                 totalPriceSum
         );
     }
+
+    public void updateAmountAndPrice(int totalAmountSum, int totalPriceSum) {
+        this.totalAmountSum = totalAmountSum;
+        this.totalPriceSum = totalPriceSum;
+    }
 }

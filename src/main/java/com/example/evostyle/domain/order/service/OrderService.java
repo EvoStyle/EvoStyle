@@ -93,6 +93,8 @@ public class OrderService {
             orderItemList.add(orderItem);
         }
 
+        order.updateAmountAndPrice(totalAmountSum, totalPriceSum);
+
         orderRepository.save(order);
 
         orderItemRepository.saveAll(orderItemList);
