@@ -1,6 +1,7 @@
 package com.example.evostyle.domain.order.dto.response;
 
 import com.example.evostyle.domain.order.entity.OrderItem;
+import com.example.evostyle.domain.order.entity.OrderStatus;
 
 public record ReadOrderItemResponse(
         Long orderItemId,
@@ -8,19 +9,18 @@ public record ReadOrderItemResponse(
         Long productDetailId,
         String productName,
         Integer eachAmount,
-        Integer totalPrice
+        Integer totalPrice,
+        OrderStatus orderStatus
 ) {
-    public static ReadOrderItemResponse from(
-            OrderItem orderItem,
-            Long productDetailId
-    ) {
+    public static ReadOrderItemResponse from(OrderItem orderItem) {
         return new ReadOrderItemResponse(
                 orderItem.getId(),
                 orderItem.getProductDetail().getProduct().getBrand().getId(),
-                productDetailId,
+                orderItem.getProductDetail().getId(),
                 orderItem.getProductName(),
                 orderItem.getEachAmount(),
-                orderItem.getTotalPrice()
+                orderItem.getTotalPrice(),
+                orderItem.getOrderStatus()
         );
     }
 }

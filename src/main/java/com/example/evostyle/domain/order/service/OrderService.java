@@ -137,10 +137,7 @@ public class OrderService {
 
                     List<ReadOrderItemResponse> readOrderItemResponseList = idToOrderItemList.get(orderId)
                             .stream()
-                            .map(orderItem -> ReadOrderItemResponse.from(
-                                    orderItem,
-                                    orderItem.getProductDetail().getId())
-                            ).toList();
+                            .map(ReadOrderItemResponse::from).toList();
 
                     int totalAmountSum = readOrderItemResponseList.stream()
                             .mapToInt(ReadOrderItemResponse::eachAmount)
@@ -168,7 +165,7 @@ public class OrderService {
             Long orderItemId
     ) {
         OrderItem orderItem = orderItemRepository.findByIdAndOrderStatus(orderItemId, OrderStatus.PENDING)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_ITEM_NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_ITEM_NOT_PENDING));
 
         Order order = orderItem.getOrder();
 
@@ -213,7 +210,7 @@ public class OrderService {
             Long orderItemId
     ) {
         OrderItem orderItem = orderItemRepository.findByIdAndOrderStatus(orderItemId, OrderStatus.PENDING)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_ITEM_NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_ITEM_NOT_PENDING));
 
         Order order = orderItem.getOrder();
 
