@@ -59,11 +59,14 @@ public enum ErrorCode {
 
     //딜리버리 관련
     DELIVERY_NOT_READY(HttpStatus.BAD_REQUEST,"배송이 준비상태가 아닙니다."),
-    DELIVERY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 배송입니다.");
+    DELIVERY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 배송입니다."),
   
     // 즐겨찾기 관련
     BOOKMARK_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 등록된 즐겨찾기입니다."),
-    BOOKMARK_NOT_FOUND(HttpStatus.NOT_FOUND, "즐겨찾기가 존재하지 않습니다.");
+    BOOKMARK_NOT_FOUND(HttpStatus.NOT_FOUND, "즐겨찾기가 존재하지 않습니다."),
+
+    // 배송
+    PARCEL_API_FAIL(HttpStatus.UNPROCESSABLE_ENTITY, "택배 송장 등록에 실패했습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

@@ -1,5 +1,6 @@
 package com.example.evostyle.domain.order.entity;
 
+import com.example.evostyle.domain.brand.entity.Brand;
 import com.example.evostyle.domain.product.productdetail.entity.ProductDetail;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -40,6 +41,10 @@ public class OrderItem {
     private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "brand_id", nullable = false)
+    private Brand brand;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_detail_id", nullable = false)
     private ProductDetail productDetail;
 
@@ -47,6 +52,7 @@ public class OrderItem {
             Integer eachAmount,
             Integer totalPrice,
             Order order,
+            Brand brand,
             OrderStatus orderStatus,
             ProductDetail productDetail,
             String productName,
@@ -56,6 +62,7 @@ public class OrderItem {
         this.eachAmount = eachAmount;
         this.totalPrice = totalPrice;
         this.order = order;
+        this.brand = brand;
         this.orderStatus = orderStatus;
         this.productDetail = productDetail;
         this.productName = productName;
@@ -67,6 +74,7 @@ public class OrderItem {
             Integer eachAmount,
             Integer totalPrice,
             Order order,
+            Brand brand,
             OrderStatus orderStatus,
             ProductDetail productDetail,
             String productName,
@@ -77,6 +85,7 @@ public class OrderItem {
                 eachAmount,
                 totalPrice,
                 order,
+                brand,
                 orderStatus,
                 productDetail,
                 productName,

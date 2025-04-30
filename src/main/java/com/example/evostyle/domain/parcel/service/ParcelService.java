@@ -9,7 +9,11 @@ import com.example.evostyle.domain.parcel.entity.Sender;
 import com.example.evostyle.domain.parcel.repository.ParcelRepository;
 import com.example.evostyle.domain.parcel.repository.ReceiverRepository;
 import com.example.evostyle.domain.parcel.repository.SenderRepository;
+import com.example.evostyle.global.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,12 +27,29 @@ public class ParcelService {
 
     @Transactional
     public ParcelResponse createParcel(ParcelRequest parcelRequest) {
-        String trackingNumber = UUID.randomUUID().toString().replace("-", "").substring(0, 20).toUpperCase();
         Sender sender = Sender.of(parcelRequest.senderRequest().name());
         ReceiverRequest receiverRequest = parcelRequest.receiverRequest();
-        Receiver receiver = Receiver.of(receiverRequest.name(), receiverRequest.address(), receiverRequest.phone(), receiverRequest.postCode());
-        Parcel parcel = Parcel.of(trackingNumber, sender, receiver);
-        Parcel savedParcel = parcelRepository.save(parcel);
-        return ParcelResponse.from(savedParcel);
+        Receiver receiver = Receiver.of(receiverRequest.name(), receiverRequest.address(), receiverRequest.phone(), receiverRequest.postCode(), parcelRequest.receiverRequest().addressAssistant());
+
+        int retryCount = 0;
+
+        final int MAX_RETRIES = 3;
+
+        while (retryCount < MAX_RETRIES) {
+            try {
+                String trackingNumber = UUID.randomUUID().toString().replace("-", "").substring(0, 20).toUpperCase();
+                Parcel parcel = Parcel.of(trackingNumber, sender, receiver, parcelRequest.deliveryRequest());
+                Parcel savedParcel = parcelRepository.save(parcel);
+
+                return ParcelResponse.from(savedParcel);
+
+            } catch (DataIntegrityViolationException e) {
+                retryCount++;
+                if (retryCount >= MAX_RETRIES) {
+                    throw new DataIntegrityViolationException("송장번호 생성 실패 – 여러 번 시도했으나 저장에 실패했습니다.");
+                }
+            }
+        }
+        throw new IllegalStateException("이곳에 도달하면 안됩니다.");
     }
 }
