@@ -16,13 +16,11 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Collections;
 
 @Slf4j(topic = "JwtAuthenticationFilter")
 @Component
@@ -56,10 +54,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         throw new UnauthorizedException(ErrorCode.JWT_EXCEPTION);
                     }
 
+                    AuthUser authUser = AuthUser.of(memberId, authority);
+
                     UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                        memberId,
-                        null,
-                        Collections.singletonList(new SimpleGrantedAuthority(authority.getRoleName()))
+                        authUser,  // principal
+                        null,  // credentials (사용 안함)
+                        authUser.authorities()
                     );
 
                     // SecurityContext에 인증 정보 등록
