@@ -1,6 +1,7 @@
 package com.example.evostyle.global.filter;
 
 import com.example.evostyle.common.util.JwtUtil;
+import com.example.evostyle.domain.member.entity.Authority;
 import com.example.evostyle.global.exception.BadRequestException;
 import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.InternalServerException;
@@ -46,16 +47,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 if (SecurityContextHolder.getContext().getAuthentication() == null) {
                     Long memberId = Long.valueOf(claims.getSubject());
-                    String authority = claims.get("authority", String.class);
+                    String roleName = claims.get("authority", String.class);
 
-                    if (authority == null || authority.isBlank()) {
+                    Authority authority;
+                    try {
+                        authority = Authority.of(roleName);
+                    } catch (IllegalArgumentException e) {
                         throw new UnauthorizedException(ErrorCode.JWT_EXCEPTION);
                     }
 
                     UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                         memberId,
                         null,
-                        Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + authority))
+                        Collections.singletonList(new SimpleGrantedAuthority(authority.getRoleName()))
                     );
 
                     // SecurityContext에 인증 정보 등록
