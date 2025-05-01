@@ -1,4 +1,4 @@
-package com.example.evostyle.global.config;
+package com.example.evostyle.global.security;
 
 import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.UnauthorizedException;

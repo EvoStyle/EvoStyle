@@ -1,4 +1,4 @@
-package com.example.evostyle.global.filter;
+package com.example.evostyle.global.security;
 
 import com.example.evostyle.common.util.JwtUtil;
 import com.example.evostyle.domain.member.entity.Authority;

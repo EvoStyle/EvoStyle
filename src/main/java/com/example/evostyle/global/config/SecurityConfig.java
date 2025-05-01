@@ -1,6 +1,8 @@
 package com.example.evostyle.global.config;
 
-import com.example.evostyle.global.filter.JwtAuthenticationFilter;
+import com.example.evostyle.global.security.CustomAccessDeniedHandler;
+import com.example.evostyle.global.security.CustomAuthEntryPoint;
+import com.example.evostyle.global.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
