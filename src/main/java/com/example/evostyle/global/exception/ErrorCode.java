@@ -16,12 +16,15 @@ public enum ErrorCode {
     DUPLICATE_EMAIL(HttpStatus.CONFLICT, "이미 사용중인 이메일 입니다."),
     USER_ALREADY_DELETED(HttpStatus.CONFLICT, "이미 탈퇴한 사용자입니다."),
 
+
+
     // JWT 관련
     MISSING_JWT_SECRET_KEY(HttpStatus.BAD_REQUEST, "JWT 시크릿 키가 누락되어 토큰 생성을 할 수 없습니다."),
     INVALID_JWT_SECRET_KEY(HttpStatus.INTERNAL_SERVER_ERROR, "JWT 시크릿 키 디코딩에 실패했습니다."),
     EXPIRED_JWT_TOKEN(HttpStatus.UNAUTHORIZED, "JWT 토큰이 만료되었습니다."),
     INVALID_BEARER_TOKEN(HttpStatus.UNAUTHORIZED, "Authorization 헤더의 Bearer 토큰이 유효하지 않습니다."),
     INVALID_JWT_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 JWT 토큰입니다."),
+
 
     //주소 관련
     ADDRESS_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 주소입니다"),
@@ -31,7 +34,10 @@ public enum ErrorCode {
     BRAND_NAME_DUPLICATED(HttpStatus.BAD_REQUEST, "이미 존재하는 브랜드 이름입니다."),
     NON_EXISTENT_BRAND_CATEGORY(HttpStatus.BAD_REQUEST, "요청한 카테고리 중 유효한 항목이 없습니다."),
     CATEGORY_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "브랜드 카테고리는 최대 3개까지입니다."),
+
+    NOT_BRAND_OWNER(HttpStatus.FORBIDDEN, "해당 브랜드 관련 권한이 없습니다"),
     BRAND_CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 브랜드 카테고리입니다."),
+
 
     //주문 관련
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 총 주문입니다."),
@@ -47,16 +53,28 @@ public enum ErrorCode {
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 상품입니다"),
     PRODUCT_DETAIL_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 상품 세부사항입니다"),
 
+    //상품 디테일 관련
+    STOCK_MODIFICATION_NOT_ALLOWED(HttpStatus.CONFLICT, "재고를 수정할 수 없는 상태입니다"),
+    PRODUCT_DETAIL_MISMATCH(HttpStatus.CONFLICT, "해당 상품에 속하지 않는 상품 디테일입니다"),
+
     //상품 카테고리 관련
     PRODUCT_CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "상품 카테고리가 존재하지 않습니다"),
 
     //상품 옵션그룹 관련
     OPTION_GROUP_NOT_FOUND(HttpStatus.NOT_FOUND, "옵션 그룹이 존재하지 않습니다"),
+
+    //상품옵션 관련
     OPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "옵션이 존재하지 않습니다"),
+    INVALID_PRODUCT_OPTION(HttpStatus.BAD_REQUEST, "해당 상품의 옵션이 아닙니다"),
+    MULTIPLE_OPTION_SELECTED(HttpStatus.BAD_REQUEST, "하나의 옵션그룹에서는 하나의 옵션만 선택할 수 있습니다."),
+
+    //상품디테일 옵션 관련
+    PRODUCT_DETAIL_NOT_FOUND(HttpStatus.NOT_FOUND, "상품 상세옵션이 존재하지 않습니다"),
 
     // 주문 관련
     INVALID_STOCK_DECREASE_AMOUNT(HttpStatus.BAD_REQUEST, "재고 차감 수량은 0보다 커야 합니다"),
     OUT_OF_STOCK(HttpStatus.BAD_REQUEST, "재고가 부족합니다"),
+
 
     //리뷰 관련
     REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 리뷰입니다"),

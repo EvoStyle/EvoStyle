@@ -7,6 +7,10 @@ import com.example.evostyle.global.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -23,15 +27,23 @@ public class ProductDetail extends BaseEntity {
     private Product product;
 
     @Column(name = "product_stock")
-    private Integer stock;
+    @ColumnDefault("0")
+    private Integer stock = 0;
 
-    private ProductDetail(Product product, Integer stock) {
+    @ColumnDefault("false")
+    private boolean isDeleted = false;
+
+
+    private ProductDetail(Product product) {
         this.product = product;
-        this.stock = stock;
     }
 
-    public ProductDetail of(Product product, Integer stock) {
-        return new ProductDetail(product, stock);
+    public static ProductDetail of(Product product) {
+        return new ProductDetail(product);
+    }
+
+    public void setStock(Integer stock){
+        this.stock = stock;
     }
 
     public void adjustStock(int previousAmount, int newAmount) {
