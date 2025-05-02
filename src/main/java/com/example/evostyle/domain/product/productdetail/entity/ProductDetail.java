@@ -2,6 +2,8 @@ package com.example.evostyle.domain.product.productdetail.entity;
 
 import com.example.evostyle.common.entity.BaseEntity;
 import com.example.evostyle.domain.product.entity.Product;
+import com.example.evostyle.global.exception.BadRequestException;
+import com.example.evostyle.global.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,6 +33,7 @@ public class ProductDetail extends BaseEntity {
     @ColumnDefault("false")
     private boolean isDeleted = false;
 
+
     private ProductDetail(Product product) {
         this.product = product;
     }
@@ -43,4 +46,19 @@ public class ProductDetail extends BaseEntity {
         this.stock = stock;
     }
 
+    public void adjustStock(int previousAmount, int newAmount) {
+        int difference = newAmount - previousAmount;
+
+        if (difference > 0) {
+            // 수량이 증가하면, 재고가 충분한지 확인 후 차감
+            if (this.stock < difference) {
+                throw new BadRequestException(ErrorCode.OUT_OF_STOCK);
+            }
+            this.stock -= difference;
+        } else if (difference < 0) {
+
+            // 수량이 감소하면, 감소된 수량만큼 재고 증가
+            this.stock += Math.abs(difference);
+        }
+    }
 }

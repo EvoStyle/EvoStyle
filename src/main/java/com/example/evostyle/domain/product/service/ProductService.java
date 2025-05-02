@@ -50,8 +50,12 @@ public class ProductService {
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_CATEGORY_NOT_FOUND));
 
 
+
         Product product = Product.of(brand, request.name(), request.price(), request.description());
         productRepository.save(product);
+
+
+
 
         categoryMappingRepository.save(ProductCategoryMapping.of(product, category));
 

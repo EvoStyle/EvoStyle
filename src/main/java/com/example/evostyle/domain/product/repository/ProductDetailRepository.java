@@ -1,5 +1,6 @@
 package com.example.evostyle.domain.product.repository;
 
+
 import com.example.evostyle.domain.product.dto.response.ProductDetailResponse;
 import com.example.evostyle.domain.product.optiongroup.dto.response.OptionResponse;
 import com.example.evostyle.domain.product.productdetail.entity.ProductDetail;
@@ -13,4 +14,5 @@ import java.util.List;
 
 public interface ProductDetailRepository extends JpaRepository<ProductDetail, Long> {
     List<ProductDetail> findByProductId(Long productId);
+
 }

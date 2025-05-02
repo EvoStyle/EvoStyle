@@ -74,4 +74,9 @@ public class Member extends BaseEntity{
         this.age = age;
         this.phoneNumber = phoneNumber;
     }
+
+    public void deleteMember() {
+        this.isDeleted = true;
+        this.deletedAt = LocalDateTime.now();
+    }
 }
