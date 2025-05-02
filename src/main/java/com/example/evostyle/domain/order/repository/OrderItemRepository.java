@@ -15,7 +15,8 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
             "JOIN FETCH oi.productDetail pd " +
             "JOIN FETCH pd.product p " +
             "JOIN FETCH p.brand b " +
-            "WHERE b.id IN :brandIdList")
+            "WHERE b.id IN :brandIdList " +
+            "AND oi.orderStatus = 'PENDING'")
     List<OrderItem> findOrderItemsByBrandIdList(@Param("brandIdList") List<Long> brandIdList);
 
     Optional<OrderItem> findByIdAndOrderStatus(Long orderItemId, OrderStatus orderStatus);

@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -36,6 +38,9 @@ public class Order extends BaseEntity {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderItem> orderItemList = new ArrayList<>();
+
     private Order(
             Member member,
             int totalAmountSum,
@@ -56,6 +61,10 @@ public class Order extends BaseEntity {
                 totalAmountSum,
                 totalPriceSum
         );
+    }
+
+    public void addOrderItem(OrderItem orderItem) {
+        this.orderItemList.add(orderItem);
     }
 
     public void updateAmountAndPrice(

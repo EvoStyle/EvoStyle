@@ -80,9 +80,6 @@ public class OrderService {
             int totalPrice = product.getPrice() * request.eachAmount();
             totalPriceSum += totalPrice;
 
-            // 재고 차감
-            productDetail.decreaseStock(request.eachAmount());
-
             OrderItem orderItem = OrderItem.of(
                     request.eachAmount(),
                     totalPrice,
@@ -96,13 +93,13 @@ public class OrderService {
             );
 
             orderItemList.add(orderItem);
+
+            order.addOrderItem(orderItem);
         }
 
         order.updateAmountAndPrice(totalAmountSum, totalPriceSum);
 
         orderRepository.save(order);
-
-        orderItemRepository.saveAll(orderItemList);
 
         List<CreateOrderItemResponse> responseList = orderItemList.stream()
                 .map(CreateOrderItemResponse::from)
@@ -172,7 +169,9 @@ public class OrderService {
 
         Order order = orderItem.getOrder();
 
-        if (!order.getId().equals(orderId)) {
+        boolean isOrderIdDifferent = !order.getId().equals(orderId);
+
+        if (isOrderIdDifferent) {
             throw new NotFoundException(ErrorCode.ORDER_NOT_FOUND);
         }
 
@@ -186,17 +185,13 @@ public class OrderService {
 
         // 이전 수량만큼 재고 복원
         int previousAmount = orderItem.getEachAmount();
+        int newAmount = request.newAmount();
         int previousTotalPrice = orderItem.getTotalPrice();
 
-        productDetail.increaseStock(previousAmount);
-
-        int newAmount = request.newAmount();
+        productDetail.adjustStock(previousAmount, newAmount);
 
         // 새로운 수량 업데이트
         orderItem.update(newAmount);
-
-        // 새로운 수량만큼 재고 차감
-        productDetail.decreaseStock(newAmount);
 
         // Order 총 수량 및 총 가격 갱신
         int newTotalAmountSum = order.getTotalAmountSum() - previousAmount + newAmount;
@@ -219,7 +214,7 @@ public class OrderService {
 
         boolean isOrderIdDifferent = !order.getId().equals(orderId);
 
-        if(isOrderIdDifferent) {
+        if (isOrderIdDifferent) {
             throw new NotFoundException(ErrorCode.ORDER_NOT_FOUND);
         }
 

@@ -34,19 +34,19 @@ public class ProductDetail extends BaseEntity {
         return new ProductDetail(product, stock);
     }
 
-    public void decreaseStock(int amount) {
-        if (amount <= 0) {
-            throw new BadRequestException(ErrorCode.INVALID_STOCK_DECREASE_AMOUNT);
+    public void adjustStock(int previousAmount, int newAmount) {
+        int difference = newAmount - previousAmount;
+
+        if (difference > 0) {
+            // 수량이 증가하면, 재고가 충분한지 확인 후 차감
+            if (this.stock < difference) {
+                throw new BadRequestException(ErrorCode.OUT_OF_STOCK);
+            }
+            this.stock -= difference;
+        } else if (difference < 0) {
+
+            // 수량이 감소하면, 감소된 수량만큼 재고 증가
+            this.stock += Math.abs(difference);
         }
-
-        if (this.stock < amount) {
-            throw new BadRequestException(ErrorCode.OUT_OF_STOCK);
-        }
-
-        this.stock -= amount;
-    }
-
-    public void increaseStock(int amount) {
-        this.stock += amount;
     }
 }
