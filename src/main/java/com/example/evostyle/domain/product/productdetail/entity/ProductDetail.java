@@ -24,7 +24,6 @@ public class ProductDetail extends BaseEntity {
     @JoinColumn(name = "product_id")
     private Product product;
 
-    @Setter
     @Column(name = "product_stock")
     @ColumnDefault("0")
     private Integer stock = 0;
@@ -38,6 +37,10 @@ public class ProductDetail extends BaseEntity {
 
     public static ProductDetail of(Product product) {
         return new ProductDetail(product);
+    }
+
+    public void setStock(Integer stock){
+        this.stock = stock;
     }
 
 }

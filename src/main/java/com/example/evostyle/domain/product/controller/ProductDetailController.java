@@ -13,20 +13,20 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/products/{productId}")
 @RequiredArgsConstructor
 public class ProductDetailController {
 
     private final ProductDetailService productDetailService;
 
-    @PostMapping("/products/{productId}/product-details")
+    @PostMapping("/product-details")
     public ResponseEntity<List<ProductDetailResponse>> createProductDetail(@PathVariable(name = "productId")Long productId){
 
         List<ProductDetailResponse> responseList = productDetailService.createProductDetail(productId);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseList);
     }
 
-    @GetMapping("/products/{productId}/product-details")
+    @GetMapping("/product-details")
     public ResponseEntity<List<ProductDetailResponse>> readByProductId(@PathVariable(name = "productId")Long productId){
 
         List<ProductDetailResponse> responseList = productDetailService.readByProductId(productId);
@@ -40,7 +40,7 @@ public class ProductDetailController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @PatchMapping("/products/{productId}/product-details")
+    @PatchMapping("/product-details")
     public ResponseEntity<List<ProductDetailResponse>> updateProductDetailStock(@RequestBody List<@Valid UpdateProductDetailRequest> requestList,
                                                                                 @PathVariable(name = "productId")Long productId){
 

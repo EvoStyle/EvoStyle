@@ -17,7 +17,6 @@ import com.example.evostyle.global.exception.ConflictException;
 import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +29,6 @@ import java.util.stream.Collectors;
 import static java.util.stream.Collectors.groupingBy;
 
 @Service
-@Slf4j
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ProductDetailService {
@@ -65,8 +63,8 @@ public class ProductDetailService {
     }
 
     //싱픔이 가지는 옵션의 모든 조합을 만들어 저장한다
-    @Transactional
-    public void generateCombinations(Map<Long, List<Option>> allOptionMap, int depth, List<Long> combinationList, Product product,
+
+    private void generateCombinations(Map<Long, List<Option>> allOptionMap, int depth, List<Long> combinationList, Product product,
                                      List<ProductDetail> productDetailList, List<ProductDetailOption> productDetailOptionList) {
 
         List<Long> optionGroupIds = new ArrayList<>(allOptionMap.keySet());
@@ -100,13 +98,13 @@ public class ProductDetailService {
 
 
     public List<ProductDetailResponse> readByProductId(Long productId) {
-        List<ProductDetailResponse> responses = new ArrayList<>();
+        List<ProductDetailResponse> responseList = new ArrayList<>();
 
         List<ProductDetail> productDetailList = productDetailRepository.findByProductId(productId);
         List<Long> productDetailIdList = productDetailList.stream().mapToLong(ProductDetail::getId).boxed().toList();
 
 
-        Map<Long, List<OptionQueryDto>> map = optionRepository.findOptionByProductDetailId(productDetailIdList)
+        Map<Long, List<OptionQueryDto>> optionGroupMap = optionRepository.findOptionByProductDetailId(productDetailIdList)
                 .stream()
                 .collect(groupingBy(OptionQueryDto::productDetailId));
 
@@ -117,13 +115,13 @@ public class ProductDetailService {
                     .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND));
 
 
-            List<OptionResponse> optionResponseList = Optional.ofNullable(map.get(productDetailId))
+            List<OptionResponse> optionResponseList = Optional.ofNullable(optionGroupMap.get(productDetailId))
                     .orElseThrow(() -> new NotFoundException(ErrorCode.OPTION_NOT_FOUND))
                     .stream().map(OptionResponse::from).toList();
 
-            responses.add(ProductDetailResponse.from(productDetail, optionResponseList));
+            responseList.add(ProductDetailResponse.from(productDetail, optionResponseList));
         }
-        return responses;
+        return responseList;
     }
 
 
