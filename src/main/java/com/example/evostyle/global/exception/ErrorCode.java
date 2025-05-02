@@ -34,7 +34,8 @@ public enum ErrorCode {
     BRAND_CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 브랜드 카테고리입니다."),
 
     //주문 관련
-    ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "주문이 존재하지 않습니다."),
+    ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 총 주문입니다."),
+    ORDER_ITEM_NOT_PENDING(HttpStatus.BAD_REQUEST, "존재하지 않거나 수락 대기 상태가 아닌 주문 세부 사항입니다."),
     ORDER_GET_FORBIDDEN(HttpStatus.FORBIDDEN, "다른 사용자의 주문 내역은 조회할 수 없습니다."),
     ORDER_CANCEL_FORBIDDEN(HttpStatus.FORBIDDEN, "이 주문을 취소할 권한이 없습니다."),
     ALREADY_CANCELLED_ORDER(HttpStatus.BAD_REQUEST, "이미 취소처리 된 주문입니다."),
@@ -65,7 +66,7 @@ public enum ErrorCode {
 
     //딜리버리 관련
     DELIVERY_NOT_READY(HttpStatus.BAD_REQUEST,"배송이 준비상태가 아닙니다."),
-    DELIVERY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 배송입니다.");
+    DELIVERY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 배송입니다."),
   
     // 즐겨찾기 관련
     BOOKMARK_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 등록된 즐겨찾기입니다."),

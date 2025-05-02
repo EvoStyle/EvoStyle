@@ -9,7 +9,7 @@ import com.example.evostyle.domain.member.entity.Address;
 import com.example.evostyle.domain.member.entity.Member;
 import com.example.evostyle.domain.member.repository.AddressRepository;
 import com.example.evostyle.domain.member.repository.MemberRepository;
-import com.example.evostyle.domain.orderitem.entity.OrderItem;
+import com.example.evostyle.domain.order.entity.OrderItem;
 import com.example.evostyle.domain.orderitem.repository.OrderItemsRepository;
 import com.example.evostyle.global.exception.BadRequestException;
 import com.example.evostyle.global.exception.ErrorCode;
@@ -36,7 +36,7 @@ public class DeliveryService {
         OrderItem orderItem = orderItemsRepository.findById(orderItemId).orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_NOT_FOUND));
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
-        Delivery delivery = Delivery.of(member, orderItem, deliveryRequest.deliveryRequest(), address.getSiDo(), address.getDetailAddress());
+        Delivery delivery = Delivery.of(member, orderItem, deliveryRequest.deliveryRequest(), address.getFullAddress(), address.getDetailAddress());
         Delivery savedDelivery = deliveryRepository.save(delivery);
         return DeliveryResponse.from(savedDelivery);
     }
@@ -55,7 +55,7 @@ public class DeliveryService {
             throw new BadRequestException(ErrorCode.DELIVERY_NOT_READY);
         }
         Address address = addressRepository.findById(addressId).orElseThrow(() -> new NotFoundException(ErrorCode.ADDRESS_NOT_FOUND));
-        delivery.update(deliveryRequest.deliveryRequest(), address.getSiDo(), address.getDetailAddress());
+        delivery.update(deliveryRequest.deliveryRequest(), address.getFullAddress(), address.getDetailAddress());
         Delivery savedDelivery = deliveryRepository.save(delivery);
         return DeliveryResponse.from(savedDelivery);
     }
