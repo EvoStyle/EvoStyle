@@ -8,4 +8,7 @@ import java.util.List;
 public interface ProductDetailOptionRepository extends JpaRepository<ProductDetailOption, Long> {
 
     List<ProductDetailOption> findByProductDetailId(Long productDetailId);
+
+    List<ProductDetailOption> findByProductDetailIdIn(List<Long> productDetailIdList);
+
 }

@@ -1,5 +1,6 @@
 package com.example.evostyle.domain.product.service;
 
+import com.example.evostyle.domain.member.repository.MemberRepository;
 import com.example.evostyle.domain.product.dto.request.UpdateProductDetailRequest;
 import com.example.evostyle.domain.product.dto.response.ProductDetailResponse;
 import com.example.evostyle.domain.product.entity.Product;
@@ -13,9 +14,7 @@ import com.example.evostyle.domain.product.productdetail.entity.ProductDetailOpt
 import com.example.evostyle.domain.product.repository.ProductDetailOptionRepository;
 import com.example.evostyle.domain.product.repository.ProductDetailRepository;
 import com.example.evostyle.domain.product.repository.ProductRepository;
-import com.example.evostyle.global.exception.ConflictException;
-import com.example.evostyle.global.exception.ErrorCode;
-import com.example.evostyle.global.exception.NotFoundException;
+import com.example.evostyle.global.exception.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,11 +37,23 @@ public class ProductDetailService {
     private final ProductDetailRepository productDetailRepository;
     private final ProductDetailOptionRepository productDetailOptionRepository;
     private final OptionRepository optionRepository;
+    private final MemberRepository memberRepository;
 
     @Transactional
-    public List<ProductDetailResponse> createProductDetail(Long productId) {
+    public List<ProductDetailResponse> createProductDetail(Long productId, Long memberId) {
+
+        if(!memberRepository.existsById(memberId)){
+            throw new NotFoundException(ErrorCode.MEMBER_NOT_FOUND);
+        }
+
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        Long brandOwnerId = product.getBrand().getMember().getId();
+
+        if(brandOwnerId != memberId){
+            throw new ForbiddenException(ErrorCode.NOT_BRAND_OWNER);
+        }
 
         List<Long> optionGroupIdList = optionGroupRepository.findIdByProductId(productId);
 
@@ -138,7 +149,21 @@ public class ProductDetailService {
 
 
     @Transactional
-    public List<ProductDetailResponse> updateProductDetailStock(List<UpdateProductDetailRequest> requestList, Long productId) {
+    public List<ProductDetailResponse> updateProductDetailStock(List<UpdateProductDetailRequest> requestList, Long productId, Long memberId) {
+
+        if(!memberRepository.existsById(memberId)){
+            throw new NotFoundException(ErrorCode.MEMBER_NOT_FOUND);
+        }
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        Long brandOwnerId = product.getBrand().getMember().getId();
+
+        if(brandOwnerId != memberId){
+            throw new ForbiddenException(ErrorCode.NOT_BRAND_OWNER);
+        }
+
 
         Map<Long, Integer> requestMap = requestList.stream().collect(Collectors.toMap(UpdateProductDetailRequest::productDetailId,
                 UpdateProductDetailRequest::stock));

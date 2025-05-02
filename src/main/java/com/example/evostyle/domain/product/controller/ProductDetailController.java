@@ -20,9 +20,10 @@ public class ProductDetailController {
     private final ProductDetailService productDetailService;
 
     @PostMapping("/product-details")
-    public ResponseEntity<List<ProductDetailResponse>> createProductDetail(@PathVariable(name = "productId")Long productId){
+    public ResponseEntity<List<ProductDetailResponse>> createProductDetail(@PathVariable(name = "productId")Long productId,
+                                                                           @RequestAttribute("memberId")Long memberId){
 
-        List<ProductDetailResponse> responseList = productDetailService.createProductDetail(productId);
+        List<ProductDetailResponse> responseList = productDetailService.createProductDetail(productId, memberId);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseList);
     }
 
@@ -42,9 +43,10 @@ public class ProductDetailController {
 
     @PatchMapping("/product-details")
     public ResponseEntity<List<ProductDetailResponse>> updateProductDetailStock(@RequestBody List<@Valid UpdateProductDetailRequest> requestList,
+                                                                                @RequestAttribute("memberId") Long memberId,
                                                                                 @PathVariable(name = "productId")Long productId){
 
-        List<ProductDetailResponse> responseList = productDetailService.updateProductDetailStock(requestList, productId);
+        List<ProductDetailResponse> responseList = productDetailService.updateProductDetailStock(requestList, productId, memberId);
         return ResponseEntity.status(HttpStatus.OK).body(responseList);
     }
 }
