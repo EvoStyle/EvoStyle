@@ -19,7 +19,6 @@ import com.example.evostyle.global.exception.BadRequestException;
 import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -225,7 +223,7 @@ public class OrderService {
 
         orderItem.markAsCancelled();
 
-        if(!orderItemRepository.existsByOrderIdAndIsCancelledFalse(orderId)) {
+        if (!orderItemRepository.existsByOrderIdAndIsCancelledFalse(orderId)) {
             order.markAsCancelled();
         }
     }
