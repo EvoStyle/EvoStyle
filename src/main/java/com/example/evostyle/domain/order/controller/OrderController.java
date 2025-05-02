@@ -2,7 +2,6 @@ package com.example.evostyle.domain.order.controller;
 
 import com.example.evostyle.domain.order.dto.request.CreateOrderItemRequest;
 import com.example.evostyle.domain.order.dto.response.CreateOrderResponse;
-import com.example.evostyle.domain.order.dto.response.ReadOrderItemWrapper;
 import com.example.evostyle.domain.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -26,11 +25,11 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createOrderResponse);
     }
 
-    @GetMapping
-    public ResponseEntity<List<ReadOrderItemWrapper>> readOrders() {
-
-        List<ReadOrderItemWrapper> wrapperList = orderService.readAllOrders();
-
-        return ResponseEntity.status(HttpStatus.OK).body(wrapperList);
-    }
+//    @GetMapping
+//    public ResponseEntity<List<ReadOrderItemWrapper>> readOrders() {
+//
+//        List<ReadOrderItemWrapper> wrapperList = orderService.readAllOrders();
+//
+//        return ResponseEntity.status(HttpStatus.OK).body(wrapperList);
+//    }
 }
