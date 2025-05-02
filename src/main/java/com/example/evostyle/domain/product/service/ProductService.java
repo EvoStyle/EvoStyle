@@ -36,6 +36,8 @@ public class ProductService {
     @Transactional
     public ProductResponse createProduct(CreateProductRequest request, Long memberId) {
 
+        log.info("memberId : " + memberId);
+
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 

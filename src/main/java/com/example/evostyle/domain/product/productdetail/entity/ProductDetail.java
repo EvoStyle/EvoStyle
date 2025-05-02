@@ -8,11 +8,13 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 @Entity
 @Getter
 @Table(name = "product_details")
 @NoArgsConstructor
-public class ProductDetail extends BaseEntity {
+public class ProductDetail extends BaseEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

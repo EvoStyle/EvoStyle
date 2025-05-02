@@ -16,6 +16,7 @@ public enum ErrorCode {
     DUPLICATE_EMAIL(HttpStatus.CONFLICT, "이미 사용중인 이메일 입니다."),
     USER_ALREADY_DELETED(HttpStatus.CONFLICT, "이미 탈퇴한 사용자입니다."),
 
+
     // JWT 관련
     MISSING_JWT_SECRET_KEY(HttpStatus.BAD_REQUEST, "JWT 시크릿 키가 누락되어 토큰 생성을 할 수 없습니다."),
     INVALID_JWT_SECRET_KEY(HttpStatus.INTERNAL_SERVER_ERROR, "JWT 시크릿 키 디코딩에 실패했습니다."),
@@ -43,6 +44,11 @@ public enum ErrorCode {
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 상품입니다"),
     PRODUCT_DETAIL_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 상품 세부사항입니다"),
 
+    //장바구니  관련
+    CART_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 장바구니 상품입니다"),
+    CART_ACCESS_DENIED(HttpStatus.FORBIDDEN, "본인의 장바구니 정보만 수정 가능합니다"),
+    CART_ITEM_ALREADY_EXISTS(HttpStatus.CONFLICT, "장바구니에 존재하는 상품입니다"),
+
     //상품 카테고리 관련
     PRODUCT_CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "상품 카테고리가 존재하지 않습니다"),
 
@@ -59,7 +65,7 @@ public enum ErrorCode {
 
     //딜리버리 관련
     DELIVERY_NOT_READY(HttpStatus.BAD_REQUEST,"배송이 준비상태가 아닙니다."),
-    DELIVERY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 배송입니다.");
+    DELIVERY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 배송입니다."),
   
     // 즐겨찾기 관련
     BOOKMARK_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 등록된 즐겨찾기입니다."),
