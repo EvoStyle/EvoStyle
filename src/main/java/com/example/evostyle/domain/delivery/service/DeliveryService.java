@@ -18,6 +18,7 @@ import com.example.evostyle.domain.orderitem.repository.OrderItemsRepository;
 import com.example.evostyle.global.exception.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -27,7 +28,6 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class DeliveryService {
 
     private final DeliveryRepository deliveryRepository;
@@ -50,7 +50,7 @@ public class DeliveryService {
         return DeliveryResponse.from(savedDelivery);
     }
 
-
+    @Transactional(readOnly = true)
     public List<DeliveryResponse> getAllDeliveryByMember(Long memberId) {
         List<Delivery> allByMemberId = deliveryRepository.findAllByMemberId(memberId);
         return allByMemberId.stream().map(DeliveryResponse::from).toList();
@@ -69,12 +69,51 @@ public class DeliveryService {
         return DeliveryResponse.from(savedDelivery);
     }
 
-    @Transactional
+
     public DeliveryResponse changeDeliveryStatusToShipped(Long deliveryId) {
+
         Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(() -> new NotFoundException(ErrorCode.DELIVERY_NOT_FOUND));
-        if (!delivery.getDeliveryStatus().equals(DeliveryStatus.READY)) {
-            throw new BadRequestException(ErrorCode.DELIVERY_NOT_READY);
+        if (delivery.getDeliveryStatus() != DeliveryStatus.READY) {
+            throw new ConflictException(ErrorCode.DELIVERY_CONFLICT_MODIFIED_BY_ADMIN);
         }
+        ParcelResponse parcelResponse = callParcelApi(delivery);
+        return performShipping(parcelResponse, delivery);
+    }
+
+    @Transactional
+    private DeliveryResponse performShipping( ParcelResponse parcelResponse, Delivery delivery) {
+        try {
+        delivery.changeStatus(DeliveryStatus.SHIPPED);
+
+        delivery.insertTrackingNumber(parcelResponse.trackingNumber());
+
+        Delivery savedDelivery = deliveryRepository.save(delivery);
+
+        return DeliveryResponse.from(savedDelivery);
+        } catch (ObjectOptimisticLockingFailureException e) {
+
+            cancelParcelApi(delivery.getTrackingNumber());
+
+            Delivery latest = deliveryRepository.findById(delivery.getId())
+                    .orElseThrow(() -> new NotFoundException(ErrorCode.DELIVERY_NOT_FOUND));
+
+            if (!latest.getDeliveryStatus().equals(DeliveryStatus.READY)) {
+
+            }
+            try {
+                ParcelResponse retryResponse = callParcelApi(latest);
+                return performShipping(retryResponse, latest);
+            } catch (ObjectOptimisticLockingFailureException exception) {
+                throw new ConflictException(ErrorCode.DELIVERY_CONFLICT_MODIFIED_BY_USER);
+            }
+        }
+    }
+
+    private void cancelParcelApi(String trackingNumber) {
+
+    }
+
+    private ParcelResponse callParcelApi(Delivery delivery) {
         SenderRequest senderRequest = SenderRequest.of(delivery.getOrderItem().getBrand().getName());
         ReceiverRequest receiverRequest = ReceiverRequest.of(delivery.getMember().getNickname(), delivery.getDeliveryAddress(), delivery.getDeliveryAddressAssistant(), delivery.getMember().getPhoneNumber(), delivery.getPostCode());
         ParcelRequest parcelRequest = ParcelRequest.of(senderRequest, receiverRequest, delivery.getDeliveryRequest());
@@ -88,14 +127,7 @@ public class DeliveryService {
                 ).
                 bodyToMono(ParcelResponse.class).
                 block();
-
-        delivery.changeStatus(DeliveryStatus.SHIPPED);
-
-        delivery.insertTrackingNumber(parcelResponse.trackingNumber());
-
-        Delivery savedDelivery = deliveryRepository.save(delivery);
-
-        return DeliveryResponse.from(savedDelivery);
+        return parcelResponse;
     }
 
     @Transactional

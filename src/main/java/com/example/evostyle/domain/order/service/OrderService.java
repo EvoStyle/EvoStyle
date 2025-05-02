@@ -79,6 +79,7 @@ public class OrderService {
                     request.eachAmount(),
                     totalPrice,
                     order,
+                    order,
                     OrderStatus.PENDING,
                     productDetail,
                     product.getName(),

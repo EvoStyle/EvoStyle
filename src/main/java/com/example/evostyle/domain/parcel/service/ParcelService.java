@@ -4,8 +4,10 @@ import com.example.evostyle.domain.parcel.dto.request.ParcelRequest;
 import com.example.evostyle.domain.parcel.dto.response.ParcelResponse;
 import com.example.evostyle.domain.parcel.dto.request.ReceiverRequest;
 import com.example.evostyle.domain.parcel.entity.Parcel;
+import com.example.evostyle.domain.parcel.entity.ParcelStatus;
 import com.example.evostyle.domain.parcel.entity.Receiver;
 import com.example.evostyle.domain.parcel.entity.Sender;
+import com.example.evostyle.domain.parcel.exception.ParcelAlreadyReceivedException;
 import com.example.evostyle.domain.parcel.repository.ParcelRepository;
 import com.example.evostyle.domain.parcel.repository.ReceiverRepository;
 import com.example.evostyle.domain.parcel.repository.SenderRepository;
@@ -51,5 +53,14 @@ public class ParcelService {
             }
         }
         throw new IllegalStateException("이곳에 도달하면 안됩니다.");
+    }
+
+    @Transactional
+    public void deleteParcel(String parcelId) {
+        Parcel parcel = parcelRepository.findById(parcelId).orElseThrow(() -> new IllegalArgumentException("송장번호가 존재하지 않습니다."));
+        if (parcel.getParcelStatus() != ParcelStatus.ISSUED) {
+            throw new ParcelAlreadyReceivedException("입고가 완료되어 출고할수 없습니다.");
+        }
+        parcelRepository.delete(parcel);
     }
 }

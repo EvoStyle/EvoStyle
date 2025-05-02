@@ -43,6 +43,9 @@ public class Delivery {
 
     private String trackingNumber;
 
+    @Version
+    private Long version;
+
     private Delivery(Member member, OrderItem orderItem, DeliveryStatus deliveryStatus, String deliveryRequest, String deliveryAddress, String deliveryAddressAssistant,String postCode) {
         this.member = member;
         this.orderItem = orderItem;

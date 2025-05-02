@@ -66,7 +66,9 @@ public enum ErrorCode {
     BOOKMARK_NOT_FOUND(HttpStatus.NOT_FOUND, "즐겨찾기가 존재하지 않습니다."),
 
     // 배송
-    PARCEL_API_FAIL(HttpStatus.UNPROCESSABLE_ENTITY, "택배 송장 등록에 실패했습니다.");
+    PARCEL_API_FAIL(HttpStatus.UNPROCESSABLE_ENTITY, "택배 송장 등록에 실패했습니다."),
+    DELIVERY_CONFLICT_MODIFIED_BY_ADMIN(HttpStatus.CONFLICT,"다른 관리자가 해당 배송을 출고하였습니다."),
+    DELIVERY_CONFLICT_MODIFIED_BY_USER(HttpStatus.CONFLICT,"사용자가 배송 정보를 수정하였습니다. 출고 전에 다시 확인해 주세요.");
 
     private final HttpStatus httpStatus;
     private final String message;

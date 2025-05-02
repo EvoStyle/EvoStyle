@@ -42,6 +42,6 @@ public class Parcel extends BaseEntity {
     }
 
     public static Parcel of(String tracking_number, Sender sender, Receiver receiver,String deliveryRequest) {
-        return  new Parcel(tracking_number,sender,receiver,ParcelStatus.READY,deliveryRequest);
+        return  new Parcel(tracking_number,sender,receiver,ParcelStatus.ISSUED,deliveryRequest);
     }
 }
