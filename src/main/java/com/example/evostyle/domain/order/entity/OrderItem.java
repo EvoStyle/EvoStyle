@@ -2,6 +2,8 @@ package com.example.evostyle.domain.order.entity;
 
 import com.example.evostyle.domain.brand.entity.Brand;
 import com.example.evostyle.domain.product.productdetail.entity.ProductDetail;
+import com.example.evostyle.global.exception.ErrorCode;
+import com.example.evostyle.global.exception.NotFoundException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -111,5 +113,21 @@ public class OrderItem {
         this.isCancelled = true;
         this.cancelledAt = LocalDateTime.now();
         this.orderStatus = OrderStatus.CANCELED;
+    }
+
+    public void validateOrderIdMatch(Long orderId) {
+        boolean isDifferent = !this.order.getId().equals(orderId);
+
+        if (isDifferent) {
+            throw new NotFoundException(ErrorCode.ORDER_NOT_FOUND);
+        }
+    }
+
+    public void validateProductDetailIdMatch(Long productDetailId) {
+        boolean isDifferent = !this.productDetail.getId().equals(productDetailId);
+
+        if (isDifferent) {
+            throw new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND);
+        }
     }
 }

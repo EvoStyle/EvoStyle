@@ -15,7 +15,6 @@ import com.example.evostyle.domain.order.repository.OrderRepository;
 import com.example.evostyle.domain.product.entity.Product;
 import com.example.evostyle.domain.product.productdetail.entity.ProductDetail;
 import com.example.evostyle.domain.product.repository.ProductDetailRepository;
-import com.example.evostyle.global.exception.BadRequestException;
 import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -162,24 +161,15 @@ public class OrderService {
             Long orderId,
             Long orderItemId
     ) {
-        OrderItem orderItem = orderItemRepository.findByIdAndOrderStatus(orderItemId, OrderStatus.PENDING)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_ITEM_NOT_PENDING));
+        OrderItem orderItem = findOrderItemById(orderItemId);
+
+        orderItem.validateOrderIdMatch(orderId);
 
         Order order = orderItem.getOrder();
 
-        boolean isOrderIdDifferent = !order.getId().equals(orderId);
-
-        if (isOrderIdDifferent) {
-            throw new NotFoundException(ErrorCode.ORDER_NOT_FOUND);
-        }
+        orderItem.validateProductDetailIdMatch(request.productDetailId());
 
         ProductDetail productDetail = orderItem.getProductDetail();
-
-        boolean isProductDetailIdDifferent = !productDetail.getId().equals(request.productDetailId());
-
-        if (isProductDetailIdDifferent) {
-            throw new BadRequestException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND);
-        }
 
         // 이전 수량만큼 재고 복원
         int previousAmount = orderItem.getEachAmount();
@@ -205,16 +195,11 @@ public class OrderService {
             Long orderId,
             Long orderItemId
     ) {
-        OrderItem orderItem = orderItemRepository.findByIdAndOrderStatus(orderItemId, OrderStatus.PENDING)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_ITEM_NOT_PENDING));
+        OrderItem orderItem = findOrderItemById(orderItemId);
+
+        orderItem.validateOrderIdMatch(orderId);
 
         Order order = orderItem.getOrder();
-
-        boolean isOrderIdDifferent = !order.getId().equals(orderId);
-
-        if (isOrderIdDifferent) {
-            throw new NotFoundException(ErrorCode.ORDER_NOT_FOUND);
-        }
 
         int updatedTotalAmountSum = order.getTotalAmountSum() - orderItem.getEachAmount();
         int updatedTotalPriceSum = order.getTotalPriceSum() - orderItem.getTotalPrice();
@@ -226,5 +211,10 @@ public class OrderService {
         if (!orderItemRepository.existsByOrderIdAndIsCancelledFalse(orderId)) {
             order.markAsCancelled();
         }
+    }
+
+    private OrderItem findOrderItemById(Long orderItemId) {
+        return orderItemRepository.findByIdAndOrderStatus(orderItemId, OrderStatus.PENDING)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_ITEM_NOT_PENDING));
     }
 }
