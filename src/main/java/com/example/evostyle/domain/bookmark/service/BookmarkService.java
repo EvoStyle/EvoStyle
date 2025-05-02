@@ -37,7 +37,7 @@ public class BookmarkService {
         Member member = memberRepository.findByIdAndIsDeletedFalse(memberId)
             .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
-        Brand brand = brandRepository.findByIdAndIsDeletedFalse(brandId)
+        Brand brand = brandRepository.findById(brandId)
             .orElseThrow(() -> new NotFoundException(ErrorCode.BRAND_NOT_FOUND));
 
         Bookmark bookmark = Bookmark.of(member, brand);
