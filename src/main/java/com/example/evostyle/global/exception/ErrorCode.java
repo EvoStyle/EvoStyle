@@ -40,6 +40,9 @@ public enum ErrorCode {
     ORDER_CANCEL_FORBIDDEN(HttpStatus.FORBIDDEN, "이 주문을 취소할 권한이 없습니다."),
     ALREADY_CANCELLED_ORDER(HttpStatus.BAD_REQUEST, "이미 취소처리 된 주문입니다."),
 
+    //주문세부사항 관련
+    ORDER_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "주문 세부사항이 존재하지 않습니다."),
+
     //상품 관련
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 상품입니다"),
     PRODUCT_DETAIL_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 상품 세부사항입니다"),
@@ -57,6 +60,9 @@ public enum ErrorCode {
 
     //리뷰 관련
     REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 리뷰입니다"),
+    REVIEW_NOT_ALLOWED(HttpStatus.FORBIDDEN, "리뷰는 배송이 완료된 상품에 대해서만 작성 가능합니다."),
+    NOT_OWNER_OF_ORDER(HttpStatus.FORBIDDEN, "해당 주문에 대한 권한이 없습니다."),
+    REVIEW_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "이미 해당 주문 상품에 대한 리뷰가 작성되었습니다."),
 
     //딜리버리 관련
     DELIVERY_NOT_READY(HttpStatus.BAD_REQUEST,"배송이 준비상태가 아닙니다."),
