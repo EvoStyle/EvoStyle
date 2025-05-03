@@ -38,27 +38,38 @@ public class Delivery {
     @Column(name = "delivery_address_assistant",nullable = false,length = 100)
     private String deliveryAddressAssistant;
 
-    private Delivery(Member member, OrderItem orderItem, DeliveryStatus deliveryStatus, String deliveryRequest, String deliveryAddress, String deliveryAddressAssistant) {
+    @Column(name = "post_code",nullable = false,length = 10)
+    private String postCode;
+
+    private String trackingNumber;
+
+    private Delivery(Member member, OrderItem orderItem, DeliveryStatus deliveryStatus, String deliveryRequest, String deliveryAddress, String deliveryAddressAssistant,String postCode) {
         this.member = member;
         this.orderItem = orderItem;
         this.deliveryStatus = deliveryStatus;
         this.deliveryRequest = deliveryRequest;
         this.deliveryAddress = deliveryAddress;
         this.deliveryAddressAssistant = deliveryAddressAssistant;
+        this.postCode = postCode;
     }
 
-    public static Delivery of(Member member, OrderItem orderItem, String deliveryRequest, String deliveryAddress, String deliveryAddressAssistant) {
-        return new Delivery(member, orderItem, DeliveryStatus.READY,deliveryRequest, deliveryAddress, deliveryAddressAssistant);
+    public static Delivery of(Member member, OrderItem orderItem, String deliveryRequest, String deliveryAddress, String deliveryAddressAssistant,String postCode) {
+        return new Delivery(member, orderItem, DeliveryStatus.READY,deliveryRequest, deliveryAddress, deliveryAddressAssistant,postCode);
     }
 
 
-    public void update(String deliveryRequest, String siDo, String detailAddress) {
+    public void update(String deliveryRequest, String deliveryAddress, String detailAddress,String postCode) {
         this.deliveryRequest = deliveryRequest;
-        this.deliveryAddress = siDo;
+        this.deliveryAddress = deliveryAddress;
         this.deliveryAddressAssistant = detailAddress;
+        this.postCode = postCode;
     }
 
     public void changeStatus(DeliveryStatus deliveryStatus) {
         this.deliveryStatus = deliveryStatus;
+    }
+
+    public void insertTrackingNumber(String trackingNumber) {
+        this.trackingNumber = trackingNumber;
     }
 }

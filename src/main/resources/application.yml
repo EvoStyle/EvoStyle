@@ -14,6 +14,22 @@ spring:
         format_sql: true
     open-in-view: false
 
+  kafka:
+    bootstrap-servers: ${kafka.url}
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      group-id: delivery-update-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    listener:
+      ack-mode: record
+delivery:
+  api:
+    base-url: ${delivery.url}
+    uri : ${delivery.uri}
+
 logging:
   level:
     org.hibernate.SQL: debug
@@ -25,3 +41,4 @@ server:
 jwt:
   secret:
     key: ${jwt.secret.key}
+
