@@ -44,4 +44,9 @@ public class Parcel extends BaseEntity {
     public static Parcel of(String tracking_number, Sender sender, Receiver receiver,String deliveryRequest) {
         return  new Parcel(tracking_number,sender,receiver,ParcelStatus.ISSUED,deliveryRequest);
     }
+
+    public void update(String address, String addressAssistant, String postCode, String deliveryRequest) {
+        this.receiver.update(address,addressAssistant,postCode);
+        this.deliveryRequest = deliveryRequest;
+    }
 }

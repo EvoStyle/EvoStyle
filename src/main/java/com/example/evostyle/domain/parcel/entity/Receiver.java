@@ -36,4 +36,10 @@ public class Receiver {
     public static Receiver of(String name, String address, String phone, String postCode,String addressAssistant) {
         return new Receiver(name, address, phone, postCode,addressAssistant);
     }
+
+    public void update(String address, String addressAssistant, String postCode) {
+        this.address = address;
+        this.addressAssistant = addressAssistant;
+        this.postCode = postCode;
+    }
 }

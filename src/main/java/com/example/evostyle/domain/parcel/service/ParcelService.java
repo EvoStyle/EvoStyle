@@ -1,6 +1,7 @@
 package com.example.evostyle.domain.parcel.service;
 
 import com.example.evostyle.domain.parcel.dto.request.ParcelRequest;
+import com.example.evostyle.domain.parcel.dto.request.ParcelUpdateUserRequest;
 import com.example.evostyle.domain.parcel.dto.response.ParcelResponse;
 import com.example.evostyle.domain.parcel.dto.request.ReceiverRequest;
 import com.example.evostyle.domain.parcel.entity.Parcel;
@@ -9,13 +10,8 @@ import com.example.evostyle.domain.parcel.entity.Receiver;
 import com.example.evostyle.domain.parcel.entity.Sender;
 import com.example.evostyle.domain.parcel.exception.ParcelAlreadyReceivedException;
 import com.example.evostyle.domain.parcel.repository.ParcelRepository;
-import com.example.evostyle.domain.parcel.repository.ReceiverRepository;
-import com.example.evostyle.domain.parcel.repository.SenderRepository;
-import com.example.evostyle.global.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,11 +52,20 @@ public class ParcelService {
     }
 
     @Transactional
-    public void deleteParcel(String parcelId) {
-        Parcel parcel = parcelRepository.findById(parcelId).orElseThrow(() -> new IllegalArgumentException("송장번호가 존재하지 않습니다."));
+    public void deleteParcel(String trackingNumber) {
+        Parcel parcel = parcelRepository.findById(trackingNumber).orElseThrow(() -> new IllegalArgumentException("송장번호가 존재하지 않습니다."));
         if (parcel.getParcelStatus() != ParcelStatus.ISSUED) {
-            throw new ParcelAlreadyReceivedException("입고가 완료되어 출고할수 없습니다.");
+            throw new ParcelAlreadyReceivedException("입고가 완료되어 취소할수 없습니다.");
         }
         parcelRepository.delete(parcel);
+    }
+
+    public ParcelResponse updateParcel(String trackingNumber, ParcelUpdateUserRequest parcelUpdateUserRequest) {
+        Parcel parcel = parcelRepository.findById(trackingNumber).orElseThrow(() -> new IllegalArgumentException("송장번호가 존재하지 않습니다."));
+        if (parcel.getParcelStatus() != ParcelStatus.ISSUED) {
+            throw new ParcelAlreadyReceivedException("이미 배송이 진행중입니다.");
+        }
+        parcel.update(parcelUpdateUserRequest.address(), parcelUpdateUserRequest.addressAssistant(), parcelUpdateUserRequest.postCode(), parcelUpdateUserRequest.deliveryRequest());
+        return ParcelResponse.from(parcel);
     }
 }

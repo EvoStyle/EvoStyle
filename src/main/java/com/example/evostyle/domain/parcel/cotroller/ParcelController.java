@@ -1,5 +1,6 @@
 package com.example.evostyle.domain.parcel.cotroller;
 
+import com.example.evostyle.domain.parcel.dto.request.ParcelUpdateUserRequest;
 import com.example.evostyle.domain.parcel.exception.ParcelAlreadyReceivedException;
 import com.example.evostyle.domain.parcel.service.ParcelService;
 import com.example.evostyle.domain.parcel.dto.request.ParcelRequest;
@@ -18,6 +19,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ParcelController {
 
+    // parcel 는 테스트용 외부api
+
     private final ParcelService parcelService;
 
     @PostMapping
@@ -35,10 +38,25 @@ public class ParcelController {
         }
     }
 
-    @DeleteMapping
-    public ResponseEntity<?> deleteParcel(@PathVariable String parcelId) {
+    @PatchMapping("/{trackingNumber}")
+    public ResponseEntity<?> updateParcel(@PathVariable String trackingNumber, @RequestBody ParcelUpdateUserRequest parcelUpdateUserRequest) {
         try {
-            parcelService.deleteParcel(parcelId);
+            ParcelResponse parcelResponse = parcelService.updateParcel(trackingNumber, parcelUpdateUserRequest);
+            return ResponseEntity.status(HttpStatus.OK).body(parcelResponse);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (ParcelAlreadyReceivedException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping
+    public ResponseEntity<?> deleteParcel(@PathVariable String trackingNumber) {
+        try {
+            parcelService.deleteParcel(trackingNumber);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 
         } catch (IllegalArgumentException e) {
