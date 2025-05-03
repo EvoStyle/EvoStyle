@@ -40,6 +40,7 @@ public class DeliveryService {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
         Delivery delivery = Delivery.of(member, orderItem, deliveryRequest.deliveryRequest(), address.getFullAddress(), address.getDetailAddress(), address.getPostCode());
+
         Delivery savedDelivery = deliveryRepository.save(delivery);
         return DeliveryResponse.from(savedDelivery);
     }
@@ -61,6 +62,7 @@ public class DeliveryService {
             }
         }
         Delivery savedDelivery = updateDelivery(deliveryUserEvent, delivery, address);
+
         return DeliveryResponse.from(savedDelivery);
     }
 

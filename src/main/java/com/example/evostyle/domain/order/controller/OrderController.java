@@ -1,7 +1,10 @@
 package com.example.evostyle.domain.order.controller;
 
 import com.example.evostyle.domain.order.dto.request.CreateOrderItemRequest;
+import com.example.evostyle.domain.order.dto.request.UpdateOrderItemRequest;
 import com.example.evostyle.domain.order.dto.response.CreateOrderResponse;
+import com.example.evostyle.domain.order.dto.response.ReadOrderResponse;
+import com.example.evostyle.domain.order.dto.response.UpdateOrderItemResponse;
 import com.example.evostyle.domain.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -9,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -25,12 +29,36 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createOrderResponse);
     }
 
-//    @GetMapping
-//    public ResponseEntity<List<ReadOrderItemWrapper>> readOrders() {
-//
-//        List<ReadOrderItemWrapper> wrapperList = orderService.readAllOrders();
-//
-//        return ResponseEntity.status(HttpStatus.OK).body(wrapperList);
-//    }
+    @GetMapping
+    public ResponseEntity<List<ReadOrderResponse>> readAllOrders() {
 
+        List<ReadOrderResponse> orderResponseList = orderService.readAllOrders();
+
+        return ResponseEntity.status(HttpStatus.OK).body(orderResponseList);
+    }
+
+    @PatchMapping("/{orderId}/order-items/{orderItemId}")
+    public ResponseEntity<UpdateOrderItemResponse> updateOrderItem(
+            @RequestBody UpdateOrderItemRequest request,
+            @PathVariable(name = "orderId") Long orderId,
+            @PathVariable(name = "orderItemId") Long orderItemId
+    ) {
+        UpdateOrderItemResponse response = orderService.updateOrderItem(
+                request,
+                orderId,
+                orderItemId
+        );
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @DeleteMapping("/{orderId}/order-items/{orderItemId}")
+    public ResponseEntity<Map<String, Long>> deleteOrderItem(
+            @PathVariable(name = "orderId") Long orderId,
+            @PathVariable(name = "orderItemId") Long orderItemId
+    ) {
+        orderService.deleteOrderItem(orderId, orderItemId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(Map.of("orderItemId", orderItemId));
+    }
 }

@@ -13,4 +13,13 @@ public record OptionResponse(
                                   option.getOptionGroup().getId(),
                                   option.getType());
     }
+
+    public static OptionResponse from(OptionQueryDto response){
+        return new OptionResponse(
+                                  response.id(),
+                                  response.optionGroupId(),
+                                  response.type()
+
+        );
+    }
 }
