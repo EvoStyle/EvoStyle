@@ -1,5 +1,5 @@
 package com.example.evostyle.domain.parcel.entity;
 
 public enum ParcelStatus {
-    READY
+    ISSUED,RECEIVED,IN_TRANSIT,DELIVERED
 }
