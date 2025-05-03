@@ -13,8 +13,6 @@ public interface BrandRepository extends JpaRepository<Brand, Long> {
 
     boolean existsByName(String name);
 
-    Optional<Brand> findByIdAndIsDeletedFalse(Long brandId);
-
     @Query("SELECT b.id FROM Brand b WHERE b.member.id = :memberId")
     List<Long> findBrandIdsByMemberId(@Param("memberId") Long memberId);
 
