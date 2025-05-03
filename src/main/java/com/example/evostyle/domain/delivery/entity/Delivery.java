@@ -1,5 +1,6 @@
 package com.example.evostyle.domain.delivery.entity;
 
+import com.example.evostyle.domain.brand.entity.Brand;
 import com.example.evostyle.domain.member.entity.Member;
 import com.example.evostyle.domain.order.entity.OrderItem;
 import jakarta.persistence.*;
@@ -25,8 +26,12 @@ public class Delivery {
     @JoinColumn(name = "order_item_id", nullable = false)
     private OrderItem orderItem;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "brand_id", nullable = false)
+    private Brand brand;
+
     @Enumerated(EnumType.STRING)
-    @Column(name = "delivery_status",nullable = false)
+    @Column(name = "delivery_status", nullable = false)
     private DeliveryStatus deliveryStatus;
 
     @Column(name = "delivery_request",length = 100)
@@ -43,9 +48,10 @@ public class Delivery {
 
     private String trackingNumber;
 
-    private Delivery(Member member, OrderItem orderItem, DeliveryStatus deliveryStatus, String deliveryRequest, String deliveryAddress, String deliveryAddressAssistant,String postCode) {
+    private Delivery(Member member, OrderItem orderItem,Brand brand, DeliveryStatus deliveryStatus, String deliveryRequest, String deliveryAddress, String deliveryAddressAssistant,String postCode) {
         this.member = member;
         this.orderItem = orderItem;
+        this.brand = brand;
         this.deliveryStatus = deliveryStatus;
         this.deliveryRequest = deliveryRequest;
         this.deliveryAddress = deliveryAddress;
@@ -53,8 +59,8 @@ public class Delivery {
         this.postCode = postCode;
     }
 
-    public static Delivery of(Member member, OrderItem orderItem, String deliveryRequest, String deliveryAddress, String deliveryAddressAssistant,String postCode) {
-        return new Delivery(member, orderItem, DeliveryStatus.READY,deliveryRequest, deliveryAddress, deliveryAddressAssistant,postCode);
+    public static Delivery of(Member member, OrderItem orderItem,Brand brand, String deliveryRequest, String deliveryAddress, String deliveryAddressAssistant,String postCode) {
+        return new Delivery(member, orderItem,brand ,DeliveryStatus.READY,deliveryRequest, deliveryAddress, deliveryAddressAssistant,postCode);
     }
 
 

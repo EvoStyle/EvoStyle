@@ -32,6 +32,7 @@ public class DeliveryKafkaListener {
             case ADMIN_UPDATE -> {
                 DeliveryAdminEvent deliveryAdminEvent = jsonHelper.convert(deliveryEventWrapper.payload(), DeliveryAdminEvent.class);
                 deliveryService.changeDeliveryStatusToShipped(deliveryAdminEvent);
+          //      kafkaTemplate.send("admin-notification-topic",,)
             }
         }
     }

@@ -43,7 +43,7 @@ public class DeliveryService {
         OrderItem orderItem = orderItemRepository.findById(orderItemId).orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_NOT_FOUND));
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
-        Delivery delivery = Delivery.of(member, orderItem, deliveryRequest.deliveryRequest(), address.getFullAddress(), address.getDetailAddress(), address.getPostCode());
+        Delivery delivery = Delivery.of(member, orderItem,orderItem.getBrand() ,deliveryRequest.deliveryRequest(), address.getFullAddress(), address.getDetailAddress(), address.getPostCode());
         Delivery savedDelivery = deliveryRepository.save(delivery);
         return DeliveryResponse.from(savedDelivery);
     }
