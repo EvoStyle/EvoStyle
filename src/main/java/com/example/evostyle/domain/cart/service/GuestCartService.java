@@ -29,9 +29,9 @@ public class GuestCartService {
 
     public final String GUEST_CART_KEY_PREFIX = "guest_cart::";
 
-    public void addCartItemGuest(AddCartItemRequest request, String cartToken, Long productDetailId) {
+    public void addCartItemGuest(AddCartItemRequest request, String cartToken) {
 
-        ProductDetail productDetail = productDetailRepository.findById(productDetailId)
+        ProductDetail productDetail = productDetailRepository.findById(request.productDetailId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND));
 
         boolean existKey = redisTemplate.hasKey(GUEST_CART_KEY_PREFIX + cartToken);
@@ -40,9 +40,9 @@ public class GuestCartService {
             throw new ConflictException(ErrorCode.CART_ITEM_ALREADY_EXISTS);
         }
 
-        int price = productDetail.getProduct().getPrice() * request.quantity();
+//        int price = productDetail.getProduct().getPrice() * request.quantity();
 
-        RedisCartItemDto redisCartItem = RedisCartItemDto.of(productDetailId, request.quantity(), price);
+        RedisCartItemDto redisCartItem = RedisCartItemDto.of(request.productDetailId(), request.quantity());
         redisTemplate.opsForHash().put(GUEST_CART_KEY_PREFIX + cartToken, String.valueOf(productDetail.getId()), redisCartItem);
 
         if (!existKey) {
@@ -66,27 +66,28 @@ public class GuestCartService {
     }
 
 
-    public void updateCartItemQuantity(UpdateCartItemRequest request, String cartToken, Long productDetailId) {
+    public void updateCartItemQuantity(String cartToken, UpdateCartItemRequest request) {
 
-        if (!productDetailRepository.existsById(productDetailId)) {
+        if (!productDetailRepository.existsById(request.productDetailId())) {
             throw new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND);
         }
 
 
         RedisCartItemDto redisCartItemDto =
-                (RedisCartItemDto) redisTemplate.opsForHash().get(GUEST_CART_KEY_PREFIX + cartToken, String.valueOf(productDetailId));
+                (RedisCartItemDto) redisTemplate.opsForHash()
+                        .get(GUEST_CART_KEY_PREFIX + cartToken, String.valueOf(request.productDetailId()));
 
         if (redisCartItemDto == null) {
             throw new NotFoundException(ErrorCode.CART_ITEM_NOT_FOUND);
         }
 
         redisCartItemDto.updateQuantity(request.quantity());
-        redisTemplate.opsForHash().put(GUEST_CART_KEY_PREFIX + cartToken, String.valueOf(productDetailId), redisCartItemDto);
+        redisTemplate.opsForHash().put(GUEST_CART_KEY_PREFIX + cartToken, String.valueOf(request.productDetailId()), redisCartItemDto);
 
     }
 
 
-    public void deleteCartItem(Long productDetailId, String cartToken) {
+    public void deleteCartItem(String cartToken, Long productDetailId) {
         boolean existKey = redisTemplate.hasKey(GUEST_CART_KEY_PREFIX + cartToken);
 
         if (!redisTemplate.opsForHash().hasKey(GUEST_CART_KEY_PREFIX + cartToken, String.valueOf(productDetailId))) {
@@ -103,5 +104,4 @@ public class GuestCartService {
         redisTemplate.delete(GUEST_CART_KEY_PREFIX + cartToken);
         return CartResponse.of(new ArrayList<>());
     }
-
 }

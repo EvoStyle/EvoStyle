@@ -34,7 +34,7 @@ public record CartItemResponse(
                                         1L,
                                         redisCartItemDto.getProductDetailId(),
                                         redisCartItemDto.getQuantity(),
-                                        redisCartItemDto.getPrice());
+                                        1000 );
     }
 
 }

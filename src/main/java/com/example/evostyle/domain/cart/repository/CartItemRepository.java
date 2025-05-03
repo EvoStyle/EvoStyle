@@ -26,4 +26,6 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
             WHERE i.cart.id = :cartId AND i.productDetail.id = :productDetailId
             """)
     Optional<CartItem> findByCartIdAndProductDetailId(@Param("cartId") Long cartId, @Param("productDetailId") Long productDetailId);
+
+
 }
