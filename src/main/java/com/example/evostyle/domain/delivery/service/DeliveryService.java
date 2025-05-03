@@ -1,7 +1,9 @@
 package com.example.evostyle.domain.delivery.service;
 
+import com.example.evostyle.common.util.JsonHelper;
 import com.example.evostyle.domain.delivery.dto.DeliveryAdminEvent;
 import com.example.evostyle.domain.delivery.dto.DeliveryUserEvent;
+import com.example.evostyle.domain.delivery.dto.UserNotificationEvent;
 import com.example.evostyle.domain.delivery.dto.request.*;
 import com.example.evostyle.domain.delivery.dto.response.DeliveryResponse;
 import com.example.evostyle.domain.delivery.dto.response.ParcelResponse;
@@ -13,9 +15,10 @@ import com.example.evostyle.domain.member.entity.Member;
 import com.example.evostyle.domain.member.repository.AddressRepository;
 import com.example.evostyle.domain.member.repository.MemberRepository;
 import com.example.evostyle.domain.order.entity.OrderItem;
-import com.example.evostyle.domain.orderitem.repository.OrderItemsRepository;
+import com.example.evostyle.domain.order.repository.OrderItemRepository;
 import com.example.evostyle.global.exception.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,16 +30,17 @@ public class DeliveryService {
 
     private final DeliveryRepository deliveryRepository;
     private final AddressRepository addressRepository;
-    private final OrderItemsRepository orderItemsRepository;
+    private final OrderItemRepository orderItemRepository;
     private final MemberRepository memberRepository;
-
+    private final KafkaTemplate<String, String> kafkaTemplate;
     private final ParcelApiService parcelApiService;
+    private final JsonHelper jsonHelper;
 
 
     @Transactional
     public DeliveryResponse createDelivery(Long addressId, Long orderItemId, Long memberId, DeliveryRequest deliveryRequest) {
         Address address = addressRepository.findById(addressId).orElseThrow(() -> new NotFoundException(ErrorCode.ADDRESS_NOT_FOUND));
-        OrderItem orderItem = orderItemsRepository.findById(orderItemId).orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_NOT_FOUND));
+        OrderItem orderItem = orderItemRepository.findById(orderItemId).orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_NOT_FOUND));
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
         Delivery delivery = Delivery.of(member, orderItem, deliveryRequest.deliveryRequest(), address.getFullAddress(), address.getDetailAddress(), address.getPostCode());
@@ -51,17 +55,19 @@ public class DeliveryService {
     }
 
 
-    public DeliveryResponse updateDelivery(DeliveryUserEvent deliveryUserEvent) {
+    public String updateDelivery(DeliveryUserEvent deliveryUserEvent) {
         Delivery delivery = deliveryRepository.findById(deliveryUserEvent.deliveryId()).orElseThrow(() -> new NotFoundException(ErrorCode.DELIVERY_NOT_FOUND));
         Address address = addressRepository.findById(deliveryUserEvent.addressId()).orElseThrow(() -> new NotFoundException(ErrorCode.ADDRESS_NOT_FOUND));
 
         if (!delivery.getDeliveryStatus().equals(DeliveryStatus.READY)) {
             if (parcelApiService.isCorrectionFailed(delivery, address, deliveryUserEvent)) {
-                throw new BadRequestException(ErrorCode.DELIVERY_NOT_READY);
+                UserNotificationEvent fail = UserNotificationEvent.fail(deliveryUserEvent.userId(), delivery.getTrackingNumber());
+                String payload = jsonHelper.toJson(fail);
+                kafkaTemplate.send("user-notification-topic", deliveryUserEvent.userId().toString(), payload);
             }
         }
         Delivery savedDelivery = updateDelivery(deliveryUserEvent, delivery, address);
-        return DeliveryResponse.from(savedDelivery);
+        return savedDelivery.getTrackingNumber();
     }
 
 

@@ -16,7 +16,6 @@ spring:
 
   kafka:
     bootstrap-servers: ${kafka.url}
-
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
     consumer:
@@ -41,4 +40,7 @@ server:
 jwt:
   secret:
     key: ${jwt.secret.key}
+
+kakao:
+  token: ${kakao.accesstoken}
 

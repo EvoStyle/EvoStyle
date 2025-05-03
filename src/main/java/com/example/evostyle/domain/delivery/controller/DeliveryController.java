@@ -44,13 +44,15 @@ public class DeliveryController {
         return ResponseEntity.status(HttpStatus.OK).body(deliveryResponses);
     }
 
-    @PatchMapping("/address/{addressId}/delivery/{deliveryId}")
+    @PatchMapping("/address/{addressId}/delivery/{deliveryId}/member/{memberId}")
     public ResponseEntity<DeliveryResponse> updateDelivery(
             @RequestBody DeliveryRequest deliveryRequest,
             @PathVariable Long addressId,
-            @PathVariable Long deliveryId
+            @PathVariable Long deliveryId,
+            @PathVariable Long memberId
+
     ) {
-        DeliveryUserUpdateEvent deliveryUserUpdateEvent = DeliveryUserUpdateEvent.of(EventType.USER_UPDATE, deliveryId, addressId, deliveryRequest.deliveryRequest());
+        DeliveryUserUpdateEvent deliveryUserUpdateEvent = DeliveryUserUpdateEvent.of(EventType.USER_UPDATE, memberId,deliveryId, addressId, deliveryRequest.deliveryRequest());
         String payload = jsonHelper.toJson(deliveryUserUpdateEvent);
         kafkaTemplate.send("delivery-event-topic", deliveryId.toString(), payload);
         return ResponseEntity.status(HttpStatus.OK).build();
