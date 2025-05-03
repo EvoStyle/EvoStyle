@@ -7,10 +7,13 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
+import java.util.Optional;
+
 public interface BrandRepository extends JpaRepository<Brand, Long> {
 
     boolean existsByName(String name);
 
     @Query("SELECT b.id FROM Brand b WHERE b.member.id = :memberId")
     List<Long> findBrandIdsByMemberId(@Param("memberId") Long memberId);
+
 }

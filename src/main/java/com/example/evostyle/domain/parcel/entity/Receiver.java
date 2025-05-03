@@ -19,18 +19,27 @@ public class Receiver {
 
     private String address;
 
+    private String addressAssistant;
+
     private String phone;
 
     private String postCode;
 
-    private Receiver(String name, String address, String phone, String postCode) {
+    private Receiver(String name, String address, String phone, String postCode, String addressAssistant) {
         this.name = name;
         this.address = address;
         this.phone = phone;
         this.postCode = postCode;
+        this.addressAssistant = addressAssistant;
     }
 
-    public static Receiver of(String name, String address, String phone, String postCode) {
-        return new Receiver(name, address, phone, postCode);
+    public static Receiver of(String name, String address, String phone, String postCode,String addressAssistant) {
+        return new Receiver(name, address, phone, postCode,addressAssistant);
+    }
+
+    public void update(String address, String addressAssistant, String postCode) {
+        this.address = address;
+        this.addressAssistant = addressAssistant;
+        this.postCode = postCode;
     }
 }
