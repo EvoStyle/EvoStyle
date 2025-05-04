@@ -27,6 +27,9 @@ public class Coupon extends BaseEntity {
     @Column(name = "max_issue_count", nullable = false)
     private Integer maxIssueCount;
 
+    @Column(name = "issue_count", nullable = false)
+    private Integer issueCount = 0;
+
     @Column(name = "start_at", nullable = false)
     private LocalDate startAt;
 
@@ -49,5 +52,9 @@ public class Coupon extends BaseEntity {
         LocalDate startAt, LocalDate endAt
     ) {
         return new Coupon(name, discountPrice, maxIssueCount, startAt, endAt);
+    }
+
+    public void increaseIssueCount() {
+        this.issueCount++;
     }
 }
