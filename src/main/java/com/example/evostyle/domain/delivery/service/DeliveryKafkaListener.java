@@ -1,10 +1,8 @@
 package com.example.evostyle.domain.delivery.service;
 
 import com.example.evostyle.common.util.JsonHelper;
-import com.example.evostyle.domain.delivery.dto.DeliveryAdminEvent;
-import com.example.evostyle.domain.delivery.dto.DeliveryEventWrapper;
-import com.example.evostyle.domain.delivery.dto.DeliveryUserEvent;
-import com.example.evostyle.domain.delivery.dto.UserNotificationEvent;
+import com.example.evostyle.domain.delivery.dto.*;
+import com.example.evostyle.domain.delivery.dto.response.DeliveryResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -17,6 +15,7 @@ public class DeliveryKafkaListener {
     private final DeliveryService deliveryService;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final KaKaoMessageService kaKaoMessageService;
+    private final SlackMessageService slackMessageService;
 
     @KafkaListener(topics = "delivery-event-topic", groupId = "delivery-update-group")
     public void updateDelivery(String message) {
@@ -31,8 +30,10 @@ public class DeliveryKafkaListener {
             }
             case ADMIN_UPDATE -> {
                 DeliveryAdminEvent deliveryAdminEvent = jsonHelper.convert(deliveryEventWrapper.payload(), DeliveryAdminEvent.class);
-                deliveryService.changeDeliveryStatusToShipped(deliveryAdminEvent);
-          //      kafkaTemplate.send("admin-notification-topic",,)
+                AdminDeliveryResponse adminDeliveryResponse = deliveryService.changeDeliveryStatusToShipped(deliveryAdminEvent);
+                AdminNotificationEvent success = AdminNotificationEvent.success(adminDeliveryResponse);
+                String payload = jsonHelper.toJson(success);
+                kafkaTemplate.send("admin-notification-topic", success.deliveryId().toString(), payload);
             }
         }
     }
@@ -41,5 +42,11 @@ public class DeliveryKafkaListener {
     public void sendUser(String message) {
         UserNotificationEvent userNotificationEvent = jsonHelper.fromJson(message, UserNotificationEvent.class);
         kaKaoMessageService.sendMessage(userNotificationEvent);
+    }
+
+    @KafkaListener(topics = "admin-notification-topic", groupId = "admin-notification-group")
+    public void sendAdmin(String message) {
+        AdminNotificationEvent adminNotificationEvent = jsonHelper.fromJson(message, AdminNotificationEvent.class);
+        slackMessageService.sendMessage(adminNotificationEvent);
     }
 }

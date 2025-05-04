@@ -1,9 +1,7 @@
 package com.example.evostyle.domain.delivery.service;
 
 import com.example.evostyle.common.util.JsonHelper;
-import com.example.evostyle.domain.delivery.dto.DeliveryAdminEvent;
-import com.example.evostyle.domain.delivery.dto.DeliveryUserEvent;
-import com.example.evostyle.domain.delivery.dto.UserNotificationEvent;
+import com.example.evostyle.domain.delivery.dto.*;
 import com.example.evostyle.domain.delivery.dto.request.*;
 import com.example.evostyle.domain.delivery.dto.response.DeliveryResponse;
 import com.example.evostyle.domain.delivery.dto.response.ParcelResponse;
@@ -78,18 +76,23 @@ public class DeliveryService {
     }
 
 
-    public DeliveryResponse changeDeliveryStatusToShipped(DeliveryAdminEvent deliveryAdminEvent) {
+    public AdminDeliveryResponse changeDeliveryStatusToShipped(DeliveryAdminEvent deliveryAdminEvent) {
 
         Delivery delivery = deliveryRepository.findById(deliveryAdminEvent.deliveryId()).orElseThrow(() -> new NotFoundException(ErrorCode.DELIVERY_NOT_FOUND));
         if (delivery.getDeliveryStatus() != DeliveryStatus.READY) {
-            throw new ConflictException(ErrorCode.DELIVERY_CONFLICT_MODIFIED_BY_ADMIN);
+            if (delivery.getTrackingNumber().isEmpty()) {
+                //log 찍고 알림을 보내는게 좋을듯 여기도달하면 단단히 잘못된것임
+            }
+            AdminNotificationEvent fail = AdminNotificationEvent.fail(delivery);
+            String payload = jsonHelper.toJson(fail);
+            kafkaTemplate.send("admin-notification-topic",delivery.getId().toString(),payload);
         }
         ParcelResponse parcelResponse = parcelApiService.createTrackingNumber(delivery);
         return performShipping(parcelResponse, delivery);
     }
 
     @Transactional
-    private DeliveryResponse performShipping( ParcelResponse parcelResponse, Delivery delivery) {
+    private AdminDeliveryResponse performShipping(ParcelResponse parcelResponse, Delivery delivery) {
 
         delivery.changeStatus(DeliveryStatus.SHIPPED);
 
@@ -97,7 +100,7 @@ public class DeliveryService {
 
         Delivery savedDelivery = deliveryRepository.save(delivery);
 
-        return DeliveryResponse.from(savedDelivery);
+        return AdminDeliveryResponse.from(savedDelivery);
 
     }
 

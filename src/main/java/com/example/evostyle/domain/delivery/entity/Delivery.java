@@ -1,5 +1,6 @@
 package com.example.evostyle.domain.delivery.entity;
 
+import com.example.evostyle.common.entity.BaseEntity;
 import com.example.evostyle.domain.brand.entity.Brand;
 import com.example.evostyle.domain.member.entity.Member;
 import com.example.evostyle.domain.order.entity.OrderItem;
@@ -12,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Table(name = "deliveries")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Delivery {
+public class Delivery extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

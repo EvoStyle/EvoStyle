@@ -49,7 +49,7 @@ public class BrandService {
             throw new BadRequestException(ErrorCode.BRAND_NAME_DUPLICATED);
         }
 
-        Brand brand = Brand.of(request.name(), member, brandCategoryList);
+        Brand brand = Brand.of(request.name(), member, request.slackWebHookUrl() ,brandCategoryList);
 
         brandRepository.save(brand);
 
