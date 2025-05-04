@@ -15,14 +15,13 @@ import java.util.ArrayList;
 public record MemberCartItemResponse(
         Long id,
         Long cartId,
-        ProductResponse productResponse,
         ProductDetailResponse productDetailResponse,
         Integer quantity,
         Integer originPrice,
         Integer discountPrice
 ) {
 
-    public static MemberCartItemResponse of(ProductResponse productResponse,
+    public static MemberCartItemResponse of(
                                             ProductDetailResponse productDetailResponse,
                                             CartItem cartItem,
                                             MemberGradle memberGradle) {
@@ -32,7 +31,6 @@ public record MemberCartItemResponse(
         return new MemberCartItemResponse(
                 cartItem.getId(),
                 cartItem.getCart().getId(),
-                productResponse,
                 productDetailResponse,
                 cartItem.getQuantity(),
                 originPrice,

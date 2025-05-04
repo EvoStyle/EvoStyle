@@ -1,6 +1,7 @@
 package com.example.evostyle.domain.cart.entity;
 
 import com.example.evostyle.common.entity.BaseEntity;
+import com.example.evostyle.domain.member.entity.Member;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
@@ -22,8 +23,8 @@ public class Cart extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "member_id")
-    private Long memberId;
+    @OneToOne
+    private Member member;
 
     @ColumnDefault("0")
     private Integer totalPrice = 0;
@@ -31,12 +32,12 @@ public class Cart extends BaseEntity {
     @ColumnDefault("0")
     private Integer discountPrice = 0;
 
-    private Cart(Long memberId){
-        this.memberId = memberId;
+    private Cart(Member member){
+        this.member = member;
 
     }
 
-    public static Cart of(Long memberId){
-        return new Cart(memberId);
+    public static Cart of(Member member){
+        return new Cart(member);
     }
 }

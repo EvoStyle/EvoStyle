@@ -11,7 +11,7 @@ public record GuestCartResponse(
 
     public static GuestCartResponse from (List<GuestCartItemResponse> cartItemResponseList) {
         int totalQuantity = cartItemResponseList.stream().mapToInt(GuestCartItemResponse::quantity).sum();
-        int totalPrice = cartItemResponseList.stream().mapToInt(GuestCartItemResponse::originPrice).sum();
+        int totalPrice = cartItemResponseList.stream().mapToInt(GuestCartItemResponse::originTotalPrice).sum();
 
         return new GuestCartResponse(
                 cartItemResponseList,

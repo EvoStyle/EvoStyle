@@ -60,7 +60,7 @@ public class GuestCartService {
         List<OptionResponse> optionResponseList = optionRepository.findByProductDetailId(productDetail.getId())
                 .stream().map(OptionResponse::from).toList();
 
-        return GuestCartItemResponse.of(ProductResponse.from(productDetail.getProduct()),
+        return GuestCartItemResponse.of( productDetail.getProduct().getPrice(),
                                         ProductDetailResponse.from(productDetail, optionResponseList), redisCartItem);
     }
 
@@ -87,7 +87,7 @@ public class GuestCartService {
                             .stream().map(OptionResponse::from).toList();
 
                     return GuestCartItemResponse.of(
-                            ProductResponse.from(product),
+                            productDetail.getProduct().getPrice(),
                             ProductDetailResponse.from(productDetail, optionResponseList),
                             dto);
                 }).toList();
@@ -114,7 +114,7 @@ public class GuestCartService {
         List<OptionResponse> optionResponseList = optionRepository.findByProductDetailId(productDetail.getId())
                 .stream().map(OptionResponse::from).toList();
 
-        return GuestCartItemResponse.of(ProductResponse.from(productDetail.getProduct()),
+        return GuestCartItemResponse.of( productDetail.getProduct().getPrice(),
                 ProductDetailResponse.from(productDetail, optionResponseList), redisCartItem);
     }
 

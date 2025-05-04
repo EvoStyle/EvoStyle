@@ -6,22 +6,21 @@ import com.example.evostyle.domain.product.dto.response.ProductDetailResponse;
 import com.example.evostyle.domain.product.dto.response.ProductResponse;
 
 public record GuestCartItemResponse(
-        ProductResponse productResponse,
         ProductDetailResponse productDetailResponse,
         Integer quantity,
-        Integer originPrice
+        Integer originTotalPrice
 ) {
 
-    public static GuestCartItemResponse of(ProductResponse productResponse,
+    public static GuestCartItemResponse of(Integer productPrice,
                                            ProductDetailResponse productDetailResponse,
                                            RedisCartItemDto redisCartItemDto) {
 
-        int originPrice = productResponse.price() * redisCartItemDto.getQuantity() ;
+        int originTotalPrice = productPrice * redisCartItemDto.getQuantity() ;
 
-        return new GuestCartItemResponse(productResponse,
+        return new GuestCartItemResponse(
                 productDetailResponse,
                 redisCartItemDto.getQuantity(),
-                originPrice
+                originTotalPrice
         );
     }
 }
