@@ -1,6 +1,7 @@
 package com.example.evostyle.domain.cart.dto.request;
 
-import jakarta.validation.constraints.NotNull;
 
-public record UpdateCartItemRequest(Long productDetailId, Integer quantity) {
+import jakarta.annotation.Nullable;
+
+public record UpdateCartItemRequest(@Nullable Long productDetailId, Integer quantity) {
 }

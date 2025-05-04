@@ -2,9 +2,17 @@ package com.example.evostyle.domain.cart.service;
 
 import com.example.evostyle.domain.cart.dto.request.AddCartItemRequest;
 import com.example.evostyle.domain.cart.dto.request.UpdateCartItemRequest;
-import com.example.evostyle.domain.cart.dto.response.CartItemResponse;
-import com.example.evostyle.domain.cart.dto.response.CartResponse;
+import com.example.evostyle.domain.cart.dto.response.GuestCartItemResponse;
+import com.example.evostyle.domain.cart.dto.response.GuestCartResponse;
+import com.example.evostyle.domain.cart.dto.response.MemberCartItemResponse;
+import com.example.evostyle.domain.cart.dto.response.MemberCartResponse;
 import com.example.evostyle.domain.cart.dto.service.RedisCartItemDto;
+import com.example.evostyle.domain.product.dto.response.ProductDetailResponse;
+import com.example.evostyle.domain.product.dto.response.ProductResponse;
+import com.example.evostyle.domain.product.entity.Product;
+import com.example.evostyle.domain.product.optiongroup.dto.response.OptionResponse;
+import com.example.evostyle.domain.product.optiongroup.entity.Option;
+import com.example.evostyle.domain.product.optiongroup.repository.OptionRepository;
 import com.example.evostyle.domain.product.productdetail.entity.ProductDetail;
 import com.example.evostyle.domain.product.repository.ProductDetailRepository;
 import com.example.evostyle.global.exception.ConflictException;
@@ -26,10 +34,12 @@ public class GuestCartService {
 
     private final ProductDetailRepository productDetailRepository;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final OptionRepository optionRepository;
 
     public final String GUEST_CART_KEY_PREFIX = "guest_cart::";
 
-    public void addCartItemGuest(AddCartItemRequest request, String cartToken) {
+
+    public GuestCartItemResponse addCartItemGuest(AddCartItemRequest request, String cartToken) {
 
         ProductDetail productDetail = productDetailRepository.findById(request.productDetailId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND));
@@ -40,18 +50,23 @@ public class GuestCartService {
             throw new ConflictException(ErrorCode.CART_ITEM_ALREADY_EXISTS);
         }
 
-//        int price = productDetail.getProduct().getPrice() * request.quantity();
-
         RedisCartItemDto redisCartItem = RedisCartItemDto.of(request.productDetailId(), request.quantity());
         redisTemplate.opsForHash().put(GUEST_CART_KEY_PREFIX + cartToken, String.valueOf(productDetail.getId()), redisCartItem);
 
         if (!existKey) {
             redisTemplate.expire(GUEST_CART_KEY_PREFIX + cartToken, Duration.ofDays(1));
         }
+
+        List<OptionResponse> optionResponseList = optionRepository.findByProductDetailId(productDetail.getId())
+                .stream().map(OptionResponse::from).toList();
+
+        return GuestCartItemResponse.of(ProductResponse.from(productDetail.getProduct()),
+                                        ProductDetailResponse.from(productDetail, optionResponseList), redisCartItem);
     }
 
 
-    public CartResponse readCartGuest(String cartToken) {
+    public GuestCartResponse readCartGuest(String cartToken) {
+
         boolean existKey = redisTemplate.hasKey(GUEST_CART_KEY_PREFIX + cartToken);
 
         List<RedisCartItemDto> list = redisTemplate.opsForHash().entries(GUEST_CART_KEY_PREFIX + cartToken)
@@ -61,31 +76,47 @@ public class GuestCartService {
             redisTemplate.expire(GUEST_CART_KEY_PREFIX + cartToken, Duration.ofDays(1));
         }
 
-        List<CartItemResponse> cartItemResponseList = list.stream().map(CartItemResponse::from).toList();
-        return CartResponse.of(cartItemResponseList);
+        List<GuestCartItemResponse> cartItemResponses = list.stream()
+                .map(dto -> {
+                    ProductDetail productDetail = productDetailRepository.findById(dto.getProductDetailId())
+                            .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND));
+
+                    Product product = productDetail.getProduct();
+
+                    List<OptionResponse> optionResponseList = optionRepository.findByProductDetailId(productDetail.getId())
+                            .stream().map(OptionResponse::from).toList();
+
+                    return GuestCartItemResponse.of(
+                            ProductResponse.from(product),
+                            ProductDetailResponse.from(productDetail, optionResponseList),
+                            dto);
+                }).toList();
+
+        return GuestCartResponse.from(cartItemResponses);
     }
 
+    public GuestCartItemResponse updateCartItemQuantity(String cartToken, UpdateCartItemRequest request) {
 
-    public void updateCartItemQuantity(String cartToken, UpdateCartItemRequest request) {
+        ProductDetail productDetail = productDetailRepository.findById(request.productDetailId())
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND));
 
-        if (!productDetailRepository.existsById(request.productDetailId())) {
-            throw new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND);
-        }
-
-
-        RedisCartItemDto redisCartItemDto =
+        RedisCartItemDto redisCartItem =
                 (RedisCartItemDto) redisTemplate.opsForHash()
                         .get(GUEST_CART_KEY_PREFIX + cartToken, String.valueOf(request.productDetailId()));
 
-        if (redisCartItemDto == null) {
+        if (redisCartItem == null) {
             throw new NotFoundException(ErrorCode.CART_ITEM_NOT_FOUND);
         }
 
-        redisCartItemDto.updateQuantity(request.quantity());
-        redisTemplate.opsForHash().put(GUEST_CART_KEY_PREFIX + cartToken, String.valueOf(request.productDetailId()), redisCartItemDto);
+        redisCartItem.updateQuantity(request.quantity());
+        redisTemplate.opsForHash().put(GUEST_CART_KEY_PREFIX + cartToken, String.valueOf(request.productDetailId()), redisCartItem);
 
+        List<OptionResponse> optionResponseList = optionRepository.findByProductDetailId(productDetail.getId())
+                .stream().map(OptionResponse::from).toList();
+
+        return GuestCartItemResponse.of(ProductResponse.from(productDetail.getProduct()),
+                ProductDetailResponse.from(productDetail, optionResponseList), redisCartItem);
     }
-
 
     public void deleteCartItem(String cartToken, Long productDetailId) {
         boolean existKey = redisTemplate.hasKey(GUEST_CART_KEY_PREFIX + cartToken);
@@ -100,8 +131,8 @@ public class GuestCartService {
         }
     }
 
-    public CartResponse emptyCart(String cartToken) {
+    public GuestCartResponse emptyCart(String cartToken) {
         redisTemplate.delete(GUEST_CART_KEY_PREFIX + cartToken);
-        return CartResponse.of(new ArrayList<>());
+        return GuestCartResponse.from(new ArrayList<>());
     }
 }

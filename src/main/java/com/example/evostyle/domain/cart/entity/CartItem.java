@@ -46,4 +46,6 @@ public class CartItem extends BaseEntity {
     public void updateQuantity(Integer quantity){
         this.quantity = quantity;
     }
+
+    public void mergeQuantity(Integer quantity){this.quantity += quantity; }
 }

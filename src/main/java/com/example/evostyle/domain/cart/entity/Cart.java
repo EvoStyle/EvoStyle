@@ -15,10 +15,6 @@ import java.util.List;
 @Entity
 @Getter
 @Table(name = "carts")
-@JsonIdentityInfo(
-        generator = ObjectIdGenerators.PropertyGenerator.class,
-        property = "id"
-)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Cart extends BaseEntity {
 
@@ -31,6 +27,9 @@ public class Cart extends BaseEntity {
 
     @ColumnDefault("0")
     private Integer totalPrice = 0;
+
+    @ColumnDefault("0")
+    private Integer discountPrice = 0;
 
     private Cart(Long memberId){
         this.memberId = memberId;
