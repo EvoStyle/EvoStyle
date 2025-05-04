@@ -1,12 +1,11 @@
-package com.example.evostyle.domain.coupon.entity;
+package com.example.evostyle.domain.member.entity;
 
 import com.example.evostyle.common.entity.BaseEntity;
-import com.example.evostyle.domain.member.entity.Member;
+import com.example.evostyle.domain.coupon.entity.Coupon;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Getter
@@ -18,9 +17,8 @@ public class MemberCoupon extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "is_used")
-    @ColumnDefault("false")
-    private Boolean isUsed;
+    @Column(name = "is_used", nullable = false)
+    private Boolean isUsed = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
@@ -30,13 +28,12 @@ public class MemberCoupon extends BaseEntity {
     @JoinColumn(name = "coupon_id", nullable = false)
     private Coupon coupon;
 
-    private MemberCoupon(Boolean isUsed, Member member, Coupon coupon) {
-        this.isUsed = isUsed;
+    private MemberCoupon(Member member, Coupon coupon) {
         this.member = member;
         this.coupon = coupon;
     }
 
-    public static MemberCoupon of(Boolean isUsed, Member member, Coupon coupon) {
-        return new MemberCoupon(isUsed, member, coupon);
+    public static MemberCoupon of(Member member, Coupon coupon) {
+        return new MemberCoupon(member, coupon);
     }
 }
