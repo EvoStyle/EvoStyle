@@ -1,9 +1,7 @@
 package com.example.evostyle.domain.cart.dto.response;
 
-import com.example.evostyle.common.util.MemberDiscountUtil;
 import com.example.evostyle.domain.cart.dto.service.RedisCartItemDto;
 import com.example.evostyle.domain.product.dto.response.ProductDetailResponse;
-import com.example.evostyle.domain.product.dto.response.ProductResponse;
 
 public record GuestCartItemResponse(
         ProductDetailResponse productDetailResponse,

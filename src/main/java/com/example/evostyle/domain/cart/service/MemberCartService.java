@@ -1,6 +1,5 @@
 package com.example.evostyle.domain.cart.service;
 
-import com.example.evostyle.common.util.MemberDiscountUtil;
 import com.example.evostyle.domain.cart.dto.request.AddCartItemRequest;
 import com.example.evostyle.domain.cart.dto.request.UpdateCartItemRequest;
 import com.example.evostyle.domain.cart.dto.response.MemberCartItemResponse;
@@ -11,12 +10,9 @@ import com.example.evostyle.domain.cart.entity.CartItem;
 import com.example.evostyle.domain.cart.repository.CartItemRepository;
 import com.example.evostyle.domain.cart.repository.CartRepository;
 import com.example.evostyle.domain.member.entity.Member;
-import com.example.evostyle.domain.member.entity.MemberGradle;
 import com.example.evostyle.domain.member.repository.MemberRepository;
 import com.example.evostyle.domain.product.dto.response.ProductDetailResponse;
-import com.example.evostyle.domain.product.dto.response.ProductResponse;
 import com.example.evostyle.domain.product.optiongroup.dto.response.OptionResponse;
-import com.example.evostyle.domain.product.optiongroup.entity.Option;
 import com.example.evostyle.domain.product.optiongroup.repository.OptionRepository;
 import com.example.evostyle.domain.product.productdetail.entity.ProductDetail;
 import com.example.evostyle.domain.product.repository.ProductDetailRepository;
@@ -55,8 +51,8 @@ public class MemberCartService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
-        Cart cart = cartRepository.findByMemberId(memberId).orElseGet(() -> Cart.of(member));
-        cartRepository.save(cart);
+        Cart cart = cartRepository.findByMemberId(memberId)
+                .orElseGet(() -> cartRepository.save(Cart.of(member)));
 
         ProductDetail productDetail = productDetailRepository.findById(request.productDetailId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND));
@@ -81,12 +77,9 @@ public class MemberCartService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
-        if (!memberRepository.existsById(memberId)) {
-            throw new NotFoundException(ErrorCode.MEMBER_NOT_FOUND);
-        }
+        if (!memberRepository.existsById(memberId)) { throw new NotFoundException(ErrorCode.MEMBER_NOT_FOUND);}
 
-        Cart cart = cartRepository.findByMemberId(memberId)
-                .orElseGet(() -> Cart.of(member));
+        Cart cart = cartRepository.findByMemberId(memberId).orElseGet(() -> cartRepository.save(Cart.of(member)));
 
         List<MemberCartItemResponse> cartItemResponseList = cartItemRepository.findByCartId(cart.getId())
                 .stream().map(c -> {
@@ -133,13 +126,12 @@ public class MemberCartService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
-        Cart cart = cartRepository.findByMemberId(memberId).orElseGet(() -> Cart.of(member));
-        cartRepository.save(cart);
+        Cart cart = cartRepository.findByMemberId(memberId).orElseGet(() -> cartRepository.save(Cart.of(member)));
 
         CartItem cartItem = cartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.CART_ITEM_NOT_FOUND));
 
-        if (cartItem.getCart().getMember().getId() != memberId) {
+        if (!cartItem.getCart().getMember().getId().equals(memberId)) {
             throw new UnauthorizedException(ErrorCode.CART_ACCESS_DENIED);
         }
         cartItemRepository.deleteById(cartItemId);

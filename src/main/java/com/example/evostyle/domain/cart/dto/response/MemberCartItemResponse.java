@@ -1,16 +1,9 @@
 package com.example.evostyle.domain.cart.dto.response;
 
 import com.example.evostyle.common.util.MemberDiscountUtil;
-import com.example.evostyle.domain.cart.dto.service.RedisCartItemDto;
 import com.example.evostyle.domain.cart.entity.CartItem;
 import com.example.evostyle.domain.member.entity.MemberGradle;
 import com.example.evostyle.domain.product.dto.response.ProductDetailResponse;
-import com.example.evostyle.domain.product.dto.response.ProductResponse;
-import com.example.evostyle.domain.product.entity.Product;
-import com.example.evostyle.domain.product.productdetail.entity.ProductDetail;
-import jakarta.persistence.criteria.CriteriaBuilder;
-
-import java.util.ArrayList;
 
 public record MemberCartItemResponse(
         Long id,
@@ -21,8 +14,7 @@ public record MemberCartItemResponse(
         Integer discountPrice
 ) {
 
-    public static MemberCartItemResponse of(
-                                            ProductDetailResponse productDetailResponse,
+    public static MemberCartItemResponse of(ProductDetailResponse productDetailResponse,
                                             CartItem cartItem,
                                             MemberGradle memberGradle) {
 
@@ -34,7 +26,6 @@ public record MemberCartItemResponse(
                 productDetailResponse,
                 cartItem.getQuantity(),
                 originPrice,
-                MemberDiscountUtil.discountPrice(memberGradle, originPrice));
-
+                MemberDiscountUtil.calculateDiscountedPrice(memberGradle, originPrice));
     }
 }

@@ -44,44 +44,37 @@ public class GuestCartService {
         ProductDetail productDetail = productDetailRepository.findById(request.productDetailId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND));
 
-        boolean existKey = redisTemplate.hasKey(GUEST_CART_KEY_PREFIX + cartToken);
-
         if (redisTemplate.opsForHash().hasKey(GUEST_CART_KEY_PREFIX + cartToken, String.valueOf(productDetail.getId()))) {
             throw new ConflictException(ErrorCode.CART_ITEM_ALREADY_EXISTS);
         }
 
         RedisCartItemDto redisCartItem = RedisCartItemDto.of(request.productDetailId(), request.quantity());
-        redisTemplate.opsForHash().put(GUEST_CART_KEY_PREFIX + cartToken, String.valueOf(productDetail.getId()), redisCartItem);
 
-        if (!existKey) {
-            redisTemplate.expire(GUEST_CART_KEY_PREFIX + cartToken, Duration.ofDays(1));
-        }
+        redisTemplate.opsForHash().put(GUEST_CART_KEY_PREFIX + cartToken, String.valueOf(productDetail.getId()), redisCartItem);
+        redisTemplate.expire(GUEST_CART_KEY_PREFIX + cartToken, Duration.ofMinutes(15));// 사용자의 마지막 사용시점을 기점으로 갱신해나가는 방식
 
         List<OptionResponse> optionResponseList = optionRepository.findByProductDetailId(productDetail.getId())
                 .stream().map(OptionResponse::from).toList();
 
-        return GuestCartItemResponse.of( productDetail.getProduct().getPrice(),
-                                        ProductDetailResponse.from(productDetail, optionResponseList), redisCartItem);
+        return GuestCartItemResponse.of(
+                productDetail.getProduct().getPrice(),
+                ProductDetailResponse.from(productDetail, optionResponseList),
+                redisCartItem
+        );
     }
 
 
     public GuestCartResponse readCartGuest(String cartToken) {
 
-        boolean existKey = redisTemplate.hasKey(GUEST_CART_KEY_PREFIX + cartToken);
-
         List<RedisCartItemDto> list = redisTemplate.opsForHash().entries(GUEST_CART_KEY_PREFIX + cartToken)
-                .values().stream().map(o -> (RedisCartItemDto) o).toList();
+                                      .values().stream().map(o -> (RedisCartItemDto) o).toList();
 
-        if (!existKey) {
-            redisTemplate.expire(GUEST_CART_KEY_PREFIX + cartToken, Duration.ofDays(1));
-        }
+        redisTemplate.expire(GUEST_CART_KEY_PREFIX + cartToken, Duration.ofMinutes(15));
 
         List<GuestCartItemResponse> cartItemResponses = list.stream()
                 .map(dto -> {
                     ProductDetail productDetail = productDetailRepository.findById(dto.getProductDetailId())
                             .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND));
-
-                    Product product = productDetail.getProduct();
 
                     List<OptionResponse> optionResponseList = optionRepository.findByProductDetailId(productDetail.getId())
                             .stream().map(OptionResponse::from).toList();
@@ -95,40 +88,37 @@ public class GuestCartService {
         return GuestCartResponse.from(cartItemResponses);
     }
 
-    public GuestCartItemResponse updateCartItemQuantity(String cartToken, UpdateCartItemRequest request) {
+    public GuestCartItemResponse updateCartItemQuantity(String cartToken, UpdateCartItemRequest request, Long productDetailId) {
 
-        ProductDetail productDetail = productDetailRepository.findById(request.productDetailId())
+        ProductDetail productDetail = productDetailRepository.findById(productDetailId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND));
 
-        RedisCartItemDto redisCartItem =
-                (RedisCartItemDto) redisTemplate.opsForHash()
-                        .get(GUEST_CART_KEY_PREFIX + cartToken, String.valueOf(request.productDetailId()));
+        RedisCartItemDto redisCartItem = (RedisCartItemDto) redisTemplate.opsForHash()
+                        .get(GUEST_CART_KEY_PREFIX + cartToken, String.valueOf(productDetailId));
 
-        if (redisCartItem == null) {
-            throw new NotFoundException(ErrorCode.CART_ITEM_NOT_FOUND);
-        }
+        if (redisCartItem == null) {throw new NotFoundException(ErrorCode.CART_ITEM_NOT_FOUND);}
 
         redisCartItem.updateQuantity(request.quantity());
-        redisTemplate.opsForHash().put(GUEST_CART_KEY_PREFIX + cartToken, String.valueOf(request.productDetailId()), redisCartItem);
+        redisTemplate.opsForHash().put(GUEST_CART_KEY_PREFIX + cartToken, String.valueOf(productDetailId), redisCartItem);
+        redisTemplate.expire(GUEST_CART_KEY_PREFIX + cartToken, Duration.ofMinutes(15));
 
         List<OptionResponse> optionResponseList = optionRepository.findByProductDetailId(productDetail.getId())
                 .stream().map(OptionResponse::from).toList();
 
-        return GuestCartItemResponse.of( productDetail.getProduct().getPrice(),
+        return GuestCartItemResponse.of(productDetail.getProduct().getPrice(),
                 ProductDetailResponse.from(productDetail, optionResponseList), redisCartItem);
     }
 
     public void deleteCartItem(String cartToken, Long productDetailId) {
-        boolean existKey = redisTemplate.hasKey(GUEST_CART_KEY_PREFIX + cartToken);
 
-        if (!redisTemplate.opsForHash().hasKey(GUEST_CART_KEY_PREFIX + cartToken, String.valueOf(productDetailId))) {
+        String redisKey = GUEST_CART_KEY_PREFIX + cartToken;
+        String field = String.valueOf(productDetailId);
+
+        if (!redisTemplate.opsForHash().hasKey(redisKey, field)) {
             throw new NotFoundException(ErrorCode.CART_ITEM_NOT_FOUND);
         }
 
-        redisTemplate.opsForHash().delete(GUEST_CART_KEY_PREFIX + cartToken, String.valueOf(productDetailId));
-        if (!existKey) {
-            redisTemplate.expire(GUEST_CART_KEY_PREFIX + cartToken, Duration.ofDays(1));
-        }
+        redisTemplate.opsForHash().delete(redisKey, field);
     }
 
     public GuestCartResponse emptyCart(String cartToken) {

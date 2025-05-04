@@ -1,9 +1,6 @@
 package com.example.evostyle.domain.cart.dto.response;
 
-import com.example.evostyle.common.util.MemberDiscountUtil;
 import com.example.evostyle.domain.cart.entity.Cart;
-import jakarta.annotation.Nullable;
-
 import java.util.List;
 
 public record MemberCartResponse(
