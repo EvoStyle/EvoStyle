@@ -11,15 +11,9 @@ import java.util.Optional;
 
 public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
 
-    @Query("SELECT oi FROM OrderItem oi " +
-            "JOIN FETCH oi.productDetail pd " +
-            "JOIN FETCH pd.product p " +
-            "JOIN FETCH p.brand b " +
-            "WHERE b.id IN :brandIdList " +
-            "AND oi.orderStatus = 'PENDING'")
-    List<OrderItem> findOrderItemsByBrandIdList(@Param("brandIdList") List<Long> brandIdList);
-
     Optional<OrderItem> findByIdAndOrderStatus(Long orderItemId, OrderStatus orderStatus);
 
-    boolean existsByOrderIdAndIsCancelledFalse(Long orderId);
+    @Query("SELECT oi FROM OrderItem oi WHERE oi.brand.member.id = :memberId")
+    List<OrderItem> findByOwnerId(@Param("memberId") Long memberId);
+
 }
