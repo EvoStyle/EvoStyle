@@ -96,7 +96,11 @@ public class ProductService {
     }
 
     @Transactional
-   public void deleteProduct(Long productId){
+   public void deleteProduct(Long productId, Long memberId){
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
+
         if(!productRepository.existsById(productId)){
             throw new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND);
         }

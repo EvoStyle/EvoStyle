@@ -50,7 +50,7 @@ public class ProductController {
                                                            HttpServletRequest servletRequest){
 
         Long memberId = (Long) servletRequest.getAttribute("memberId");
-        productService.deleteProduct(productId,  memberId);
+        productService.deleteProduct(productId, memberId);
         return  ResponseEntity.status(HttpStatus.OK).body(Map.of("productDetailId", productId));
     }
 }
