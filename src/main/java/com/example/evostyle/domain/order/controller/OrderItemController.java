@@ -44,12 +44,7 @@ public class OrderItemController {
     ) {
         Long memberId = extractMemberId(httpServletRequest);
 
-        UpdateOrderItemResponse response = orderItemService.updateOrderItem(
-                request,
-                orderId,
-                orderItemId,
-                memberId
-        );
+        UpdateOrderItemResponse response = orderItemService.updateOrderItem(request, orderId, orderItemId, memberId);
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
