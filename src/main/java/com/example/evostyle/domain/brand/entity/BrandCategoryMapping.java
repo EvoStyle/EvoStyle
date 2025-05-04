@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
         name = "brand_category_mappings",
         uniqueConstraints = {@UniqueConstraint(
                 name = "uk_brand_category_combination",
-                columnNames = "brand_id, brand_category_id")})
+                columnNames = {"brand_id", "brand_category_id"})})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class BrandCategoryMapping extends BaseEntity {
 

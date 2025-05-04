@@ -28,17 +28,25 @@ public class Parcel extends BaseEntity {
 
     private ParcelStatus parcelStatus;
 
+    private String deliveryRequest;
+
     private LocalDateTime estimatedDeliveryDate;
 
-    private Parcel(String trackingNumber, Sender sender, Receiver receiver, ParcelStatus parcelStatus) {
+    private Parcel(String trackingNumber, Sender sender, Receiver receiver, ParcelStatus parcelStatus,String deliveryRequest) {
         this.trackingNumber = trackingNumber;
         this.sender = sender;
         this.receiver = receiver;
         this.parcelStatus = parcelStatus;
+        this.deliveryRequest = deliveryRequest;
         this.estimatedDeliveryDate = LocalDateTime.now().plusDays(ThreadLocalRandom.current().nextInt(1,5));
     }
 
-    public static Parcel of(String tracking_number, Sender sender, Receiver receiver) {
-        return  new Parcel(tracking_number,sender,receiver,ParcelStatus.READY);
+    public static Parcel of(String tracking_number, Sender sender, Receiver receiver,String deliveryRequest) {
+        return  new Parcel(tracking_number,sender,receiver,ParcelStatus.ISSUED,deliveryRequest);
+    }
+
+    public void update(String address, String addressAssistant, String postCode, String deliveryRequest) {
+        this.receiver.update(address,addressAssistant,postCode);
+        this.deliveryRequest = deliveryRequest;
     }
 }

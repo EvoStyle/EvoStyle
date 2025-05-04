@@ -53,7 +53,7 @@ public class JwtUtil {
             .setSubject(String.valueOf(memberId))
             .claim("email", email)
             .claim("nickname", nickname)
-            .claim("authority", authority)
+            .claim("authority", authority.getRoleName())  // "ROLE_OWNER" 같은 문자열로 저장
             .setIssuedAt(new Date())
             .setExpiration(new Date(date.getTime() + ACCESS_TOKEN_EXPIRATION))
             .signWith(key, signatureAlgorithm)
@@ -107,6 +107,11 @@ public class JwtUtil {
         token = removeBearer(token);
         Claims claims = parseClaims(token);
         return claims.get("authority", String.class);
+    }
+
+    // enum으로 바로 변환
+    public Authority getAuthorityEnum(String token) {
+        return Authority.of(getAuthority(token));
     }
 
     // "Bearer " 접두어 제거

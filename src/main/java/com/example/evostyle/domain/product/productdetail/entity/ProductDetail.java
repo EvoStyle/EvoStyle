@@ -7,6 +7,10 @@ import com.example.evostyle.global.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
+
+import java.time.LocalDateTime;
 
 import java.io.Serializable;
 
@@ -18,33 +22,45 @@ public class ProductDetail extends BaseEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id ;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;
 
     @Column(name = "product_stock")
-    private Integer stock;
+    @ColumnDefault("0")
+    private Integer stock = 0;
 
-    private ProductDetail(Product product, Integer stock){
-        this.product = product ;
-        this.stock = stock ;
+    @ColumnDefault("false")
+    private boolean isDeleted = false;
+
+
+    private ProductDetail(Product product) {
+        this.product = product;
     }
 
-    public ProductDetail of(Product product, Integer stock){
-        return new ProductDetail(product, stock);
+    public static ProductDetail of(Product product) {
+        return new ProductDetail(product);
     }
 
-    public void decreaseStock(int amount) {
-        if(amount <= 0) {
-            throw new BadRequestException(ErrorCode.INVALID_STOCK_DECREASE_AMOUNT);
-        }
+    public void setStock(Integer stock){
+        this.stock = stock;
+    }
 
-        if(this.stock < amount) {
-            throw new BadRequestException(ErrorCode.OUT_OF_STOCK);
-        }
+    public void adjustStock(int previousAmount, int newAmount) {
+        int difference = newAmount - previousAmount;
 
-        this.stock -= amount;
+        if (difference > 0) {
+            // 수량이 증가하면, 재고가 충분한지 확인 후 차감
+            if (this.stock < difference) {
+                throw new BadRequestException(ErrorCode.OUT_OF_STOCK);
+            }
+            this.stock -= difference;
+        } else if (difference < 0) {
+
+            // 수량이 감소하면, 감소된 수량만큼 재고 증가
+            this.stock += Math.abs(difference);
+        }
     }
 }

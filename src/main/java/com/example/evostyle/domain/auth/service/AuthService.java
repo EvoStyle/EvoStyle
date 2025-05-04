@@ -1,7 +1,6 @@
 package com.example.evostyle.domain.auth.service;
 
 import com.example.evostyle.common.util.JwtUtil;
-import com.example.evostyle.common.util.PasswordEncoder;
 import com.example.evostyle.domain.auth.dto.request.LoginRequest;
 import com.example.evostyle.domain.auth.dto.request.SignUpRequest;
 import com.example.evostyle.domain.auth.dto.response.LoginResponse;
@@ -14,6 +13,7 @@ import com.example.evostyle.global.exception.NotFoundException;
 import com.example.evostyle.global.exception.UnauthorizedException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service

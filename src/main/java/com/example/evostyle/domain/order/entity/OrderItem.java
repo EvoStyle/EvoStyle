@@ -1,10 +1,13 @@
 package com.example.evostyle.domain.order.entity;
 
+import com.example.evostyle.domain.brand.entity.Brand;
 import com.example.evostyle.domain.product.productdetail.entity.ProductDetail;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -35,9 +38,19 @@ public class OrderItem {
     @Column(name = "product_description", nullable = false)
     private String productDescription;
 
+    @Column(name = "cancelled_at")
+    private LocalDateTime cancelledAt;
+
+    @Column(name = "is_cancelled", nullable = false)
+    private boolean isCancelled;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "brand_id", nullable = false)
+    private Brand brand;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_detail_id", nullable = false)
@@ -47,6 +60,7 @@ public class OrderItem {
             Integer eachAmount,
             Integer totalPrice,
             Order order,
+            Brand brand,
             OrderStatus orderStatus,
             ProductDetail productDetail,
             String productName,
@@ -56,6 +70,7 @@ public class OrderItem {
         this.eachAmount = eachAmount;
         this.totalPrice = totalPrice;
         this.order = order;
+        this.brand = brand;
         this.orderStatus = orderStatus;
         this.productDetail = productDetail;
         this.productName = productName;
@@ -67,6 +82,7 @@ public class OrderItem {
             Integer eachAmount,
             Integer totalPrice,
             Order order,
+            Brand brand,
             OrderStatus orderStatus,
             ProductDetail productDetail,
             String productName,
@@ -77,11 +93,23 @@ public class OrderItem {
                 eachAmount,
                 totalPrice,
                 order,
+                brand,
                 orderStatus,
                 productDetail,
                 productName,
                 productPrice,
                 productDescription
         );
+    }
+
+    public void update(int newAmount) {
+        this.eachAmount = newAmount;
+        this.totalPrice = this.productPrice * newAmount;
+    };
+
+    public void markAsCancelled() {
+        this.isCancelled = true;
+        this.cancelledAt = LocalDateTime.now();
+        this.orderStatus = OrderStatus.CANCELED;
     }
 }

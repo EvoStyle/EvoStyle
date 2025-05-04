@@ -3,10 +3,11 @@ package com.example.evostyle.domain.member.controller;
 import com.example.evostyle.domain.member.dto.request.UpdateMemberRequest;
 import com.example.evostyle.domain.member.dto.response.MemberResponse;
 import com.example.evostyle.domain.member.service.MemberService;
-import jakarta.servlet.http.HttpServletRequest;
+import com.example.evostyle.global.security.AuthUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -20,9 +21,11 @@ public class MemberController {
 
     @GetMapping
     public ResponseEntity<MemberResponse> readMember(
-        HttpServletRequest request
+        @AuthenticationPrincipal AuthUser authUser
     ) {
-        MemberResponse memberResponse = memberService.readMember(request);
+        Long memberId = authUser.memberId();
+
+        MemberResponse memberResponse = memberService.readMember(memberId);
 
         return ResponseEntity.status(HttpStatus.OK).body(memberResponse);
     }
@@ -30,9 +33,11 @@ public class MemberController {
     @PatchMapping
     public ResponseEntity<MemberResponse> updateMember(
         @RequestBody UpdateMemberRequest request,
-        HttpServletRequest httpServletRequest
+        @AuthenticationPrincipal AuthUser authUser
     ) {
-        MemberResponse memberResponse = memberService.updateMember(request, httpServletRequest);
+        Long memberId = authUser.memberId();
+
+        MemberResponse memberResponse = memberService.updateMember(request, memberId);
 
         return ResponseEntity.status(HttpStatus.OK).body(memberResponse);
     }
@@ -40,9 +45,11 @@ public class MemberController {
     @DeleteMapping("/{memberId}")
     public ResponseEntity<Map<String, Long>> deleteMember(
         @PathVariable(name = "memberId") Long memberId,
-        HttpServletRequest request
+        @AuthenticationPrincipal AuthUser authUser
     ) {
-        memberService.deleteMember(memberId, request);
+        Long loginMemberId = authUser.memberId();
+
+        memberService.deleteMember(memberId, loginMemberId);
 
         return ResponseEntity.status(HttpStatus.OK).body(Map.of("memberId", memberId));
     }
