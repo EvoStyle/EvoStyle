@@ -1,6 +1,5 @@
 package com.example.evostyle.domain.order.service;
 
-import com.example.evostyle.domain.brand.repository.BrandRepository;
 import com.example.evostyle.domain.member.entity.Authority;
 import com.example.evostyle.domain.member.entity.Member;
 import com.example.evostyle.domain.member.repository.MemberRepository;
@@ -9,7 +8,8 @@ import com.example.evostyle.domain.order.dto.response.ReadOrderItemResponse;
 import com.example.evostyle.domain.order.dto.response.ReadOrderResponse;
 import com.example.evostyle.domain.order.entity.Order;
 import com.example.evostyle.domain.order.entity.OrderItem;
-import com.example.evostyle.domain.order.repository.OrderItemRepository;
+import com.example.evostyle.domain.order.repository.OrderItemQueryDsl;
+import com.example.evostyle.domain.order.repository.OrderQueryDsl;
 import com.example.evostyle.domain.order.repository.OrderRepository;
 import com.example.evostyle.domain.product.productdetail.entity.ProductDetail;
 import com.example.evostyle.domain.product.repository.ProductDetailRepository;
@@ -18,7 +18,6 @@ import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.NotFoundException;
 import com.mysema.commons.lang.Pair;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,16 +26,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class OrderService {
 
     private final OrderRepository orderRepository;
-    private final OrderItemRepository orderItemRepository;
     private final MemberRepository memberRepository;
     private final ProductDetailRepository productDetailRepository;
+    private final OrderItemQueryDsl orderItemQueryDsl;
+    private final OrderQueryDsl orderQueryDsl;
 
     @Transactional
     public Pair<Order, Map<Long, ProductDetail>> createOrder(Long memberId, List<CreateOrderItemRequest> requestList) {
@@ -79,7 +78,7 @@ public class OrderService {
         if (member.getAuthority() != Authority.OWNER) {
             throw new BadRequestException(ErrorCode.FORBIDDEN_MEMBER_OPERATION);
         }
-        List<OrderItem> orderItemList = orderItemRepository.findByOwnerId(memberId);
+        List<OrderItem> orderItemList = orderItemQueryDsl.findByOwnerId(memberId);
 
         Map<Long, List<OrderItem>> idToOrderItemList = orderItemList.stream()
                 .collect(Collectors.groupingBy(orderItem -> orderItem.getOrder().getId()));
@@ -112,7 +111,7 @@ public class OrderService {
 
     @Transactional
     public void deleteOrder(Long orderId, Long memberId) {
-        Order order = orderRepository.findByIdWithItems(orderId)
+        Order order = orderQueryDsl.findByIdWithItems(orderId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_NOT_FOUND));
 
         validateOrderOwnedByMember(memberId, order);
