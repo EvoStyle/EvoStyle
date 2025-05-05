@@ -11,7 +11,7 @@ import com.example.evostyle.domain.order.entity.OrderStatus;
 import com.example.evostyle.domain.order.repository.OrderItemRepository;
 import com.example.evostyle.domain.order.repository.OrderRepository;
 import com.example.evostyle.domain.product.entity.Product;
-import com.example.evostyle.domain.product.productdetail.entity.ProductDetail;
+import com.example.evostyle.domain.product.entity.ProductDetail;
 import com.example.evostyle.domain.product.repository.ProductDetailRepository;
 import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.NotFoundException;

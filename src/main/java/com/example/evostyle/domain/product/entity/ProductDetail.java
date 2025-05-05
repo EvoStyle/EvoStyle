@@ -1,7 +1,6 @@
-package com.example.evostyle.domain.product.productdetail.entity;
+package com.example.evostyle.domain.product.entity;
 
 import com.example.evostyle.common.entity.BaseEntity;
-import com.example.evostyle.domain.product.entity.Product;
 import com.example.evostyle.global.exception.BadRequestException;
 import com.example.evostyle.global.exception.ErrorCode;
 import jakarta.persistence.*;
