@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface OrderItemQueryDsl {
-    Optional<OrderItem> findById(Long orderItemId);
+    Optional<OrderItem> findPendingById(Long orderItemId);
 
     List<OrderItem> findByOwnerId(Long memberId);
 }

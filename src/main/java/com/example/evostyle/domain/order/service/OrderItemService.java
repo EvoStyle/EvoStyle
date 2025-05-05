@@ -7,8 +7,8 @@ import com.example.evostyle.domain.order.dto.response.CreateOrderResponse;
 import com.example.evostyle.domain.order.dto.response.UpdateOrderItemResponse;
 import com.example.evostyle.domain.order.entity.Order;
 import com.example.evostyle.domain.order.entity.OrderItem;
-import com.example.evostyle.domain.order.repository.OrderItemRepository;
 import com.example.evostyle.domain.order.repository.OrderItemQueryDsl;
+import com.example.evostyle.domain.order.repository.OrderItemRepository;
 import com.example.evostyle.domain.product.productdetail.entity.ProductDetail;
 import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.NotFoundException;
@@ -27,7 +27,7 @@ import java.util.Map;
 public class OrderItemService {
 
     private final OrderItemRepository orderItemRepository;
-    private final OrderItemQueryDsl orderItemRepositoryCustom;
+    private final OrderItemQueryDsl orderItemQueryDsl;
     private final OrderService orderService;
 
     @Transactional
@@ -85,7 +85,7 @@ public class OrderItemService {
     }
 
     private OrderItem findOrderItemById(Long orderItemId) {
-        return orderItemRepositoryCustom.findById(orderItemId)
+        return orderItemQueryDsl.findPendingById(orderItemId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_ITEM_NOT_PENDING));
     }
 }

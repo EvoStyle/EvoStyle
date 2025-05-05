@@ -17,7 +17,7 @@ public class OrderItemQueryDslImpl implements OrderItemQueryDsl {
     private final QOrderItem orderItem = QOrderItem.orderItem;
 
     @Override
-    public Optional<OrderItem> findById(Long orderItemId) {
+    public Optional<OrderItem> findPendingById(Long orderItemId) {
 
         return Optional.ofNullable(
                 jpaQueryFactory.selectFrom(orderItem)
