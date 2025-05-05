@@ -5,7 +5,6 @@ import com.example.evostyle.domain.brand.dto.response.CategoryInfo;
 import com.example.evostyle.domain.brand.dto.response.UpdateBrandCategoryResponse;
 import com.example.evostyle.domain.brand.service.BrandCategoryService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
