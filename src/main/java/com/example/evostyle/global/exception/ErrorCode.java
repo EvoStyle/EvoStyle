@@ -31,11 +31,6 @@ public enum ErrorCode {
     JWT_EXCEPTION(HttpStatus.UNAUTHORIZED, "JWT 토큰 처리 중 오류가 발생했습니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다."),
 
-    //Spring Security 관련
-    UNAUTHORIZED(HttpStatus.UNAUTHORIZED,"로그인이 필요합니다."),
-    ACCESS_DENIED(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
-
-
     //주소 관련
     ADDRESS_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 주소입니다"),
 
