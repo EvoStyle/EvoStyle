@@ -1,5 +1,6 @@
 package com.example.evostyle.domain.brand.repository;
 
+import com.example.evostyle.domain.brand.dto.request.BrandCategoryRequest;
 import com.example.evostyle.domain.brand.dto.response.CategoryInfo;
 import com.example.evostyle.domain.brand.entity.Brand;
 import com.example.evostyle.domain.brand.entity.BrandCategory;
@@ -16,4 +17,8 @@ public interface BrandCategoryRepository extends JpaRepository<BrandCategory, Lo
             "JOIN bcm.brandCategory bc " +
             "WHERE bcm.brand = :brand")
     List<CategoryInfo> findCategoryInfoByBrand(Brand brand);
+
+    boolean existsByName(String name);
+
+    List<BrandCategory> findByNameIn(List<BrandCategoryRequest> brandCategoryRequest);
 }

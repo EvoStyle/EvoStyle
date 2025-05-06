@@ -44,6 +44,7 @@ public enum ErrorCode {
     BRAND_NAME_DUPLICATED(HttpStatus.BAD_REQUEST, "이미 존재하는 브랜드 이름입니다."),
     NON_EXISTENT_BRAND_CATEGORY(HttpStatus.BAD_REQUEST, "요청한 카테고리 중 유효한 항목이 없습니다."),
     CATEGORY_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "브랜드 카테고리는 최대 3개까지입니다."),
+    BRAND_CATEGORY_NAME_DUPLICATED(HttpStatus.BAD_REQUEST,"이미 존재하는 브랜드 카테고리 이름입니다."),
 
     NOT_BRAND_OWNER(HttpStatus.FORBIDDEN, "해당 브랜드 관련 권한이 없습니다"),
     BRAND_CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 브랜드 카테고리입니다."),

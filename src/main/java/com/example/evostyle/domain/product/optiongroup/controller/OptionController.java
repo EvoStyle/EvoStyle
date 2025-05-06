@@ -1,9 +1,11 @@
 package com.example.evostyle.domain.product.optiongroup.controller;
 
 
+import com.example.evostyle.domain.product.optiongroup.dto.request.CreateOptionRequest;
 import com.example.evostyle.domain.product.optiongroup.dto.request.UpdateOptionRequest;
 import com.example.evostyle.domain.product.optiongroup.dto.response.OptionResponse;
 import com.example.evostyle.domain.product.optiongroup.service.OptionService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +21,13 @@ public class OptionController {
 
     public final OptionService optionService;
 
+    @PostMapping
+    public ResponseEntity<List<OptionResponse>> createOptionGroup(@PathVariable Long optionGroupId,
+                                                                  List<@Valid CreateOptionRequest> createOptionRequestList) {
+
+        List<OptionResponse> optionGroupResponseList = optionService.createOptionGroup(optionGroupId, createOptionRequestList);
+        return ResponseEntity.status(HttpStatus.CREATED).body(optionGroupResponseList);
+    }
 
     @GetMapping("optionGroups/{optionGroupId}/options")
     public ResponseEntity<List<OptionResponse>> readByOptionGroup(@PathVariable(name = "optionGroupId") Long optionGroupId) {

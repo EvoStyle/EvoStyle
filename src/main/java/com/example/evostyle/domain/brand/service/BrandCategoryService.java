@@ -1,5 +1,6 @@
 package com.example.evostyle.domain.brand.service;
 
+import com.example.evostyle.domain.brand.dto.request.BrandCategoryRequest;
 import com.example.evostyle.domain.brand.dto.request.UpdateBrandCategoryRequest;
 import com.example.evostyle.domain.brand.dto.response.CategoryInfo;
 import com.example.evostyle.domain.brand.dto.response.UpdateBrandCategoryResponse;
@@ -14,9 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -87,5 +86,28 @@ public class BrandCategoryService {
                 .toList();
 
         return UpdateBrandCategoryResponse.from(brand, categoryInfoList);
+    }
+
+    @Transactional
+    public Map<String, String> createBrandCategories(List<BrandCategoryRequest> brandCategoryRequest) {
+        Set<String> duplicated = brandCategoryRepository.findByNameIn(brandCategoryRequest).stream().map(BrandCategory::getName).collect(Collectors.toSet());
+        Map<String, String> result = new LinkedHashMap<>();
+
+        for (BrandCategoryRequest categoryRequest : brandCategoryRequest) {
+            if (duplicated.contains(categoryRequest.name())) {
+                result.put(categoryRequest.name(), "실패");
+            } else {
+                result.put(categoryRequest.name(), "성공");
+            }
+        }
+
+        List<BrandCategory> brandCategoryList = result.entrySet().stream().
+                filter(entry -> entry.getValue().equals("성공"))
+                .map(entry -> BrandCategory.of(entry.getKey()))
+                .toList();
+
+        brandCategoryRepository.saveAll(brandCategoryList);
+
+        return result;
     }
 }

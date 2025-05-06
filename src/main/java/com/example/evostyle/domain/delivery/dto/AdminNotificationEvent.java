@@ -47,7 +47,8 @@ public record AdminNotificationEvent(
                 delivery.getMember().getNickname(),
                 delivery.getMember().getPhoneNumber(),
                 false,
-                "배송이 이미 출고 되었습니다."
+                "배송이 이미 출고 되었습니다.",
+                delivery.getBrand().getSlackWebHookUrl()
         );
     }
 }

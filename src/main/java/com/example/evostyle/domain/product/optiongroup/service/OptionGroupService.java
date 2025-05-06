@@ -13,6 +13,7 @@ import com.example.evostyle.domain.product.optiongroup.entity.OptionGroup;
 import com.example.evostyle.domain.product.optiongroup.repository.OptionGroupRepository;
 import com.example.evostyle.domain.product.optiongroup.repository.OptionRepository;
 import com.example.evostyle.domain.product.repository.ProductRepository;
+import com.example.evostyle.domain.product.service.ProductDetailService;
 import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ public class OptionGroupService {
     private final OptionGroupRepository optionGroupRepository;
     private final OptionRepository optionRepository;
     private final ProductRepository productRepository;
+    private final ProductDetailService productDetailService;
 
     @Transactional
     public CreateOptionGroupResponse createOptionGroupWithOptions(CreateOptionGroupRequest request, Long productId) {

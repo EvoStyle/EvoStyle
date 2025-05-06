@@ -85,14 +85,12 @@ public class ProductDetailService {
             ProductDetail productDetail = ProductDetail.of(product);
             productDetailList.add(productDetail);
 
-
             for (Long optionId : combinationList) {
                 Option option = optionRepository.findById(optionId)
                         .orElseThrow(() -> new NotFoundException(ErrorCode.OPTION_NOT_FOUND));
 
                 productDetailOptionList.add(ProductDetailOption.of(productDetail, option));
             }
-
             return;
         }
 
@@ -105,8 +103,6 @@ public class ProductDetailService {
             combinationList.remove(combinationList.size() - 1);
         }
     }
-
-
 
     public List<ProductDetailResponse> readByProductId(Long productId) {
         List<ProductDetailResponse> responseList = new ArrayList<>();

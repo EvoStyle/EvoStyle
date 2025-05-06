@@ -1,6 +1,7 @@
 package com.example.evostyle.domain.product.productdetail.entity;
 
 import com.example.evostyle.common.entity.BaseEntity;
+import com.example.evostyle.domain.brand.entity.Brand;
 import com.example.evostyle.domain.product.entity.Product;
 import com.example.evostyle.global.exception.BadRequestException;
 import com.example.evostyle.global.exception.ErrorCode;
@@ -26,6 +27,10 @@ public class ProductDetail extends BaseEntity {
     @JoinColumn(name = "product_id")
     private Product product;
 
+    @ManyToOne
+    @JoinColumn(name = "brand_id")
+    private Brand brand;
+
     @Column(name = "product_stock")
     @ColumnDefault("0")
     private Integer stock = 0;
@@ -34,12 +39,13 @@ public class ProductDetail extends BaseEntity {
     private boolean isDeleted = false;
 
 
-    private ProductDetail(Product product) {
+    private ProductDetail(Product product,Brand brand) {
         this.product = product;
+        this.brand = brand;
     }
 
     public static ProductDetail of(Product product) {
-        return new ProductDetail(product);
+        return new ProductDetail(product,product.getBrand());
     }
 
     public void setStock(Integer stock){
