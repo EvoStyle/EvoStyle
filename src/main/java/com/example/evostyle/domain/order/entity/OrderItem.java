@@ -112,4 +112,8 @@ public class OrderItem {
         this.cancelledAt = LocalDateTime.now();
         this.orderStatus = OrderStatus.CANCELED;
     }
+
+    public void updateOrderStatus(OrderStatus orderStatus){
+        this.orderStatus = orderStatus;
+    }
 }
