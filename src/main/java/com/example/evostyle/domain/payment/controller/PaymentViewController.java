@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-@Controller("/api/payment")
-@RequestMapping
+@Controller
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class PaymentViewController {
 
@@ -21,8 +21,4 @@ public class PaymentViewController {
         return "payment/checkout";
     }
 
-    @GetMapping("/umjunsick")
-    public String umtest() {
-        return "umtest";
-    }
 }
