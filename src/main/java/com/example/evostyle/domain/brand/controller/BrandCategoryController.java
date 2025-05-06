@@ -21,7 +21,7 @@ public class BrandCategoryController {
 
     private final BrandCategoryService brandCategoryService;
 
-    @PostMapping
+    @PostMapping("/categories")
     public ResponseEntity<Map<String, String>> createBrandCategories(@RequestBody List<BrandCategoryRequest> brandCategoryRequest) {
 
         Map<String, String> brandCategoryList = brandCategoryService.createBrandCategories(brandCategoryRequest);

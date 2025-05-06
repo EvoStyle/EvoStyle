@@ -20,6 +20,8 @@ public class CustomAuthEntryPoint implements AuthenticationEntryPoint {
         HttpServletResponse response,
         AuthenticationException authException
     ) throws IOException, ServletException {
-        throw new UnauthorizedException(ErrorCode.UNAUTHORIZED);
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().write("{\"message\": \"인증이 필요합니다.\"}");
     }
 }

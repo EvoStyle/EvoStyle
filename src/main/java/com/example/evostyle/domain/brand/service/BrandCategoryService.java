@@ -90,7 +90,8 @@ public class BrandCategoryService {
 
     @Transactional
     public Map<String, String> createBrandCategories(List<BrandCategoryRequest> brandCategoryRequest) {
-        Set<String> duplicated = brandCategoryRepository.findByNameIn(brandCategoryRequest).stream().map(BrandCategory::getName).collect(Collectors.toSet());
+        List<String> nameList = brandCategoryRequest.stream().map(BrandCategoryRequest::name).toList();
+        Set<String> duplicated = brandCategoryRepository.findByNameIn(nameList).stream().map(BrandCategory::getName).collect(Collectors.toSet());
         Map<String, String> result = new LinkedHashMap<>();
 
         for (BrandCategoryRequest categoryRequest : brandCategoryRequest) {

@@ -18,7 +18,5 @@ public interface BrandCategoryRepository extends JpaRepository<BrandCategory, Lo
             "WHERE bcm.brand = :brand")
     List<CategoryInfo> findCategoryInfoByBrand(Brand brand);
 
-    boolean existsByName(String name);
-
-    List<BrandCategory> findByNameIn(List<BrandCategoryRequest> brandCategoryRequest);
+    List<BrandCategory> findByNameIn(List<String> brandCategoryRequest);
 }
