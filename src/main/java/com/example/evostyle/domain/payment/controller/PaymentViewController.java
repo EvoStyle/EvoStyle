@@ -16,10 +16,13 @@ public class PaymentViewController {
 
     private final PaymentService paymentService;
 
-    @GetMapping("/checkout/{orderId}")
-    public String checkoutPage(@PathVariable(name = "orderId") Long orderId, Model model) {
-        PaymentCheckoutResponse checkoutResponse = paymentService.checkoutPayment(orderId);
-        model.addAttribute("orderInfo", checkoutResponse);
+    @GetMapping("/checkout")
+    public String checkoutPage() {
         return "payment/checkout";
+    }
+
+    @GetMapping("/umjunsick")
+    public String umtest() {
+        return "umtest";
     }
 }
