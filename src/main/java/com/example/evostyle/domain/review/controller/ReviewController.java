@@ -58,7 +58,7 @@ public class ReviewController {
         return ResponseEntity.status(HttpStatus.OK).body(updateReviewResponse);
     }
 
-    @DeleteMapping("products/{productId}/reviews/{reviewId}")
+    @DeleteMapping("/products/{productId}/reviews/{reviewId}")
     public ResponseEntity<Map<String, Long>> deleteReview(
         @PathVariable(name = "productId") Long productId,
         @PathVariable(name = "reviewId") Long reviewId,
