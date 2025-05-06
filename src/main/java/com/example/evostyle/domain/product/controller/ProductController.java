@@ -27,7 +27,6 @@ public class ProductController {
     @GetMapping("/products/{productId}")
     public ResponseEntity<ProductResponse> readProduct(@PathVariable(name = "productId") Long productId){
         ProductResponse response = productService.readProduct(productId);
-
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 

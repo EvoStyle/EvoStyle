@@ -61,4 +61,8 @@ public class ProductDetail extends BaseEntity {
             this.stock += Math.abs(difference);
         }
     }
+
+    public void deductStock(int quantity){
+        this.stock -= quantity;
+    }
 }

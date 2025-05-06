@@ -45,6 +45,14 @@ public class Member extends BaseEntity{
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "member_gradle", nullable = false)
+    private MemberGrade memberGrade = MemberGrade.MEMBER;
+
+    @Column(name = "purchase_sum")
+    @ColumnDefault("0")
+    private Long purchaseSum = 0L;
+
     @Column(name = "is_deleted")
     @ColumnDefault("false")
     private boolean isDeleted = false;
@@ -78,5 +86,14 @@ public class Member extends BaseEntity{
     public void deleteMember() {
         this.isDeleted = true;
         this.deletedAt = LocalDateTime.now();
+    }
+
+    public void addToPurchaseSum(int amount){
+        this.purchaseSum += amount;
+    }
+
+    public void promoteGrade(){
+        // 만약에 누적주문 금액이 현재 등급 다음 단계의 누적금액을 넘는다면 등급을 업그레이드한다
+
     }
 }
