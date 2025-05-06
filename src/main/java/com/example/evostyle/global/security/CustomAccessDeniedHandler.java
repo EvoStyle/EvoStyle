@@ -1,7 +1,5 @@
 package com.example.evostyle.global.security;
 
-import com.example.evostyle.global.exception.ErrorCode;
-import com.example.evostyle.global.exception.ForbiddenException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,6 +18,18 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
         HttpServletResponse response,
         AccessDeniedException accessDeniedException
     ) throws IOException, ServletException {
-        throw new ForbiddenException(ErrorCode.ACCESS_DENIED);
+        response.setStatus(HttpServletResponse.SC_FORBIDDEN); // 403
+        response.setContentType("application/json;charset=UTF-8");
+
+        String jsonResponse = """
+        {
+            "status": 403,
+            "error": "FORBIDDEN",
+            "message": "접근 권한이 없습니다.",
+            "path": "%s"
+        }
+        """.formatted(request.getRequestURI());
+
+        response.getWriter().write(jsonResponse);
     }
 }
