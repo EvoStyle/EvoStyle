@@ -2,9 +2,11 @@ package com.example.evostyle.domain.brand.controller;
 
 import com.example.evostyle.common.util.JwtUtil;
 import com.example.evostyle.domain.brand.dto.request.CreateBrandRequest;
+import com.example.evostyle.domain.brand.dto.request.UpdateOwnerBrandCategoryRequest;
 import com.example.evostyle.domain.brand.dto.request.UpdateBrandNameRequest;
 import com.example.evostyle.domain.brand.dto.response.CreateBrandResponse;
 import com.example.evostyle.domain.brand.dto.response.ReadBrandResponse;
+import com.example.evostyle.domain.brand.dto.response.UpdateOwnerBrandCategoryResponse;
 import com.example.evostyle.domain.brand.dto.response.UpdateBrandNameResponse;
 import com.example.evostyle.domain.brand.service.BrandService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -61,6 +63,16 @@ public class BrandController {
         Long memberId = extractMemberId(httpServletRequest);
 
         UpdateBrandNameResponse response = brandService.updateBrand(request, brandId, memberId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PatchMapping("/{brandId}/categories")
+    public ResponseEntity<UpdateOwnerBrandCategoryResponse> updateBrandCategories(
+            @RequestBody @Valid UpdateOwnerBrandCategoryRequest request,
+            @PathVariable(name = "brandId") Long brandId
+    ) {
+        UpdateOwnerBrandCategoryResponse response = brandService.updateBrandCategories(request, brandId);
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }

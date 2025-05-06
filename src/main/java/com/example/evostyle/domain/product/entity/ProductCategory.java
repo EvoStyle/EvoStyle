@@ -1,4 +1,4 @@
-package com.example.evostyle.domain.product.productcategory.entity;
+package com.example.evostyle.domain.product.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -24,5 +24,9 @@ public class ProductCategory {
 
     public static ProductCategory of(String name){
         return new ProductCategory(name);
+    }
+
+    public void update(String name) {
+        this.name = name;
     }
 }

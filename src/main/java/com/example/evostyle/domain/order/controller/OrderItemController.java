@@ -16,14 +16,14 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/orders")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class OrderItemController {
 
     private final OrderItemService orderItemService;
     private final JwtUtil jwtUtil;
 
-    @PostMapping
+    @PostMapping("/order-items")
     public ResponseEntity<CreateOrderResponse> createOrder(
             @RequestBody List<CreateOrderItemRequest> requestList,
             HttpServletRequest httpServletRequest
@@ -35,7 +35,7 @@ public class OrderItemController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createOrderResponse);
     }
 
-    @PatchMapping("/{orderId}/order-items/{orderItemId}")
+    @PatchMapping("/orders/{orderId}/order-items/{orderItemId}")
     public ResponseEntity<UpdateOrderItemResponse> updateOrderItem(
             @RequestBody UpdateOrderItemRequest request,
             @PathVariable(name = "orderId") Long orderId,
@@ -49,7 +49,7 @@ public class OrderItemController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @DeleteMapping("/{orderId}/order-items/{orderItemId}")
+    @DeleteMapping("/orders/{orderId}/order-items/{orderItemId}")
     public ResponseEntity<Map<String, Long>> deleteOrderItem(
             @PathVariable(name = "orderId") Long orderId,
             @PathVariable(name = "orderItemId") Long orderItemId,

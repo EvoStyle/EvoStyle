@@ -1,6 +1,6 @@
-package com.example.evostyle.domain.product.productcategory.repository;
+package com.example.evostyle.domain.product.repository;
 
-import com.example.evostyle.domain.product.productcategory.entity.ProductCategoryMapping;
+import com.example.evostyle.domain.product.entity.ProductCategoryMapping;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

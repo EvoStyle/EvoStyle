@@ -47,7 +47,7 @@ public enum ErrorCode {
 
     NOT_BRAND_OWNER(HttpStatus.FORBIDDEN, "해당 브랜드 관련 권한이 없습니다"),
     BRAND_CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 브랜드 카테고리입니다."),
-
+    BRAND_CATEGORY_DUPLICATE(HttpStatus.BAD_REQUEST, "이미 존재하는 브랜드 카테고리입니다"),
 
     //주문 관련
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 총 주문입니다."),
@@ -68,6 +68,7 @@ public enum ErrorCode {
 
     //상품 카테고리 관련
     PRODUCT_CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "상품 카테고리가 존재하지 않습니다"),
+    PRODUCT_CATEGORY_DUPLICATE(HttpStatus.BAD_REQUEST, "이미 존재하는 상품 카테고리입니다"),
 
     //상품 옵션그룹 관련
     OPTION_GROUP_NOT_FOUND(HttpStatus.NOT_FOUND, "옵션 그룹이 존재하지 않습니다"),
