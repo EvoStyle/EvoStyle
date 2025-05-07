@@ -18,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -29,17 +31,22 @@ public class AuthService {
 
     @Transactional
     public SignUpResponse signup(SignUpRequest request) {
-        if (memberRepository.existsByEmail(request.email())) {
-            throw new ConflictException(ErrorCode.DUPLICATE_EMAIL);
+        List<Member> memberList = memberRepository.findDuplicates(request.email(), request.nickname(), request.phoneNumber());
+
+        for (Member member : memberList) {
+            if (member.getEmail().equals(request.email())) {
+                throw new ConflictException(ErrorCode.DUPLICATE_EMAIL);
+            }
+
+            if (member.getNickname().equals(request.nickname())) {
+                throw new ConflictException(ErrorCode.DUPLICATE_NICKNAME);
+            }
+
+            if (member.getPhoneNumber().equals(request.phoneNumber())) {
+                throw new ConflictException(ErrorCode.DUPLICATE_PHONENUMBER);
+            }
         }
 
-        if (memberRepository.existsByNickname(request.nickname())) {
-            throw new ConflictException(ErrorCode.DUPLICATE_NICKNAME);
-        }
-
-        if (memberRepository.existsByPhoneNumber(request.phoneNumber())) {
-            throw new ConflictException(ErrorCode.DUPLICATE_PHONENUMBER);
-        }
 
         Member member = Member.of(
             request.email(),
