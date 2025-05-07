@@ -5,8 +5,4 @@ public record PaymentConfirmRequest(
         String orderId,
         Integer amount
 ) {
-
-    public static PaymentConfirmRequest of(String paymentKey,  String orderId, Integer amount){
-        return new PaymentConfirmRequest(paymentKey, orderId, amount);
-    }
 }

@@ -91,6 +91,7 @@ public class Member extends BaseEntity {
     public void addToPurchaseSum(int amount) {
         this.purchaseSum += amount;
     }
+    public void minusToPurchaseSum(int amount){this.purchaseSum -= amount;}
 
     public void promoteGrade() {
         MemberGrade[] values = MemberGrade.values();

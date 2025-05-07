@@ -1,16 +1,22 @@
 package com.example.evostyle.domain.payment.service;
 
+import com.example.evostyle.domain.brand.entity.Brand;
+import com.example.evostyle.domain.brand.repository.BrandRepository;
 import com.example.evostyle.domain.member.entity.Member;
+import com.example.evostyle.domain.member.repository.MemberRepository;
 import com.example.evostyle.domain.order.entity.Order;
 import com.example.evostyle.domain.order.entity.OrderItem;
 import com.example.evostyle.domain.order.entity.OrderStatus;
 import com.example.evostyle.domain.order.repository.OrderRepository;
+import com.example.evostyle.domain.payment.dto.request.PaymentCancelRequest;
 import com.example.evostyle.domain.payment.dto.request.PaymentConfirmRequest;
+import com.example.evostyle.domain.payment.dto.response.PaymentCancelResponse;
 import com.example.evostyle.domain.payment.dto.response.PaymentCheckoutResponse;
 import com.example.evostyle.domain.payment.dto.response.PaymentResponse;
 import com.example.evostyle.domain.payment.dto.response.TossPaymentResponse;
 import com.example.evostyle.domain.payment.entity.Payment;
 import com.example.evostyle.domain.payment.repository.PaymentRepository;
+import com.example.evostyle.global.exception.ConflictException;
 import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.InvalidException;
 import com.example.evostyle.global.exception.NotFoundException;
@@ -21,54 +27,20 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.Base64;
+import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class PaymentService {
 
-    private final OrderRepository orderRepository;
     private final PaymentRepository paymentRepository;
-    private final WebClient webClient;
-
-    final String TOSS_CONFIRM_URL = "https://api.tosspayments.com/v1/payments/confirm";
-
-    public PaymentCheckoutResponse checkoutPayment(Long orderId) {
-
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.OPTION_NOT_FOUND));
-
-        //if(order. 주문의 상태가 결제 완료이면){
-        // 이미 결제된 주문이라는 예외를 발생시키기
-        // }
-
-        return PaymentCheckoutResponse.from(order);
-    }
+    private final MemberRepository memberRepository;
 
     @Transactional
-    public PaymentResponse confirmPayment(PaymentConfirmRequest request, Long orderId) {
-
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_NOT_FOUND));
-
-        if (order.getTotalPriceSum() != request.amount()) {// 주문금액과 결제 금액이 일치하지 않는다면
-            throw new InvalidException(ErrorCode.PAYMENT_INVALID_AMOUNT);
-        }
-
-        String encodedAuth = Base64.getEncoder().encodeToString(("test_sk_yL0qZ4G1VOlGMeM4w2xvroWb2MQY" + ":").getBytes());
-
-
-        TossPaymentResponse tossResponse = webClient.post().uri(TOSS_CONFIRM_URL)
-                .header("Authorization", "Basic " + encodedAuth)
-                .bodyValue(request)
-                .retrieve()
-                .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
-                        response -> response.bodyToMono(String.class)
-                                .flatMap(errorBody -> Mono.error(new RuntimeException("결제 승인 실패: " + errorBody))))
-                .bodyToMono(TossPaymentResponse.class)
-                .block();
+    public PaymentResponse completeConfirmFlow(TossPaymentResponse tossResponse, Order order) {
 
         order.getOrderItemList().forEach(o -> o.updateOrderStatus(OrderStatus.PAID));// 주문 상태 변경
-        //orderItem이 가지는 productDetailId와 일치하는 productDetail의 재고를 차감한다
 
         for (OrderItem orderItem : order.getOrderItemList()) {
             orderItem.getProductDetail().deductStock(orderItem.getEachAmount());
@@ -81,6 +53,34 @@ public class PaymentService {
         Payment payment = Payment.of(order, tossResponse);
 
         paymentRepository.save(payment);
+        return PaymentResponse.from(payment);
+    }
+
+    @Transactional
+    public void completeCancelFlow(String paymentKey){
+        //payment 키로 결제를 찾아서 오더 상품을 찾은다음에 그게 가지고 있는 상품디테일의 재고를 돌려놓는다
+        Payment payment = paymentRepository.findByPaymentKey(paymentKey)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUNT_PAYMENT));
+
+        Member member = payment.getOrder().getMember();
+        member.minusToPurchaseSum(payment.getTotalAmount());
+        payment.getOrder().getOrderItemList().forEach(o -> o.updateOrderStatus(OrderStatus.CANCELED));
+    }
+
+
+
+    public List<PaymentResponse> findByMember(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
+
+        return paymentRepository.findByMemberId(memberId)
+                .stream().map(PaymentResponse::from).toList();
+    }
+
+    public PaymentResponse findByPaymentKey(String paymentKey) {
+        Payment payment =  paymentRepository.findByPaymentKey(paymentKey)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUNT_PAYMENT));
+
         return PaymentResponse.from(payment);
     }
 }
