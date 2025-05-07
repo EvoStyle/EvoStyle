@@ -6,10 +6,11 @@ import com.example.evostyle.domain.review.dto.response.CreateReviewResponse;
 import com.example.evostyle.domain.review.dto.response.ReadReviewResponse;
 import com.example.evostyle.domain.review.dto.response.UpdateReviewResponse;
 import com.example.evostyle.domain.review.service.ReviewService;
-import jakarta.servlet.http.HttpServletRequest;
+import com.example.evostyle.global.security.AuthUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,9 +27,9 @@ public class ReviewController {
     public ResponseEntity<CreateReviewResponse> createReview(
         @PathVariable(name = "orderItemId") Long orderItemId,
         @RequestBody CreateReviewRequest request,
-        HttpServletRequest servletRequest
+        @AuthenticationPrincipal AuthUser authUser
     ) {
-        Long memberId = (Long) servletRequest.getAttribute("memberId");
+        Long memberId = authUser.memberId();
 
         CreateReviewResponse reviewResponse = reviewService.createReview(memberId, orderItemId, request);
 
@@ -49,9 +50,9 @@ public class ReviewController {
         @PathVariable(name = "productId") Long productId,
         @PathVariable(name = "reviewId") Long reviewId,
         @RequestBody UpdateReviewRequest request,
-        HttpServletRequest servletRequest
+        @AuthenticationPrincipal AuthUser authUser
     ) {
-        Long memberId = (Long) servletRequest.getAttribute("memberId");
+        Long memberId = authUser.memberId();
 
         UpdateReviewResponse updateReviewResponse = reviewService.updateReview(memberId, productId, reviewId, request);
 
@@ -62,9 +63,9 @@ public class ReviewController {
     public ResponseEntity<Map<String, Long>> deleteReview(
         @PathVariable(name = "productId") Long productId,
         @PathVariable(name = "reviewId") Long reviewId,
-        HttpServletRequest request
+        @AuthenticationPrincipal AuthUser authUser
     ) {
-        Long memberId = (Long) request.getAttribute("memberId");
+        Long memberId = authUser.memberId();
 
         reviewService.deleteReview(memberId, productId, reviewId);
 

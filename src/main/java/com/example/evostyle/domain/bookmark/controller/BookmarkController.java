@@ -3,10 +3,11 @@ package com.example.evostyle.domain.bookmark.controller;
 import com.example.evostyle.domain.bookmark.dto.response.CreateBookmarkResponse;
 import com.example.evostyle.domain.bookmark.dto.response.ReadBookmarkResponse;
 import com.example.evostyle.domain.bookmark.service.BookmarkService;
-import jakarta.servlet.http.HttpServletRequest;
+import com.example.evostyle.global.security.AuthUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,9 +23,9 @@ public class BookmarkController {
     @PostMapping("/{brandId}/bookmarks")
     public ResponseEntity<CreateBookmarkResponse> createBookmark(
         @PathVariable(name = "brandId") Long brandId,
-        HttpServletRequest request
+        @AuthenticationPrincipal AuthUser authUser
     ) {
-        Long memberId = (Long) request.getAttribute("memberId");
+        Long memberId = authUser.memberId();
 
         CreateBookmarkResponse bookmarkResponse = bookmarkService.createBookmark(memberId, brandId);
 
@@ -32,8 +33,10 @@ public class BookmarkController {
     }
 
     @GetMapping("/bookmarks")
-    public ResponseEntity<List<ReadBookmarkResponse>> readAllBookmarks(HttpServletRequest request) {
-        Long memberId = (Long) request.getAttribute("memberId");
+    public ResponseEntity<List<ReadBookmarkResponse>> readAllBookmarks(
+        @AuthenticationPrincipal AuthUser authUser
+    ) {
+        Long memberId = authUser.memberId();
 
         List<ReadBookmarkResponse> bookmarkResponseList = bookmarkService.readAllBookmarks(memberId);
 
@@ -43,9 +46,9 @@ public class BookmarkController {
     @DeleteMapping("/{brandId}/bookmarks")
     public ResponseEntity<Map<String, Long>> deleteBookmark(
         @PathVariable(name = "brandId") Long brandId,
-        HttpServletRequest request
+        @AuthenticationPrincipal AuthUser authUser
     ) {
-        Long memberId = (Long) request.getAttribute("memberId");
+        Long memberId = authUser.memberId();
 
         Long deleteBookmarkId = bookmarkService.deleteBookmark(memberId, brandId);
 
