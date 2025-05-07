@@ -27,7 +27,7 @@
         <h4 class="card-title">엄준식의 명품 바지</h4>
         <ul class="list-group list-group-flush">
             <li class="list-group-item">
-                <strong>결제 금액:</strong> 15000 KRW
+                <strong>결제 금액:</strong> 800000 KRW
             </li>
             <li class="list-group-item">
                 <strong>고객 이름:</strong> 엄준식
@@ -46,8 +46,8 @@
 
   <!-- 주문 정보 데이터 (JS에서 사용) -->
     <div id="orderData"
-         data-order-id="UJ-123456"
-         data-amount="15000"
+         data-order-id="hello-22020"
+         data-amount="800000"
          data-order-name="엄준식의 명품 바지"
          data-customer-email="umjun@example.com"
          data-customer-name="엄준식"
@@ -83,7 +83,7 @@
           currency: "KRW",
           value: orderInfo.totalAmount
         },
-        orderId: orderInfo.orderId,
+        orderId: orderInfo.orderId + "",
         orderName: orderInfo.orderName,
         successUrl: window.location.origin + "/payments/success",
         failUrl: window.location.origin + "/payments/fail",

@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @Table(name = "members")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Member extends BaseEntity{
+public class Member extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -58,8 +58,8 @@ public class Member extends BaseEntity{
     private boolean isDeleted = false;
 
     private Member(
-        String email, String password, String nickname,
-        Integer age, String phoneNumber, Authority authority, GenderType genderType
+            String email, String password, String nickname,
+            Integer age, String phoneNumber, Authority authority, GenderType genderType
     ) {
         this.email = email;
         this.password = password;
@@ -71,8 +71,8 @@ public class Member extends BaseEntity{
     }
 
     public static Member of(
-        String email, String password, String nickname,
-        Integer age, String phoneNumber, Authority authority, GenderType genderType
+            String email, String password, String nickname,
+            Integer age, String phoneNumber, Authority authority, GenderType genderType
     ) {
         return new Member(email, password, nickname, age, phoneNumber, authority, genderType);
     }
@@ -88,12 +88,17 @@ public class Member extends BaseEntity{
         this.deletedAt = LocalDateTime.now();
     }
 
-    public void addToPurchaseSum(int amount){
+    public void addToPurchaseSum(int amount) {
         this.purchaseSum += amount;
     }
 
-    public void promoteGrade(){
-        // 만약에 누적주문 금액이 현재 등급 다음 단계의 누적금액을 넘는다면 등급을 업그레이드한다
+    public void promoteGrade() {
+        MemberGrade[] values = MemberGrade.values();
+        int nextOrdinal = this.memberGrade.ordinal() + 1;
 
+        if (values[nextOrdinal].purchaseSum <= this.purchaseSum) {
+            this.memberGrade = this.memberGrade.nextGrade();
+        }
     }
+
 }

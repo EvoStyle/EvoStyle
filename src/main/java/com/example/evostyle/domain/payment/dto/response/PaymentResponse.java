@@ -10,10 +10,10 @@ public record PaymentResponse(
         Integer totalAmount
 ) {
 
-    public static PaymentResponse from(Payment payment){
+    public static PaymentResponse from(Payment payment) {
         return new PaymentResponse(
                 payment.getPaymentKey(),
-                "orderId - " + payment.getOrder().getId(),
+                "order-" + payment.getOrder().getId(),
                 payment.getOrderName(),
                 payment.getMethod(),
                 payment.getTotalAmount()

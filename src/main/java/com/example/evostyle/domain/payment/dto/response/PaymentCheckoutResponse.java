@@ -17,12 +17,12 @@ public record PaymentCheckoutResponse(
               order.getOrderItemList().get(0).getProductName() + "외" + (order.getOrderItemList().size() - 1) + "개";
 
         return new PaymentCheckoutResponse(
-               "orderId - " + order.getId(),
+                "order-" + order.getId(),
                 orderName,
                 order.getTotalAmountSum(),
                 order.getMember().getNickname(),
                 order.getMember().getEmail(),
-                "user - " + order.getMember().getId()
+                "user- " + order.getMember().getId()
         );
     }
 }
