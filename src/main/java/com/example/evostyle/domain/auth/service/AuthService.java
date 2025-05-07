@@ -5,12 +5,14 @@ import com.example.evostyle.domain.auth.dto.request.LoginRequest;
 import com.example.evostyle.domain.auth.dto.request.SignUpRequest;
 import com.example.evostyle.domain.auth.dto.response.LoginResponse;
 import com.example.evostyle.domain.auth.dto.response.SignUpResponse;
+import com.example.evostyle.domain.member.entity.Authority;
 import com.example.evostyle.domain.member.entity.Member;
 import com.example.evostyle.domain.member.repository.MemberRepository;
 import com.example.evostyle.global.exception.ConflictException;
 import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.NotFoundException;
 import com.example.evostyle.global.exception.UnauthorizedException;
+import io.jsonwebtoken.Claims;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -73,5 +75,23 @@ public class AuthService {
         refreshTokenService.save(member.getId(), refreshToken, jwtUtil.getRefreshTokenExpiration());
 
         return LoginResponse.from(accessToken, refreshToken);
+    }
+
+    public LoginResponse refreshAccessToken(String refreshToken) {
+        Claims claims = jwtUtil.parseClaimsAllowExpired(refreshToken);
+        Long memberId = Long.valueOf(claims.getSubject());
+
+        String savedToken = refreshTokenService.get(memberId);
+        if (savedToken == null || !savedToken.equals(refreshToken)) {
+            throw new UnauthorizedException(ErrorCode.INVALID_REFRESH_TOKEN);
+        }
+
+        String email = claims.get("email", String.class);
+        String nickname = claims.get("nickname", String.class);
+        Authority authority = Authority.of(claims.get("authority", String.class));
+
+        String newAccessToken = jwtUtil.createToken(memberId, email, nickname, authority);
+
+        return LoginResponse.from(newAccessToken, refreshToken);
     }
 }

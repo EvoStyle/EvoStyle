@@ -8,10 +8,7 @@ import com.example.evostyle.domain.auth.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequestMapping("/api/auth")
 @RestController
@@ -29,8 +26,15 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
-        LoginResponse login = authService.login(request);
+        LoginResponse loginResponse = authService.login(request);
 
-        return ResponseEntity.status(HttpStatus.OK).body(login);
+        return ResponseEntity.status(HttpStatus.OK).body(loginResponse);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<LoginResponse> refreshToken(@RequestHeader("Authorization") String refreshToken) {
+        LoginResponse loginResponse = authService.refreshAccessToken(refreshToken);
+
+        return ResponseEntity.status(HttpStatus.OK).body(loginResponse);
     }
 }

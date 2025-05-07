@@ -101,6 +101,19 @@ public class JwtUtil {
         }
     }
 
+    // 만료된 Refresh Token에서 memberId 추출
+    public Claims parseClaimsAllowExpired(String token) {
+        try {
+            return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(removeBearer(token))
+                .getBody();
+        } catch (ExpiredJwtException e) {
+            return e.getClaims();  // 만료되었어도 Claims는 꺼낼 수 있음
+        }
+    }
+
     // 토큰에서 사용자 Id 추출
     public Long getMemberId(String token) {
         token = removeBearer(token);
