@@ -94,4 +94,11 @@ public class AuthService {
 
         return LoginResponse.from(newAccessToken, refreshToken);
     }
+
+    public void logout(String refreshToken) {
+        Claims claims = jwtUtil.parseClaimsAllowExpired(refreshToken);
+        Long memberId = Long.valueOf(claims.getSubject());
+
+        refreshTokenService.delete(memberId);
+    }
 }

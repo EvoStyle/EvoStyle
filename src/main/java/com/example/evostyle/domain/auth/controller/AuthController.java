@@ -5,10 +5,14 @@ import com.example.evostyle.domain.auth.dto.request.SignUpRequest;
 import com.example.evostyle.domain.auth.dto.response.LoginResponse;
 import com.example.evostyle.domain.auth.dto.response.SignUpResponse;
 import com.example.evostyle.domain.auth.service.AuthService;
+import com.example.evostyle.global.security.AuthUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RequestMapping("/api/auth")
 @RestController
@@ -36,5 +40,17 @@ public class AuthController {
         LoginResponse loginResponse = authService.refreshAccessToken(refreshToken);
 
         return ResponseEntity.status(HttpStatus.OK).body(loginResponse);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Map<String, Long>> logout(
+        @RequestHeader("Authorization") String refreshToken,
+        @AuthenticationPrincipal AuthUser authUser
+    ) {
+        Long memberId = authUser.memberId();
+
+        authService.logout(refreshToken);
+
+        return ResponseEntity.status(HttpStatus.OK).body(Map.of("memberId", memberId));
     }
 }
