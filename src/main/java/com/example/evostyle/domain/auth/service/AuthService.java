@@ -61,8 +61,14 @@ public class AuthService {
             throw new UnauthorizedException(ErrorCode.INVALID_PASSWORD);
         }
 
-        String token = jwtUtil.createToken(member.getId(), member.getEmail(), member.getNickname(), member.getAuthority());
+        String accessToken = jwtUtil.createToken(
+            member.getId(),
+            member.getEmail(),
+            member.getNickname(),
+            member.getAuthority());
 
-        return LoginResponse.from(token);
+        String refreshToken = jwtUtil.createRefreshToken(member.getId());
+
+        return LoginResponse.from(accessToken, refreshToken);
     }
 }

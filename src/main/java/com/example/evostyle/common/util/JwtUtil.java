@@ -22,6 +22,7 @@ public class JwtUtil {
 
     private static final String BEARER_PREFIX = "Bearer ";
     private static final long ACCESS_TOKEN_EXPIRATION = 30 * 60 * 1000;  // 30분
+    private static final long REFRESH_TOKEN_EXPIRATION = 7 * 24 * 60 * 60 * 1000L;  // 7일
 
     @Value("${jwt.secret.key}")
     private String secretKey;
@@ -56,6 +57,18 @@ public class JwtUtil {
             .claim("authority", authority.getRoleName())  // "ROLE_OWNER" 같은 문자열로 저장
             .setIssuedAt(new Date())
             .setExpiration(new Date(date.getTime() + ACCESS_TOKEN_EXPIRATION))
+            .signWith(key, signatureAlgorithm)
+            .compact();
+    }
+
+    // Refresh Token 생성
+    public String createRefreshToken(Long memberId) {
+        Date now = new Date();
+
+        return BEARER_PREFIX + Jwts.builder()
+            .setSubject(String.valueOf(memberId))
+            .setIssuedAt(now)
+            .setExpiration(new Date(now.getTime() + REFRESH_TOKEN_EXPIRATION))
             .signWith(key, signatureAlgorithm)
             .compact();
     }

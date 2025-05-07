@@ -1,8 +1,8 @@
 package com.example.evostyle.domain.auth.dto.response;
 
-public record LoginResponse(String accessToken) {
+public record LoginResponse(String accessToken, String refreshToken) {
 
-    public static LoginResponse from(String accessToken) {
-        return new LoginResponse(accessToken);
+    public static LoginResponse from(String accessToken, String refreshToken) {
+        return new LoginResponse(accessToken, refreshToken);
     }
 }
