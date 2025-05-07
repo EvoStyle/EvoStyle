@@ -16,8 +16,6 @@ public enum ErrorCode {
     DUPLICATE_EMAIL(HttpStatus.CONFLICT, "이미 사용중인 이메일 입니다."),
     USER_ALREADY_DELETED(HttpStatus.CONFLICT, "이미 탈퇴한 사용자입니다."),
 
-
-
     // JWT 관련
     MISSING_JWT_SECRET_KEY(HttpStatus.BAD_REQUEST, "JWT 시크릿 키가 누락되어 토큰 생성을 할 수 없습니다."),
     INVALID_JWT_SECRET_KEY(HttpStatus.INTERNAL_SERVER_ERROR, "JWT 시크릿 키 디코딩에 실패했습니다."),
@@ -38,6 +36,7 @@ public enum ErrorCode {
 
     //주소 관련
     ADDRESS_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 주소입니다"),
+    MAX_ADDRESS_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "주소는 최대 5개까지만 등록할 수 있습니다."),
 
     //브랜드 관련
     BRAND_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 브랜드입니다"),
