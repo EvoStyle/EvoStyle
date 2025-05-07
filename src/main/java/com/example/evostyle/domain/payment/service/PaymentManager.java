@@ -1,12 +1,14 @@
 package com.example.evostyle.domain.payment.service;
 
 import com.example.evostyle.domain.order.entity.Order;
+import com.example.evostyle.domain.order.entity.OrderStatus;
 import com.example.evostyle.domain.order.repository.OrderRepository;
 import com.example.evostyle.domain.payment.dto.request.PaymentCancelRequest;
 import com.example.evostyle.domain.payment.dto.request.PaymentConfirmRequest;
 import com.example.evostyle.domain.payment.dto.response.PaymentCancelResponse;
 import com.example.evostyle.domain.payment.dto.response.PaymentResponse;
 import com.example.evostyle.domain.payment.dto.response.TossPaymentResponse;
+import com.example.evostyle.domain.payment.entity.Payment;
 import com.example.evostyle.domain.payment.repository.PaymentRepository;
 import com.example.evostyle.global.exception.*;
 import lombok.RequiredArgsConstructor;
@@ -61,26 +63,28 @@ public class PaymentManager {
         try {
             return paymentService.completeConfirmFlow(tossResponse, order);
         } catch (Exception e) {
-            cancelPayment(PaymentCancelRequest.of("시스템 오류로 인해 결제가 실패했습니다"), tossResponse.paymentKey());
+            revertPayment(PaymentCancelRequest.of("시스템 오류로 인해 결제가 실패했습니다"), tossResponse.paymentKey());
             throw new ConflictException(ErrorCode.PAYMENT_SYSTEM_ERROR);
         }
     }
 
 
-
     public PaymentCancelResponse cancelPayment(PaymentCancelRequest request, String paymentKey) {
+        Payment payment = paymentRepository.findByPaymentKey(paymentKey)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PAYMENT_CANCEL_FAILED));
 
-        // 이부분 고민입니다..,
-//        Payment payment = paymentRepository.findByPaymentKey(paymentKey)
-//                .orElseThrow(() -> new NotFoundException(ErrorCode.PAYMENT_CANCEL_FAILED));
-//
-//        boolean hasInvalidStatus = payment.getOrder().getOrderItemList().stream()
-//                .anyMatch(o -> o.getOrderStatus() != OrderStatus.PAID && o.getOrderStatus() != OrderStatus.PENDING);
-//
-//        if (hasInvalidStatus) {
-//            throw new ConflictException(ErrorCode.PAYMENT_CANNOT_BE_CANCELED);
-//        }
+        boolean hasInvalidStatus = payment.getOrder().getOrderItemList().stream()
+                .anyMatch(o -> o.getOrderStatus() != OrderStatus.PAID && o.getOrderStatus() != OrderStatus.PENDING);
 
+        if (hasInvalidStatus) {
+            throw new ConflictException(ErrorCode.PAYMENT_CANNOT_BE_CANCELED);
+        }
+
+        return revertPayment(request, paymentKey);
+    }
+
+
+    private PaymentCancelResponse revertPayment(PaymentCancelRequest request, String paymentKey){
         PaymentCancelResponse cancelResponse = webClient.post()
                 .uri("https://api.tosspayments.com/v1/payments/{paymentKey}/cancel", paymentKey)
                 .header("Authorization", "Basic " + encodedAuth)
