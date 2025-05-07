@@ -30,6 +30,14 @@ public class AuthService {
             throw new ConflictException(ErrorCode.DUPLICATE_EMAIL);
         }
 
+        if (memberRepository.existsByNickname(request.nickname())) {
+            throw new ConflictException(ErrorCode.DUPLICATE_NICKNAME);
+        }
+
+        if (memberRepository.existsByPhoneNumber(request.phoneNumber())) {
+            throw new ConflictException(ErrorCode.DUPLICATE_PHONENUMBER);
+        }
+
         Member member = Member.of(
             request.email(),
             passwordEncoder.encode(request.password()),
