@@ -23,6 +23,7 @@ public class AuthService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final RefreshTokenService refreshTokenService;
 
     @Transactional
     public SignUpResponse signup(SignUpRequest request) {
@@ -68,6 +69,8 @@ public class AuthService {
             member.getAuthority());
 
         String refreshToken = jwtUtil.createRefreshToken(member.getId());
+
+        refreshTokenService.save(member.getId(), refreshToken, jwtUtil.getRefreshTokenExpiration());
 
         return LoginResponse.from(accessToken, refreshToken);
     }

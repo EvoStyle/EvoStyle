@@ -122,9 +122,8 @@ public class JwtUtil {
         return claims.get("authority", String.class);
     }
 
-    // enum으로 바로 변환
-    public Authority getAuthorityEnum(String token) {
-        return Authority.of(getAuthority(token));
+    public long getRefreshTokenExpiration() {
+        return REFRESH_TOKEN_EXPIRATION;
     }
 
     // "Bearer " 접두어 제거
