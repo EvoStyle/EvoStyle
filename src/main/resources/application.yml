@@ -8,8 +8,9 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
     properties:
+      hibernate.generate_statistics: true
       hibernate:
         format_sql: true
     open-in-view: false
@@ -24,6 +25,10 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
     listener:
       ack-mode: record
+    properties:
+      offsets.topic.replication.factor: 1
+      transaction.state.log.replication.factor: 1
+      transaction.state.log.min.isr: 1
 delivery:
   api:
     base-url: ${delivery.url}

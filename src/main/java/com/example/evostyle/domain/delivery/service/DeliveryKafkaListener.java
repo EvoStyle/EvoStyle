@@ -4,34 +4,34 @@ import com.example.evostyle.common.util.JsonHelper;
 import com.example.evostyle.domain.delivery.dto.*;
 import com.example.evostyle.domain.delivery.dto.response.DeliveryResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class DeliveryKafkaListener {
     private final JsonHelper jsonHelper;
-    private final DeliveryService deliveryService;
+    private final DeliveryUpdateService deliveryService;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final KaKaoMessageService kaKaoMessageService;
     private final SlackMessageService slackMessageService;
 
-    @KafkaListener(topics = "delivery-event-topic", groupId = "delivery-update-group")
+    @KafkaListener(id = "listener-1",topics = "delivery-event-topic", groupId = "delivery-update-group")
     public void updateDelivery(String message) {
-        DeliveryEventWrapper deliveryEventWrapper = jsonHelper.fromJson(message, DeliveryEventWrapper.class);
-        switch (deliveryEventWrapper.eventType()) {
+        DeliveryUserEvent deliveryEvent = jsonHelper.fromJson(message, DeliveryUserEvent.class);
+        switch (deliveryEvent.eventType()) {
             case USER_UPDATE -> {
-                DeliveryUserEvent deliveryUserEvent = jsonHelper.convert(deliveryEventWrapper.payload(), DeliveryUserEvent.class);
-                String trackingNumber = deliveryService.updateDelivery(deliveryUserEvent);
-                UserNotificationEvent success = UserNotificationEvent.success(deliveryUserEvent.userId(), trackingNumber);
+                String trackingNumber = deliveryService.updateDelivery(deliveryEvent);
+                UserNotificationEvent success = UserNotificationEvent.success(deliveryEvent.userId(), trackingNumber);
                 String payload = jsonHelper.toJson(success);
-                kafkaTemplate.send("user-notification-topic", deliveryUserEvent.userId().toString(), payload);
+                kafkaTemplate.send("user-notification-topic", deliveryEvent.userId().toString(), payload);
             }
             case ADMIN_UPDATE -> {
-                DeliveryAdminEvent deliveryAdminEvent = jsonHelper.convert(deliveryEventWrapper.payload(), DeliveryAdminEvent.class);
-                AdminDeliveryResponse adminDeliveryResponse = deliveryService.changeDeliveryStatusToShipped(deliveryAdminEvent);
-                AdminNotificationEvent success = AdminNotificationEvent.success(adminDeliveryResponse);
+                AdminDeliveryResponse adminDeliveryResponse = deliveryService.changeDeliveryStatusToShipped(deliveryEvent);
+               AdminNotificationEvent success = AdminNotificationEvent.success(adminDeliveryResponse);
                 String payload = jsonHelper.toJson(success);
                 kafkaTemplate.send("admin-notification-topic", success.deliveryId().toString(), payload);
             }

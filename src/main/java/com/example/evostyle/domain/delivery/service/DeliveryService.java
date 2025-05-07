@@ -15,6 +15,7 @@ import com.example.evostyle.domain.member.repository.MemberRepository;
 import com.example.evostyle.domain.order.entity.OrderItem;
 import com.example.evostyle.domain.order.repository.OrderItemRepository;
 import com.example.evostyle.global.exception.*;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,7 @@ public class DeliveryService {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ParcelApiService parcelApiService;
     private final JsonHelper jsonHelper;
+    private final EntityManager entityManager;
 
 
     @Transactional
@@ -53,54 +55,23 @@ public class DeliveryService {
     }
 
 
-    public String updateDelivery(DeliveryUserEvent deliveryUserEvent) {
-        Delivery delivery = deliveryRepository.findById(deliveryUserEvent.deliveryId()).orElseThrow(() -> new NotFoundException(ErrorCode.DELIVERY_NOT_FOUND));
-        Address address = addressRepository.findById(deliveryUserEvent.addressId()).orElseThrow(() -> new NotFoundException(ErrorCode.ADDRESS_NOT_FOUND));
-
-        if (!delivery.getDeliveryStatus().equals(DeliveryStatus.READY)) {
-            if (parcelApiService.isCorrectionFailed(delivery, address, deliveryUserEvent)) {
-                UserNotificationEvent fail = UserNotificationEvent.fail(deliveryUserEvent.userId(), delivery.getTrackingNumber());
-                String payload = jsonHelper.toJson(fail);
-                kafkaTemplate.send("user-notification-topic", deliveryUserEvent.userId().toString(), payload);
-            }
-        }
-        Delivery savedDelivery = updateDelivery(deliveryUserEvent, delivery, address);
-        return savedDelivery.getTrackingNumber();
-    }
-
-
     @Transactional
-    private Delivery updateDelivery(DeliveryUserEvent deliveryUserEvent, Delivery delivery, Address address) {
+    public Delivery updateDelivery(DeliveryUserEvent deliveryUserEvent, Delivery delivery, Address address) {
         delivery.update(deliveryUserEvent.newDeliveryRequest(), address.getFullAddress(), address.getDetailAddress(), address.getPostCode());
         return deliveryRepository.save(delivery);
     }
 
 
-    public AdminDeliveryResponse changeDeliveryStatusToShipped(DeliveryAdminEvent deliveryAdminEvent) {
-
-        Delivery delivery = deliveryRepository.findById(deliveryAdminEvent.deliveryId()).orElseThrow(() -> new NotFoundException(ErrorCode.DELIVERY_NOT_FOUND));
-        if (delivery.getDeliveryStatus() != DeliveryStatus.READY) {
-            if (delivery.getTrackingNumber().isEmpty()) {
-                //log 찍고 알림을 보내는게 좋을듯 여기도달하면 단단히 잘못된것임
-            }
-            AdminNotificationEvent fail = AdminNotificationEvent.fail(delivery);
-            String payload = jsonHelper.toJson(fail);
-            kafkaTemplate.send("admin-notification-topic",delivery.getId().toString(),payload);
-        }
-        ParcelResponse parcelResponse = parcelApiService.createTrackingNumber(delivery);
-        return performShipping(parcelResponse, delivery);
-    }
-
     @Transactional
-    private AdminDeliveryResponse performShipping(ParcelResponse parcelResponse, Delivery delivery) {
+    public AdminDeliveryResponse performShipping(ParcelResponse parcelResponse, Delivery managed) {
+//        Delivery managed = entityManager.contains(delivery) ? delivery : entityManager.merge(delivery);
+        managed.changeStatus(DeliveryStatus.SHIPPED);
 
-        delivery.changeStatus(DeliveryStatus.SHIPPED);
+        managed.insertTrackingNumber(parcelResponse.trackingNumber());
 
-        delivery.insertTrackingNumber(parcelResponse.trackingNumber());
+        deliveryRepository.save(managed);
 
-        Delivery savedDelivery = deliveryRepository.save(delivery);
-
-        return AdminDeliveryResponse.from(savedDelivery);
+        return AdminDeliveryResponse.from(managed);
 
     }
 

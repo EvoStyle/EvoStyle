@@ -64,7 +64,7 @@ public class DeliveryController {
     public ResponseEntity<DeliveryResponse> changeDeliveryStatusToShipped(@PathVariable Long deliveryId) {
         DeliveryAdminUpdateEvent deliveryAdminUpdateEvent = DeliveryAdminUpdateEvent.of(EventType.ADMIN_UPDATE, deliveryId);
         String payload = jsonHelper.toJson(deliveryAdminUpdateEvent);
-        kafkaTemplate.send("delveiry-event-topic", deliveryId.toString(), payload);
+        kafkaTemplate.send("delivery-event-topic", deliveryId.toString(), payload);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
