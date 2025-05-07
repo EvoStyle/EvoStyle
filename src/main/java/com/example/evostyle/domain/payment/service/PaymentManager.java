@@ -20,7 +20,7 @@ import java.util.Base64;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class PaymentFacade {
+public class PaymentManager {
 
     private final WebClient webClient;
     private final PaymentService paymentService;

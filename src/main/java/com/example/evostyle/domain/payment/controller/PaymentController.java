@@ -5,7 +5,7 @@ import com.example.evostyle.domain.payment.dto.request.PaymentCancelRequest;
 import com.example.evostyle.domain.payment.dto.request.PaymentConfirmRequest;
 import com.example.evostyle.domain.payment.dto.response.PaymentCancelResponse;
 import com.example.evostyle.domain.payment.dto.response.PaymentResponse;
-import com.example.evostyle.domain.payment.service.PaymentFacade;
+import com.example.evostyle.domain.payment.service.PaymentManager;
 import com.example.evostyle.domain.payment.service.PaymentService;
 import com.example.evostyle.global.security.AuthUser;
 import lombok.RequiredArgsConstructor;
@@ -22,18 +22,18 @@ import java.util.List;
 public class PaymentController {
 
     private final PaymentService paymentService;
-    private final PaymentFacade paymentFacade;
+    private final PaymentManager paymentManager;
 
     @PostMapping("/payments/confirm/{orderId}")
     public ResponseEntity<PaymentResponse> confirmPayment(@RequestBody PaymentConfirmRequest request,
                                                           @PathVariable(name = "orderId") Long orderId) {
-        PaymentResponse paymentResponse = paymentFacade.confirmPayment(request, orderId);
+        PaymentResponse paymentResponse = paymentManager.confirmPayment(request, orderId);
         return ResponseEntity.status(HttpStatus.CREATED).body(paymentResponse);
     }
 
     @DeleteMapping("payments/cancel/{paymentKey}")
     public ResponseEntity<PaymentCancelResponse> paymentCancel(@PathVariable(name = "paymentKey")String paymentKey, @RequestBody PaymentCancelRequest request){
-        PaymentCancelResponse response = paymentFacade.cancelPayment(request, paymentKey);
+        PaymentCancelResponse response = paymentManager.cancelPayment(request, paymentKey);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -44,12 +44,6 @@ public class PaymentController {
         return ResponseEntity.status(HttpStatus.OK).body(responseList);
     }
 
-//    @GetMapping("/brand/{brandId}/payments")
-//    public ResponseEntity<List<PaymentResponse>> findByBrand(@AuthenticationPrincipal AuthUser authUser,
-//                                                    @PathVariable(name = "brandId") Long brandId) {
-//        List<PaymentResponse> responseList = paymentService.findByBrand(authUser.memberId(), brandId);
-//        return ResponseEntity.status(HttpStatus.OK).body(responseList);
-//    }
 
     @GetMapping("/payment/{paymentKey}")
     public ResponseEntity<PaymentResponse> findByPaymentKey(@PathVariable("paymentKey") String paymentKey){
