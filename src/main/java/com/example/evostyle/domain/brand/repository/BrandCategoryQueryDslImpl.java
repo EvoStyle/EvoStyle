@@ -1,7 +1,8 @@
 package com.example.evostyle.domain.brand.repository;
 
-import com.example.evostyle.domain.brand.dto.response.CategoryInfo;
+import com.example.evostyle.domain.brand.dto.response.BrandCategoryInfo;
 import com.example.evostyle.domain.brand.entity.Brand;
+import com.example.evostyle.domain.brand.entity.BrandCategoryMapping;
 import com.example.evostyle.domain.brand.entity.QBrandCategory;
 import com.example.evostyle.domain.brand.entity.QBrandCategoryMapping;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -17,16 +18,29 @@ public class BrandCategoryQueryDslImpl implements BrandCategoryQueryDsl {
     private final JPAQueryFactory jpaQueryFactory;
     private final QBrandCategory brandCategory = QBrandCategory.brandCategory;
     private final QBrandCategoryMapping brandCategoryMapping = QBrandCategoryMapping.brandCategoryMapping;
+    private final BrandCategoryMappingRepository brandCategoryMappingRepository;
 
     @Override
-    public List<CategoryInfo> findCategoryInfoByBrand(Brand brand) {
+    public List<BrandCategoryInfo> findCategoryInfoByBrand(Brand brand) {
         return jpaQueryFactory.select(brandCategory)
                 .from(brandCategoryMapping)
                 .join(brandCategoryMapping.brandCategory, brandCategory)
                 .where(brandCategoryMapping.brand.eq(brand))
                 .fetch()
                 .stream()
-                .map(CategoryInfo::from)
+                .map(BrandCategoryInfo::from)
                 .toList();
+    }
+
+    @Override
+    public void deleteAllByBrandId(Long brandId) {
+        jpaQueryFactory.delete(brandCategoryMapping)
+                .where(brandCategoryMapping.brand.id.eq(brandId))
+                .execute();
+    }
+
+    @Override
+    public void saveBrandCategoryMappings(List<BrandCategoryMapping> brandCategoryMappingList) {
+        brandCategoryMappingRepository.saveAll(brandCategoryMappingList);
     }
 }

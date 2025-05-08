@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface BrandCategoryRepository extends JpaRepository<BrandCategory, Long> {
+public interface BrandCategoryRepository extends JpaRepository<BrandCategory, Long>, BrandCategoryQueryDsl {
 
     boolean existsByName(String name);
 
