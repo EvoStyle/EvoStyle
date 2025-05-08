@@ -2,7 +2,6 @@ package com.example.evostyle.domain.cart.repository;
 
 
 import com.example.evostyle.domain.cart.entity.CartItem;
-import com.example.evostyle.domain.product.productdetail.entity.ProductDetailOption;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
