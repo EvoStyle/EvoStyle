@@ -47,7 +47,6 @@ public class AuthService {
             }
         }
 
-
         Member member = Member.of(
             request.email(),
             passwordEncoder.encode(request.password()),
