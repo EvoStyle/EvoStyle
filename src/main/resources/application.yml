@@ -15,6 +15,12 @@ spring:
         format_sql: true
     open-in-view: false
 
+  data:
+    redis:
+      host: ${redis.host}
+      port: ${redis.port}
+
+
   kafka:
     bootstrap-servers: ${kafka.url}
     producer:

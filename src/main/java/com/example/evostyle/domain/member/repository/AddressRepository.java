@@ -17,4 +17,6 @@ public interface AddressRepository extends JpaRepository<Address, Long> ,Address
     @Modifying
     @Query("UPDATE Address a SET a.isBasecamp = false WHERE a.member.id = :memberId")
     void updateAllBasecampFalse(Long memberId);
+
+    long countByMemberId(Long memberId);
 }

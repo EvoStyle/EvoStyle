@@ -7,8 +7,6 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-import java.util.Optional;
-
 public interface BrandRepository extends JpaRepository<Brand, Long> {
 
     boolean existsByName(String name);

@@ -1,7 +1,5 @@
 package com.example.evostyle.global.security;
 
-import com.example.evostyle.global.exception.ErrorCode;
-import com.example.evostyle.global.exception.UnauthorizedException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,8 +18,18 @@ public class CustomAuthEntryPoint implements AuthenticationEntryPoint {
         HttpServletResponse response,
         AuthenticationException authException
     ) throws IOException, ServletException {
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json;charset=UTF-8");
-        response.getWriter().write("{\"message\": \"인증이 필요합니다.\"}");
+
+        String jsonResponse = """
+            {
+                "status": 401,
+                "error": "UNAUTHORIZED",
+                "message": "인증이 필요합니다.",
+                "path": "%s"
+            }
+            """.formatted(request.getRequestURI());
+
+        response.getWriter().write(jsonResponse);
     }
 }

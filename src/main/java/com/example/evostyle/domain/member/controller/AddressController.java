@@ -6,10 +6,11 @@ import com.example.evostyle.domain.member.dto.response.CreateAddressResponse;
 import com.example.evostyle.domain.member.dto.response.ReadAddressResponse;
 import com.example.evostyle.domain.member.dto.response.UpdateAddressResponse;
 import com.example.evostyle.domain.member.service.AddressService;
-import jakarta.servlet.http.HttpServletRequest;
+import com.example.evostyle.global.security.AuthUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,9 +26,9 @@ public class AddressController {
     @PostMapping
     public ResponseEntity<CreateAddressResponse> createAddress(
         @RequestBody CreateAddressRequest request,
-        HttpServletRequest servletRequest
+        @AuthenticationPrincipal AuthUser authUser
     ) {
-        Long memberId = (Long) servletRequest.getAttribute("memberId");
+        Long memberId = authUser.memberId();
 
         CreateAddressResponse addressResponse = addressService.createAddress(memberId, request);
 
@@ -35,8 +36,10 @@ public class AddressController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReadAddressResponse>> readAllAddresses(HttpServletRequest request) {
-        Long memberId = (Long) request.getAttribute("memberId");
+    public ResponseEntity<List<ReadAddressResponse>> readAllAddresses(
+        @AuthenticationPrincipal AuthUser authUser
+    ) {
+        Long memberId = authUser.memberId();
 
         List<ReadAddressResponse> addressResponseList = addressService.readAllAddresses(memberId);
 
@@ -47,9 +50,9 @@ public class AddressController {
     public ResponseEntity<UpdateAddressResponse> updateAddress(
         @PathVariable(name = "addressId") Long addressId,
         @RequestBody UpdateAddressRequest request,
-        HttpServletRequest servletRequest
+        @AuthenticationPrincipal AuthUser authUser
     ) {
-        Long memberId = (Long) servletRequest.getAttribute("memberId");
+        Long memberId = authUser.memberId();
 
         UpdateAddressResponse updateAddressResponse = addressService.updateAddress(memberId, addressId, request);
 
@@ -59,9 +62,9 @@ public class AddressController {
     @PatchMapping("/{addressId}/isBasecamp")
     public ResponseEntity<UpdateAddressResponse> updateIsBasecamp(
         @PathVariable(name = "addressId") Long addressId,
-        HttpServletRequest request
+        @AuthenticationPrincipal AuthUser authUser
     ) {
-        Long memberId = (Long) request.getAttribute("memberId");
+        Long memberId = authUser.memberId();
 
         UpdateAddressResponse updateAddressResponse = addressService.updateIsBasecamp(memberId, addressId);
 
@@ -71,9 +74,9 @@ public class AddressController {
     @DeleteMapping("/{addressId}")
     public ResponseEntity<Map<String, Long>> deleteAddress(
         @PathVariable(name = "addressId") Long addressId,
-        HttpServletRequest request
+        @AuthenticationPrincipal AuthUser authUser
     ) {
-        Long memberId = (Long) request.getAttribute("memberId");
+        Long memberId = authUser.memberId();
 
         addressService.deleteAddress(addressId, memberId);
 
