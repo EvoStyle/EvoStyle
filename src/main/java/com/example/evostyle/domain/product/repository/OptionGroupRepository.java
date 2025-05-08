@@ -1,10 +1,8 @@
-package com.example.evostyle.domain.product.optiongroup.repository;
+package com.example.evostyle.domain.product.repository;
 
-import com.example.evostyle.domain.product.optiongroup.entity.Option;
-import com.example.evostyle.domain.product.optiongroup.entity.OptionGroup;
+import com.example.evostyle.domain.product.entity.OptionGroup;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 

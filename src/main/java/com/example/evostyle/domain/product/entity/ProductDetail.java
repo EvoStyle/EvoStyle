@@ -1,16 +1,13 @@
-package com.example.evostyle.domain.product.productdetail.entity;
+package com.example.evostyle.domain.product.entity;
 
 import com.example.evostyle.common.entity.BaseEntity;
-import com.example.evostyle.domain.product.entity.Product;
+import com.example.evostyle.domain.brand.entity.Brand;
 import com.example.evostyle.global.exception.BadRequestException;
 import com.example.evostyle.global.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -26,6 +23,11 @@ public class ProductDetail extends BaseEntity {
     @JoinColumn(name = "product_id")
     private Product product;
 
+
+    @OneToOne
+    @JoinColumn(name = "brand_id")
+    private Brand brand;
+
     @Column(name = "product_stock")
     @ColumnDefault("0")
     private Integer stock = 0;
@@ -34,12 +36,13 @@ public class ProductDetail extends BaseEntity {
     private boolean isDeleted = false;
 
 
-    private ProductDetail(Product product) {
+    private ProductDetail(Brand brand, Product product) {
+        this.brand = brand;
         this.product = product;
     }
 
-    public static ProductDetail of(Product product) {
-        return new ProductDetail(product);
+    public static ProductDetail of(Brand brand, Product product) {
+        return new ProductDetail(brand, product);
     }
 
     public void setStock(Integer stock){

@@ -1,14 +1,15 @@
-package com.example.evostyle.domain.product.optiongroup.controller;
+package com.example.evostyle.domain.product.controller;
 
-import com.example.evostyle.domain.product.optiongroup.dto.request.CreateOptionGroupRequest;
-import com.example.evostyle.domain.product.optiongroup.dto.request.UpdateOptionGroupRequest;
-import com.example.evostyle.domain.product.optiongroup.dto.response.CreateOptionGroupResponse;
-import com.example.evostyle.domain.product.optiongroup.dto.response.OptionGroupResponse;
-import com.example.evostyle.domain.product.optiongroup.service.OptionGroupService;
-import com.example.evostyle.domain.product.service.ProductService;
+import com.example.evostyle.domain.product.dto.request.CreateOptionGroupRequest;
+import com.example.evostyle.domain.product.dto.request.UpdateOptionGroupRequest;
+import com.example.evostyle.domain.product.dto.response.CreateOptionGroupResponse;
+import com.example.evostyle.domain.product.dto.response.OptionGroupResponse;
+import com.example.evostyle.domain.product.service.OptionGroupService;
+import com.example.evostyle.global.security.AuthUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,9 +25,10 @@ public class OptionGroupController {
 
     @PostMapping("/products/{productId}/optionGroups")
     public ResponseEntity<CreateOptionGroupResponse> createOptionGroup(@RequestBody CreateOptionGroupRequest request,
-                                                                       @PathVariable(name = "productId") Long productId) {
-
-        CreateOptionGroupResponse response = optionGroupService.createOptionGroupWithOptions(request, productId);
+                                                                       @PathVariable(name = "productId") Long productId,
+                                                                       @AuthenticationPrincipal AuthUser authUser) {
+        Long memberId = authUser.memberId();
+        CreateOptionGroupResponse response = optionGroupService.createOptionGroupWithOptions(memberId, productId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

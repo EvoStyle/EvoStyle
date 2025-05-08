@@ -1,4 +1,4 @@
-package com.example.evostyle.domain.product.optiongroup.dto.request;
+package com.example.evostyle.domain.product.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 

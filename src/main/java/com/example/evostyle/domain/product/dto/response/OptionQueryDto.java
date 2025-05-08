@@ -1,4 +1,4 @@
-package com.example.evostyle.domain.product.optiongroup.dto.response;
+package com.example.evostyle.domain.product.dto.response;
 
 public record OptionQueryDto(
         Long productDetailId,

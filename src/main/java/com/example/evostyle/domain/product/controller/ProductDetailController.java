@@ -19,14 +19,6 @@ public class ProductDetailController {
 
     private final ProductDetailService productDetailService;
 
-    @PostMapping("/product-details")
-    public ResponseEntity<List<ProductDetailResponse>> createProductDetail(@PathVariable(name = "productId")Long productId,
-                                                                           @RequestAttribute("memberId")Long memberId){
-
-        List<ProductDetailResponse> responseList = productDetailService.createProductDetail(productId, memberId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(responseList);
-    }
-
     @GetMapping("/product-details")
     public ResponseEntity<List<ProductDetailResponse>> readByProductId(@PathVariable(name = "productId")Long productId){
 

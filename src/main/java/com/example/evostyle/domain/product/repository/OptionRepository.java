@@ -1,7 +1,7 @@
-package com.example.evostyle.domain.product.optiongroup.repository;
+package com.example.evostyle.domain.product.repository;
 
-import com.example.evostyle.domain.product.optiongroup.dto.response.OptionQueryDto;
-import com.example.evostyle.domain.product.optiongroup.entity.Option;
+import com.example.evostyle.domain.product.dto.response.OptionQueryDto;
+import com.example.evostyle.domain.product.entity.Option;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -27,7 +27,7 @@ public interface OptionRepository extends JpaRepository<Option, Long> {
     List<Option> findByOptionGroupId(@Param("optionGroupIdList") List<Long> optionGroupIdList);
 
     @Query("""
-            SELECT new com.example.evostyle.domain.product.optiongroup.dto.response.OptionQueryDto(
+            SELECT new com.example.evostyle.domain.product.dto.response.OptionQueryDto(
                             pdo.productDetail.id , o.id, o.optionGroup.id , o.type
             )
             FROM ProductDetailOption pdo JOIN Option o

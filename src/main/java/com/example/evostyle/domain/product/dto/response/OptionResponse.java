@@ -1,6 +1,6 @@
-package com.example.evostyle.domain.product.optiongroup.dto.response;
+package com.example.evostyle.domain.product.dto.response;
 
-import com.example.evostyle.domain.product.optiongroup.entity.Option;
+import com.example.evostyle.domain.product.entity.Option;
 
 public record OptionResponse(
         Long id,

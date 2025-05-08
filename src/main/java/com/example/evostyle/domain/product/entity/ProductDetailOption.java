@@ -1,8 +1,6 @@
-package com.example.evostyle.domain.product.productdetail.entity;
+package com.example.evostyle.domain.product.entity;
 
 
-import com.example.evostyle.domain.product.optiongroup.entity.OptionGroup;
-import com.example.evostyle.domain.product.optiongroup.entity.Option;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

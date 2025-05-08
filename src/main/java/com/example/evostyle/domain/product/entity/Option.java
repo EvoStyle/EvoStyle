@@ -1,4 +1,4 @@
-package com.example.evostyle.domain.product.optiongroup.entity;
+package com.example.evostyle.domain.product.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
