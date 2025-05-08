@@ -39,16 +39,6 @@ public class RedisConfig {
         return Redisson.create(config);
     }
 
-//    @Bean
-//    public RedisTemplate<String, String> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
-//        RedisTemplate<String, String> template = new RedisTemplate<>();
-//        template.setConnectionFactory(redisConnectionFactory);
-//        template.setKeySerializer(new StringRedisSerializer());
-//        template.setValueSerializer(new StringRedisSerializer());
-//        return template;
-//    }
-
-
     @Bean
     public RedisConnectionFactory redisConnectionFactory(RedisConfiguration defaultRedisConfig){
         LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
@@ -57,7 +47,16 @@ public class RedisConfig {
     }
 
     @Bean
-    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory){
+    public RedisTemplate<String, String> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String, String> template = new RedisTemplate<>();
+        template.setConnectionFactory(redisConnectionFactory);
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new StringRedisSerializer());
+        return template;
+    }
+
+    @Bean
+    public RedisTemplate<String, Object> objectRedisTemplate(RedisConnectionFactory redisConnectionFactory){
 
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory);
