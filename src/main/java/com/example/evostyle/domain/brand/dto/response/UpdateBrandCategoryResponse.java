@@ -1,22 +1,12 @@
 package com.example.evostyle.domain.brand.dto.response;
 
-import com.example.evostyle.domain.brand.entity.Brand;
+import com.example.evostyle.domain.brand.entity.BrandCategory;
 
-import java.util.List;
-
-public record UpdateBrandCategoryResponse(
-        Long id,
-        String name,
-        List<CategoryInfo> updatedBrandCategoryInfoList
-) {
-    public static UpdateBrandCategoryResponse from(
-            Brand brand,
-            List<CategoryInfo> updatedBrandCategoryInfoList
-    ) {
+public record UpdateBrandCategoryResponse(Long id, String name) {
+    public static UpdateBrandCategoryResponse from(BrandCategory brandCategory) {
         return new UpdateBrandCategoryResponse(
-                brand.getId(),
-                brand.getName(),
-                updatedBrandCategoryInfoList
+                brandCategory.getId(),
+                brandCategory.getName()
         );
     }
 }
