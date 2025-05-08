@@ -19,6 +19,7 @@ spring:
       host: ${redis.host}
       port: ${redis.port}
 
+
   kafka:
     bootstrap-servers: ${kafka.url}
 

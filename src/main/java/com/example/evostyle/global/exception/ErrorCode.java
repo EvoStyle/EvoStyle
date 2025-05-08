@@ -18,8 +18,6 @@ public enum ErrorCode {
     DUPLICATE_PHONENUMBER(HttpStatus.CONFLICT, "이미 등록된 전화번호입니다."),
     USER_ALREADY_DELETED(HttpStatus.CONFLICT, "이미 탈퇴한 사용자입니다."),
 
-
-
     // JWT 관련
     MISSING_JWT_SECRET_KEY(HttpStatus.BAD_REQUEST, "JWT 시크릿 키가 누락되어 토큰 생성을 할 수 없습니다."),
     INVALID_JWT_SECRET_KEY(HttpStatus.INTERNAL_SERVER_ERROR, "JWT 시크릿 키 디코딩에 실패했습니다."),
@@ -46,7 +44,6 @@ public enum ErrorCode {
     CATEGORY_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "브랜드 카테고리는 최대 3개까지입니다."),
     NOT_BRAND_OWNER(HttpStatus.FORBIDDEN, "해당 브랜드 관련 권한이 없습니다"),
     BRAND_CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 브랜드 카테고리입니다."),
-
 
     //주문 관련
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 총 주문입니다."),
@@ -89,19 +86,27 @@ public enum ErrorCode {
     NOT_OWNER_OF_ORDER(HttpStatus.FORBIDDEN, "해당 주문에 대한 권한이 없습니다."),
     REVIEW_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "이미 해당 주문 상품에 대한 리뷰가 작성되었습니다."),
 
-    //즐겨찾기 
+    //즐겨찾기 관련
     BOOKMARK_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 등록된 즐겨찾기입니다."),
     BOOKMARK_NOT_FOUND(HttpStatus.NOT_FOUND, "즐겨찾기가 존재하지 않습니다."),
 
-    // 배송,
+    //배송 관련
     DELIVERY_NOT_READY(HttpStatus.BAD_REQUEST,"배송이 이미 시작되었습니다. 택배회사에 문의해주세요"),
     DELIVERY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 배송입니다."),
     PARCEL_API_FAIL(HttpStatus.UNPROCESSABLE_ENTITY, "택배 송장 등록에 실패했습니다."),
     DELIVERY_CONFLICT_MODIFIED_BY_ADMIN(HttpStatus.CONFLICT,"다른 관리자가 해당 배송을 출고하였습니다."),
     DELIVERY_CONFLICT_MODIFIED_BY_USER(HttpStatus.CONFLICT,"사용자가 배송 정보를 수정하였습니다. 출고 전에 다시 확인해 주세요."),
 
-    // 직렬화
-    JSON_SERIALIZATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "JSON 직렬화 실패");
+    //직렬화 관련
+    JSON_SERIALIZATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "JSON 직렬화 실패"),
+
+    //쿠폰 관련
+    COUPON_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 쿠폰입니다."),
+    COUPON_ALREADY_ISSUED(HttpStatus.CONFLICT, "이미 발급받은 쿠폰입니다."),
+    COUPON_ISSUE_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "쿠폰 발급 수량을 초과했습니다."),
+
+    //Lock 관련
+    LOCK_ACQUISITION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "잠금 획득에 실패했습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
