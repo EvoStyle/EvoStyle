@@ -13,7 +13,9 @@ public enum ErrorCode {
     INVALID_MEMBER_AUTHORITY(HttpStatus.BAD_REQUEST, "유효하지 않은 Authority 입니다."),
     INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "올바르지 않은 비밀번호입니다."),
     FORBIDDEN_MEMBER_OPERATION(HttpStatus.FORBIDDEN, "해당 회원에 대한 작업 권한이 없습니다."),
-    DUPLICATE_EMAIL(HttpStatus.CONFLICT, "이미 사용중인 이메일 입니다."),
+    DUPLICATE_EMAIL(HttpStatus.CONFLICT, "이미 사용중인 이메일입니다."),
+    DUPLICATE_NICKNAME(HttpStatus.CONFLICT, "이미 사용중인 닉네임입니다."),
+    DUPLICATE_PHONENUMBER(HttpStatus.CONFLICT, "이미 등록된 전화번호입니다."),
     USER_ALREADY_DELETED(HttpStatus.CONFLICT, "이미 탈퇴한 사용자입니다."),
 
     // JWT 관련
@@ -27,11 +29,10 @@ public enum ErrorCode {
     UNSUPPORTED_JWT_TOKEN(HttpStatus.BAD_REQUEST,"지원되지 않는 JWT 토큰입니다."),
     INVALID_JWT_ARGUMENT(HttpStatus.BAD_REQUEST, "잘못된 JWT 토큰 값입니다."),
     JWT_EXCEPTION(HttpStatus.UNAUTHORIZED, "JWT 토큰 처리 중 오류가 발생했습니다."),
-    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다."),
+    INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 리프레시 토큰입니다."),
 
-    //Spring Security 관련
-    UNAUTHORIZED(HttpStatus.UNAUTHORIZED,"로그인이 필요합니다."),
-    ACCESS_DENIED(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
+    //서버 관련
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다."),
 
     //주소 관련
     ADDRESS_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 주소입니다"),
