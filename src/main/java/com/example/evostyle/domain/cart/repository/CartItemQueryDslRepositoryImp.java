@@ -10,9 +10,9 @@ import java.util.List;
 
 import static com.example.evostyle.domain.cart.entity.QCart.cart;
 import static com.example.evostyle.domain.cart.entity.QCartItem.cartItem;
-import static com.example.evostyle.domain.product.optiongroup.entity.QOption.option;
-import static com.example.evostyle.domain.product.productdetail.entity.QProductDetail.productDetail;
-import static com.example.evostyle.domain.product.productdetail.entity.QProductDetailOption.productDetailOption;
+import static com.example.evostyle.domain.product.entity.QOption.option;
+import static com.example.evostyle.domain.product.entity.QProductDetail.productDetail;
+import static com.example.evostyle.domain.product.entity.QProductDetailOption.productDetailOption;
 
 @Repository
 @RequiredArgsConstructor

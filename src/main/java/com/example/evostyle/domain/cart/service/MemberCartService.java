@@ -65,7 +65,7 @@ public class MemberCartService {
 
         return MemberCartItemResponse.of(
                 ProductDetailResponse.from(productDetail, optionResponseList),
-                cartItem, member.getMemberGradle());
+                cartItem, member.getMemberGrade());
     }
 
     public MemberCartResponse readCart(Long memberId) {
@@ -86,7 +86,7 @@ public class MemberCartService {
                     return MemberCartItemResponse.of(
                             ProductDetailResponse.from(c.getProductDetail(), optionList),
                             c,
-                            member.getMemberGradle());
+                            member.getMemberGrade());
                 }).toList();
 
         return MemberCartResponse.of(cart, cartItemResponseList);
@@ -110,7 +110,7 @@ public class MemberCartService {
         return MemberCartItemResponse.of(
                 ProductDetailResponse.from(cartItem.getProductDetail(), optionResponseList),
                 cartItem,
-                member.getMemberGradle()
+                member.getMemberGrade()
         );
     }
 
@@ -180,7 +180,7 @@ public class MemberCartService {
                     return MemberCartItemResponse.of(
                             ProductDetailResponse.from(c.getProductDetail(), optionList),
                             c,
-                            member.getMemberGradle());
+                            member.getMemberGrade());
                 }).toList();
 
         return MemberCartResponse.of(cart, cartItemResponseList);

@@ -53,8 +53,9 @@ public class ProductController {
     }
 
     @DeleteMapping("/products/{productId}")
-    public ResponseEntity<Map<String, Long>> deleteProduct(@PathVariable(name = "productId") Long productId){
-        productService.deleteProduct(productId);
+    public ResponseEntity<Map<String, Long>> deleteProduct(@PathVariable(name = "productId") Long productId,
+                                                           @AuthenticationPrincipal AuthUser authUser){
+        productService.deleteProduct(authUser.memberId(), productId);
 
         return  ResponseEntity.status(HttpStatus.OK).body(Map.of("productDetailId", productId));
     }

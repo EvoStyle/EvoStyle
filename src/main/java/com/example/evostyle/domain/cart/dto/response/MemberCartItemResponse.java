@@ -2,7 +2,7 @@ package com.example.evostyle.domain.cart.dto.response;
 
 import com.example.evostyle.common.util.MemberDiscountUtil;
 import com.example.evostyle.domain.cart.entity.CartItem;
-import com.example.evostyle.domain.member.entity.MemberGradle;
+import com.example.evostyle.domain.member.entity.MemberGrade;
 import com.example.evostyle.domain.product.dto.response.ProductDetailResponse;
 
 public record MemberCartItemResponse(
@@ -16,7 +16,7 @@ public record MemberCartItemResponse(
 
     public static MemberCartItemResponse of(ProductDetailResponse productDetailResponse,
                                             CartItem cartItem,
-                                            MemberGradle memberGradle) {
+                                            MemberGrade memberGrade) {
 
         int originPrice = cartItem.getQuantity() * cartItem.getProductDetail().getProduct().getPrice();
 
@@ -26,6 +26,6 @@ public record MemberCartItemResponse(
                 productDetailResponse,
                 cartItem.getQuantity(),
                 originPrice,
-                MemberDiscountUtil.calculateDiscountedPrice(memberGradle, originPrice));
+                MemberDiscountUtil.calculateDiscountedPrice(memberGrade, originPrice));
     }
 }

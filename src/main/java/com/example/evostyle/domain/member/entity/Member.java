@@ -44,7 +44,7 @@ public class Member extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "member_gradle", nullable = false)
-    private MemberGradle memberGradle = MemberGradle.MEMBER;
+    private MemberGrade memberGrade = MemberGrade.MEMBER;
 
     @Column(name = "purchase_sum")
     @ColumnDefault("0")
@@ -52,14 +52,6 @@ public class Member extends BaseEntity {
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "member_gradle", nullable = false)
-    private MemberGrade memberGrade = MemberGrade.MEMBER;
-
-    @Column(name = "purchase_sum")
-    @ColumnDefault("0")
-    private Long purchaseSum = 0L;
 
     @Column(name = "is_deleted")
     @ColumnDefault("false")

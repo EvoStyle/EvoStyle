@@ -110,7 +110,7 @@ public enum ErrorCode {
     //결제관련
     PAYMENT_INVALID_AMOUNT(HttpStatus.CONFLICT, "주문 금액과 결제 금액이 일치하지 않습니다"),
     ORDER_ALREADY_PAID(HttpStatus.CONFLICT, "이미 결제된 주문건입니다"),
-    NOT_FOUNT_PAYMENT(HttpStatus.NOT_FOUND, "존재하지 않는 결제내역입니다"),
+    NOT_FOUND_PAYMENT(HttpStatus.NOT_FOUND, "존재하지 않는 결제내역입니다"),
     PAYMENT_SYSTEM_ERROR(HttpStatus.CONFLICT, "시스템 오류로 결제가 실패했습니다"),
     PAYMENT_NOT_APPROVED(HttpStatus.CONFLICT, "결제 승인이 실패되었습니다"),
     PAYMENT_CANCEL_FAILED(HttpStatus.CONFLICT, "결제 취소가 실패되었습니다"),

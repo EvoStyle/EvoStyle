@@ -20,7 +20,10 @@ import com.example.evostyle.global.exception.ConflictException;
 import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.InvalidException;
 import com.example.evostyle.global.exception.NotFoundException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -30,17 +33,25 @@ import java.util.Base64;
 import java.util.List;
 
 @Service
+@Slf4j
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final MemberRepository memberRepository;
+    private final OrderRepository orderRepository;
+
+    @PersistenceContext
+    private EntityManager em;
 
     @Transactional
-    public PaymentResponse completeConfirmFlow(TossPaymentResponse tossResponse, Order order) {
+    public PaymentResponse completeConfirmFlow(TossPaymentResponse tossResponse, Long orderId) {
 
-        order.getOrderItemList().forEach(o -> o.updateOrderStatus(OrderStatus.PAID));// 주문 상태 변경
+        Order order = orderRepository.findById(orderId)
+                        .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_NOT_FOUND));
+
+        order.getOrderItemList().forEach(orderItem -> {orderItem.updateOrderStatus(OrderStatus.PAID);});
 
         for (OrderItem orderItem : order.getOrderItemList()) {
             orderItem.getProductDetail().deductStock(orderItem.getEachAmount());
@@ -60,7 +71,7 @@ public class PaymentService {
     public void completeCancelFlow(String paymentKey){
         //payment 키로 결제를 찾아서 오더 상품을 찾은다음에 그게 가지고 있는 상품디테일의 재고를 돌려놓는다
         Payment payment = paymentRepository.findByPaymentKey(paymentKey)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUNT_PAYMENT));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_PAYMENT));
 
         Member member = payment.getOrder().getMember();
         member.minusToPurchaseSum(payment.getTotalAmount());
@@ -79,7 +90,7 @@ public class PaymentService {
 
     public PaymentResponse findByPaymentKey(String paymentKey) {
         Payment payment =  paymentRepository.findByPaymentKey(paymentKey)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUNT_PAYMENT));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_PAYMENT));
 
         return PaymentResponse.from(payment);
     }

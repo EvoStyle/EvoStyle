@@ -13,7 +13,9 @@ import com.example.evostyle.domain.payment.repository.PaymentRepository;
 import com.example.evostyle.global.exception.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -28,12 +30,14 @@ public class PaymentManager {
     private final PaymentService paymentService;
     private final OrderRepository orderRepository;
 
+    @Value("${payment.toss.test-secret-key}")
+    private String secretKey;
+
     final String TOSS_CONFIRM_URL = "https://api.tosspayments.com/v1/payments/confirm";
-//    final String TOSS_CANCEl_URL = "https://api.tosspayments.com/v1/payments/{paymentKey}/cancel";
-    final String SECRET_KEY = "test_sk_yL0qZ4G1VOlGMeM4w2xvroWb2MQY";
 
 
-    final String encodedAuth = Base64.getEncoder().encodeToString((SECRET_KEY + ":").getBytes());
+
+    final String encodedAuth = Base64.getEncoder().encodeToString(("test_sk_yL0qZ4G1VOlGMeM4w2xvroWb2MQY" + ":").getBytes());
     private final PaymentRepository paymentRepository;
 
 
@@ -61,7 +65,7 @@ public class PaymentManager {
                 .block();
 
         try {
-            return paymentService.completeConfirmFlow(tossResponse, order);
+            return paymentService.completeConfirmFlow(tossResponse, order.getId());
         } catch (Exception e) {
             revertPayment(PaymentCancelRequest.of("시스템 오류로 인해 결제가 실패했습니다"), tossResponse.paymentKey());
             throw new ConflictException(ErrorCode.PAYMENT_SYSTEM_ERROR);
@@ -69,6 +73,7 @@ public class PaymentManager {
     }
 
 
+    @Transactional(readOnly = true)
     public PaymentCancelResponse cancelPayment(PaymentCancelRequest request, String paymentKey) {
         Payment payment = paymentRepository.findByPaymentKey(paymentKey)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PAYMENT_CANCEL_FAILED));
@@ -80,7 +85,10 @@ public class PaymentManager {
             throw new ConflictException(ErrorCode.PAYMENT_CANNOT_BE_CANCELED);
         }
 
-        return revertPayment(request, paymentKey);
+        PaymentCancelResponse cancelResponse =  revertPayment(request, paymentKey);
+        paymentService.completeCancelFlow(paymentKey);
+
+        return cancelResponse;
     }
 
 
@@ -101,8 +109,6 @@ public class PaymentManager {
                 .bodyToMono(PaymentCancelResponse.class)
                 .block();
 
-
-        paymentService.completeCancelFlow(paymentKey);
         return cancelResponse;
     }
 }
