@@ -50,7 +50,4 @@ jwt:
 
 payment:
   toss:
-    test-client-key: test_ck_24xLea5zVAz4kK5v0aY6rQAMYNwW
-    test-secret-key: test_sk_yL0qZ4G1VOlGMeM4w2xvroWb2MQY
-
-
+    test-secret-key: ${toss.test-secret-key}
