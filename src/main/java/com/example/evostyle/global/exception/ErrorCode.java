@@ -107,10 +107,18 @@ public enum ErrorCode {
     BOOKMARK_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 등록된 즐겨찾기입니다."),
     BOOKMARK_NOT_FOUND(HttpStatus.NOT_FOUND, "즐겨찾기가 존재하지 않습니다."),
 
-    //배송 관련
-    // 배송,딜리버리 관련
+    //결제관련
+    PAYMENT_INVALID_AMOUNT(HttpStatus.CONFLICT, "주문 금액과 결제 금액이 일치하지 않습니다"),
+    ORDER_ALREADY_PAID(HttpStatus.CONFLICT, "이미 결제된 주문건입니다"),
+    NOT_FOUND_PAYMENT(HttpStatus.NOT_FOUND, "존재하지 않는 결제내역입니다"),
+    PAYMENT_SYSTEM_ERROR(HttpStatus.CONFLICT, "시스템 오류로 결제가 실패했습니다"),
+    PAYMENT_NOT_APPROVED(HttpStatus.CONFLICT, "결제 승인이 실패되었습니다"),
+    PAYMENT_CANCEL_FAILED(HttpStatus.CONFLICT, "결제 취소가 실패되었습니다"),
+    PAYMENT_CANNOT_BE_CANCELED(HttpStatus.BAD_REQUEST, "해당 주문은 결제 취소가 허용되지 않습니다."),
+
+
+    // 배송,
     DELIVERY_NOT_READY(HttpStatus.BAD_REQUEST,"배송이 이미 시작되었습니다. 택배회사에 문의해주세요"),
-//    DELIVERY_NOT_READY(HttpStatus.BAD_REQUEST,"배송이 준비상태가 아닙니다."),
     DELIVERY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 배송입니다."),
     PARCEL_API_FAIL(HttpStatus.UNPROCESSABLE_ENTITY, "택배 송장 등록에 실패했습니다."),
     DELIVERY_CONFLICT_MODIFIED_BY_ADMIN(HttpStatus.CONFLICT,"다른 관리자가 해당 배송을 출고하였습니다."),

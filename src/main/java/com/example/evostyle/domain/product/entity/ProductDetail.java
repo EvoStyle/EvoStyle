@@ -67,4 +67,8 @@ public class ProductDetail extends BaseEntity {
     public void delete(){
         this.isDeleted = false;
     }
+
+    public void deductStock(int quantity){
+        this.stock -= quantity;
+    }
 }
