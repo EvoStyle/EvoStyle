@@ -68,7 +68,6 @@ public class DeliveryController {
     }
 
 
-    // 권한설정필요 관리자용
     @PatchMapping("/delivery/{deliveryId}")
     public ResponseEntity<DeliveryResponse> changeDeliveryStatusToShipped(@PathVariable Long deliveryId) {
         DeliveryAdminUpdateEvent deliveryAdminUpdateEvent = DeliveryAdminUpdateEvent.of(EventType.ADMIN_UPDATE, deliveryId);
