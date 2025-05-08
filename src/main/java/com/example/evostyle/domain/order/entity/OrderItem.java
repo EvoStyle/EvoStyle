@@ -1,7 +1,7 @@
 package com.example.evostyle.domain.order.entity;
 
 import com.example.evostyle.domain.brand.entity.Brand;
-import com.example.evostyle.domain.product.productdetail.entity.ProductDetail;
+import com.example.evostyle.domain.product.entity.ProductDetail;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
