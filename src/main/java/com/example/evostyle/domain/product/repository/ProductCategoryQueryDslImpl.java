@@ -33,7 +33,14 @@ public class ProductCategoryQueryDslImpl implements ProductCategoryQueryDsl {
     }
 
     @Override
-    public void saveBrandCategoryMappings(List<ProductCategoryMapping> productCategoryMappingList) {
+    public void deleteAllByProductId(Long productId) {
+        jpaQueryFactory.delete(productCategoryMapping)
+                .where(productCategoryMapping.product.id.eq(productId))
+                .execute();
+    }
+
+    @Override
+    public void saveProductCategoryMappings(List<ProductCategoryMapping> productCategoryMappingList) {
         productCategoryMappingRepository.saveAll(productCategoryMappingList);
     }
 }

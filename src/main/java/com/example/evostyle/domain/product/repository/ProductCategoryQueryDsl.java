@@ -10,5 +10,7 @@ public interface ProductCategoryQueryDsl {
 
     List<ProductCategoryInfo> findCategoryInfoByProduct(Product product);
 
-    void saveBrandCategoryMappings(List<ProductCategoryMapping> brandCategoryMappingList);
+    void deleteAllByProductId(Long productId);
+
+    void saveProductCategoryMappings(List<ProductCategoryMapping> brandCategoryMappingList);
 }

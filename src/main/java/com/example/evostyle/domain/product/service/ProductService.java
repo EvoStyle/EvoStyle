@@ -3,9 +3,11 @@ package com.example.evostyle.domain.product.service;
 import com.example.evostyle.domain.brand.entity.Brand;
 import com.example.evostyle.domain.brand.repository.BrandRepository;
 import com.example.evostyle.domain.product.dto.request.CreateProductRequest;
+import com.example.evostyle.domain.product.dto.request.UpdateOwnerProductCategoryRequest;
 import com.example.evostyle.domain.product.dto.request.UpdateProductRequest;
 import com.example.evostyle.domain.product.dto.response.ProductCategoryInfo;
 import com.example.evostyle.domain.product.dto.response.ProductResponse;
+import com.example.evostyle.domain.product.dto.response.UpdateOwnerProductCategoryResponse;
 import com.example.evostyle.domain.product.entity.*;
 import com.example.evostyle.domain.product.repository.*;
 import com.example.evostyle.global.exception.ErrorCode;
@@ -49,7 +51,7 @@ public class ProductService {
                 .map(productCategory -> ProductCategoryMapping.of(product, productCategory))
                 .toList();
 
-        productCategoryRepository.saveBrandCategoryMappings(productCategoryMappingList);
+        productCategoryRepository.saveProductCategoryMappings(productCategoryMappingList);
 
         List<ProductCategoryInfo> productCategoryInfoList = productCategoryList.stream()
                 .map(ProductCategoryInfo::from)
@@ -99,6 +101,27 @@ public class ProductService {
         List<ProductCategoryInfo> productCategoryInfoList = productCategoryRepository.findCategoryInfoByProduct(product);
 
         return ProductResponse.from(product, productCategoryInfoList);
+    }
+
+    @Transactional
+    public UpdateOwnerProductCategoryResponse updateProductCategories(UpdateOwnerProductCategoryRequest request, Long productId) {
+        Product product = findProductById(productId);
+
+        productCategoryRepository.deleteAllByProductId(productId);
+
+        List<ProductCategory> productCategoryList = productCategoryRepository.findAllById(request.categoryIdList());
+
+        List<ProductCategoryMapping> productCategoryMappingList = productCategoryList.stream()
+                .map(category -> ProductCategoryMapping.of(product, category))
+                .toList();
+
+        productCategoryRepository.saveProductCategoryMappings(productCategoryMappingList);
+
+        List<ProductCategoryInfo> productCategoryInfoList = productCategoryList.stream()
+                .map(ProductCategoryInfo::from)
+                .toList();
+
+        return UpdateOwnerProductCategoryResponse.from(product, productCategoryInfoList);
     }
 
     @Transactional

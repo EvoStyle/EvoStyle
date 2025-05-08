@@ -1,10 +1,13 @@
 package com.example.evostyle.domain.product.controller;
 
 import com.example.evostyle.domain.product.dto.request.CreateProductRequest;
+import com.example.evostyle.domain.product.dto.request.UpdateOwnerProductCategoryRequest;
 import com.example.evostyle.domain.product.dto.request.UpdateProductRequest;
 import com.example.evostyle.domain.product.dto.response.ProductResponse;
+import com.example.evostyle.domain.product.dto.response.UpdateOwnerProductCategoryResponse;
 import com.example.evostyle.domain.product.service.ProductService;
 import com.example.evostyle.global.security.AuthUser;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -54,8 +57,17 @@ public class ProductController {
             @PathVariable(name = "productId") Long productId,
             @AuthenticationPrincipal AuthUser authUser
     ) {
-
         ProductResponse response = productService.updateProduct(authUser.memberId(), request, productId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PatchMapping("/products/{productId}/categories")
+    public ResponseEntity<UpdateOwnerProductCategoryResponse> updateProductCategories(
+            @RequestBody @Valid UpdateOwnerProductCategoryRequest request,
+            @PathVariable(name = "productId") Long productId
+    ) {
+        UpdateOwnerProductCategoryResponse response = productService.updateProductCategories(request, productId);
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
