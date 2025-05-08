@@ -23,8 +23,7 @@ public class ProductDetail extends BaseEntity {
     @JoinColumn(name = "product_id")
     private Product product;
 
-
-    @OneToOne
+   @ManyToOne
     @JoinColumn(name = "brand_id")
     private Brand brand;
 
@@ -63,5 +62,9 @@ public class ProductDetail extends BaseEntity {
             // 수량이 감소하면, 감소된 수량만큼 재고 증가
             this.stock += Math.abs(difference);
         }
+    }
+
+    public void delete(){
+        this.isDeleted = false;
     }
 }

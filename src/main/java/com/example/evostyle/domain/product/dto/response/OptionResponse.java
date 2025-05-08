@@ -15,8 +15,7 @@ public record OptionResponse(
     }
 
     public static OptionResponse from(OptionQueryDto response){
-        return new OptionResponse(
-                                  response.id(),
+        return new OptionResponse(response.id(),
                                   response.optionGroupId(),
                                   response.type()
 

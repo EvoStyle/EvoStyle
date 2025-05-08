@@ -29,6 +29,7 @@ public class OptionService {
     private final OptionRepository optionRepository;
     private final ProductDetailService productDetailService;
 
+    @Transactional
     public List<OptionResponse> createOption(Long memberId, Long optionGroupId, List<CreateOptionRequest> requestList){
 
         if(!memberRepository.existsById(memberId)){throw new NotFoundException(ErrorCode.MEMBER_NOT_FOUND);}
@@ -40,14 +41,13 @@ public class OptionService {
 
         List<Option> optionList = requestList.stream().map(r -> Option.of(optionGroup, r.type())).toList();
         optionRepository.saveAll(optionList);
-        productDetailService.createProductDetail(optionGroup.getProduct().getId());
-
+        productDetailService.createProductDetail(memberId, optionGroup.getProduct().getId());
         return optionList.stream().map(OptionResponse::from).toList();
     }
 
     public List<OptionResponse> readByOptionGroup(Long optionGroupId) {
         if (!optionGroupRepository.existsById(optionGroupId)){throw new NotFoundException(ErrorCode.OPTION_GROUP_NOT_FOUND);}
-        return optionRepository.findOptionByOptionGroupId(optionGroupId).stream().map(OptionResponse::from).toList();
+        return optionRepository.findByOptionGroupId(optionGroupId).stream().map(OptionResponse::from).toList();
     }
 
     @Transactional
@@ -60,11 +60,10 @@ public class OptionService {
 
     @Transactional
     public void deleteOption(Long optionId) {
-        if (!optionRepository.existsById(optionId)) {
-            throw new NotFoundException(ErrorCode.OPTION_NOT_FOUND);
-        }
+       Option option = optionRepository.findById(optionId)
+               .orElseThrow(() -> new NotFoundException(ErrorCode.OPTION_NOT_FOUND));
 
-        optionRepository.deleteById(optionId);
+       option.delete();
     }
 
 }

@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface OptionGroupRepository extends JpaRepository<OptionGroup, Long> {
 
@@ -15,5 +16,7 @@ public interface OptionGroupRepository extends JpaRepository<OptionGroup, Long> 
             """)
     List<Long> findIdByProductId(Long productId);
 
-    List<OptionGroup> findByProductId(Long productId);
+    List<OptionGroup> findByProductIdAndIsDeletedFalse(Long productId);
+
+    Optional<OptionGroup> findByIdAndIsDeletedFalse(Long id);
 }

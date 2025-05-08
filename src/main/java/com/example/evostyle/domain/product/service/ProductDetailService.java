@@ -38,14 +38,16 @@ public class ProductDetailService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public void createProductDetail(Long productId) {
+    public void createProductDetail(Long memberId, Long productId) {
+
+        if(!memberRepository.existsById(memberId)){throw new NotFoundException(ErrorCode.MEMBER_NOT_FOUND);}
+
         Product product = productRepository.findById(productId).orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND));
         List<Long> optionGroupIdList = optionGroupRepository.findIdByProductId(productId);
 
         Set<Set<Long>> existingCombinationSet = new HashSet<>(productDetailOptionRepository.findAll()
                 .stream().collect(Collectors.groupingBy(pdo -> pdo.getProductDetail().getId(),
-                        Collectors.mapping(pdo -> pdo.getOption().getId(), Collectors.toSet())))
-                .values());
+                        Collectors.mapping(pdo -> pdo.getOption().getId(), Collectors.toSet()))).values());
 
         Map<Long, List<Option>> allOptionMap = optionRepository.findByOptionGroupIdIn(optionGroupIdList)
                 .stream()

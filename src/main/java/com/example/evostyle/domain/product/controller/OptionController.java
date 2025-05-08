@@ -22,18 +22,16 @@ public class OptionController {
 
     public final OptionService optionService;
 
-    @PostMapping("/option-group/{optionGroupId}/options")
+    @PostMapping("/option-groups/{optionGroupId}/options")
     public ResponseEntity<List<OptionResponse>> createOption(@PathVariable(name = "optionGroupId")Long optionGroupId,
                                                        @RequestBody List<CreateOptionRequest> requestList,
                                                        @AuthenticationPrincipal AuthUser authUser){
 
-        Long memberId = authUser.memberId();
-
-        List<OptionResponse> response = optionService.createOption(memberId, optionGroupId, requestList);
+        List<OptionResponse> response = optionService.createOption(authUser.memberId(), optionGroupId, requestList);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("optionGroups/{optionGroupId}/options")
+    @GetMapping("option-groups/{optionGroupId}/options")
     public ResponseEntity<List<OptionResponse>> readByOptionGroup(@PathVariable(name = "optionGroupId") Long optionGroupId) {
 
         List<OptionResponse> responseList = optionService.readByOptionGroup(optionGroupId);
@@ -53,7 +51,6 @@ public class OptionController {
     public ResponseEntity<Map<String, Long>> deleteOption(@PathVariable(name = "optionId") Long optionId) {
 
         optionService.deleteOption(optionId);
-
         return ResponseEntity.status(HttpStatus.OK).body(Map.of("optionId", optionId));
     }
 }

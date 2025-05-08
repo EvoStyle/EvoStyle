@@ -1,9 +1,11 @@
 package com.example.evostyle.domain.product.entity;
 
+import com.example.evostyle.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Getter
@@ -22,6 +24,9 @@ public class OptionGroup {
     @Column(length = 15, nullable = false)
     private String name;
 
+    @ColumnDefault("false")
+    private boolean isDeleted = false;
+
 
     private OptionGroup (String name, Product product) {
         this.name = name ;
@@ -33,4 +38,8 @@ public class OptionGroup {
     }
 
     public void update(String name){this.name = name ;}
+
+    public void delete(){
+        this.isDeleted = false;
+    }
 }

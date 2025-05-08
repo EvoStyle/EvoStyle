@@ -7,16 +7,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 
 public interface OptionRepository extends JpaRepository<Option, Long> {
 
-    @Query(
-            "SELECT o.id FROM Option o WHERE o.optionGroup.id = :optionGroupId"
-    )
-    List<Long> findIdByOptionGroupId(@Param("optionGroupId") Long optionGroupId);
 
-    List<Option> findOptionByOptionGroupId(Long optionGroupId);
+
+    List<Option> findByOptionGroupId(Long optionGroupId);
 
 
     @Query("""

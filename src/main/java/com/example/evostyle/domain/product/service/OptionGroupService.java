@@ -51,24 +51,32 @@ public class OptionGroupService {
 
     public List<OptionGroupResponse> readOptionGroupByProduct(Long productId) {
         if (!productRepository.existsById(productId)) {throw new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND);}
-        return optionGroupRepository.findByProductId(productId).stream().map(OptionGroupResponse::from).toList();
+        return optionGroupRepository.findByProductIdAndIsDeletedFalse(productId).stream().map(OptionGroupResponse::from).toList();
     }
 
     @Transactional
-    public OptionGroupResponse updateOptionGroupName(UpdateOptionGroupRequest request, Long optionGroupId) {
+    public OptionGroupResponse updateOptionGroupName(Long memberId, UpdateOptionGroupRequest request, Long optionGroupId) {
 
-        OptionGroup optionGroup = optionGroupRepository.findById(optionGroupId).orElseThrow(() -> new NotFoundException(ErrorCode.OPTION_GROUP_NOT_FOUND));
+        if(!memberRepository.existsById(memberId)){throw new NotFoundException(ErrorCode.MEMBER_NOT_FOUND);}
+        OptionGroup optionGroup = optionGroupRepository.findByIdAndIsDeletedFalse(optionGroupId).orElseThrow(() -> new NotFoundException(ErrorCode.OPTION_GROUP_NOT_FOUND));
+
+        Long brandOwnerId = optionGroup.getProduct().getBrand().getMember().getId();
+        if(!memberId.equals(brandOwnerId)){throw new UnauthorizedException(ErrorCode.NOT_BRAND_OWNER);}
 
         optionGroup.update(request.name());
         return OptionGroupResponse.from(optionGroup);
     }
 
     @Transactional
-    public void deleteOptionGroup(Long optionGroupId) {
-        if (!optionGroupRepository.existsById(optionGroupId)) {throw new NotFoundException(ErrorCode.OPTION_GROUP_NOT_FOUND);}
+    public void deleteOptionGroup(Long memberId, Long optionGroupId) {
+        if(!memberRepository.existsById(memberId)){throw new NotFoundException(ErrorCode.MEMBER_NOT_FOUND);}
 
-        List<Long> optionIdList = optionRepository.findIdByOptionGroupId(optionGroupId);
-        optionRepository.deleteAllById(optionIdList);
-        optionRepository.deleteById(optionGroupId);
+        OptionGroup optionGroup = optionGroupRepository.findByIdAndIsDeletedFalse(optionGroupId).orElseThrow(() -> new NotFoundException(ErrorCode.OPTION_GROUP_NOT_FOUND));
+
+        Long brandOwnerId = optionGroup.getProduct().getBrand().getMember().getId();
+        if(!memberId.equals(brandOwnerId)){throw new UnauthorizedException(ErrorCode.NOT_BRAND_OWNER);}
+
+        optionRepository.findByOptionGroupId(optionGroupId).forEach(Option::delete);
+        optionGroup.delete();
     }
 }

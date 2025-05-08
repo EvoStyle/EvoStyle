@@ -8,9 +8,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Entity
 @Table(name = "products")
+
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Product extends BaseEntity {
 
@@ -38,6 +41,12 @@ public class Product extends BaseEntity {
     @ColumnDefault("0.0")
     private Float averageRating = 0.0F;
 
+    @ColumnDefault("false")
+    private boolean isDeleted = false;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     private Product(Brand brand, String name, Integer price, String description){
         this.brand = brand;
         this.name = name;
@@ -54,4 +63,10 @@ public class Product extends BaseEntity {
         if(description != null && !description.isBlank()){this.description = description;}
         if(price != null){this.price = price ;}
     }
+
+    public void delete(){
+        this.isDeleted = false;
+        this.deletedAt = LocalDateTime.now();
+    }
+
 }
