@@ -4,14 +4,9 @@ import com.example.evostyle.domain.cart.dto.request.AddCartItemRequest;
 import com.example.evostyle.domain.cart.dto.request.UpdateCartItemRequest;
 import com.example.evostyle.domain.cart.dto.response.GuestCartItemResponse;
 import com.example.evostyle.domain.cart.dto.response.GuestCartResponse;
-import com.example.evostyle.domain.cart.dto.response.MemberCartItemResponse;
-import com.example.evostyle.domain.cart.dto.response.MemberCartResponse;
 import com.example.evostyle.domain.cart.dto.service.RedisCartItemDto;
 import com.example.evostyle.domain.product.dto.response.ProductDetailResponse;
-import com.example.evostyle.domain.product.dto.response.ProductResponse;
-import com.example.evostyle.domain.product.entity.Product;
 import com.example.evostyle.domain.product.optiongroup.dto.response.OptionResponse;
-import com.example.evostyle.domain.product.optiongroup.entity.Option;
 import com.example.evostyle.domain.product.optiongroup.repository.OptionRepository;
 import com.example.evostyle.domain.product.productdetail.entity.ProductDetail;
 import com.example.evostyle.domain.product.repository.ProductDetailRepository;
@@ -39,7 +34,7 @@ public class GuestCartService {
     public final String GUEST_CART_KEY_PREFIX = "guest_cart::";
 
 
-    public GuestCartItemResponse addCartItemGuest(AddCartItemRequest request, String cartToken) {
+    public GuestCartItemResponse addCartItem(AddCartItemRequest request, String cartToken) {
 
         ProductDetail productDetail = productDetailRepository.findById(request.productDetailId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND));
@@ -64,14 +59,14 @@ public class GuestCartService {
     }
 
 
-    public GuestCartResponse readCartGuest(String cartToken) {
+    public GuestCartResponse readCart(String cartToken) {
 
-        List<RedisCartItemDto> list = redisTemplate.opsForHash().entries(GUEST_CART_KEY_PREFIX + cartToken)
+        List<RedisCartItemDto> redisCartItemDtoList = redisTemplate.opsForHash().entries(GUEST_CART_KEY_PREFIX + cartToken)
                                       .values().stream().map(o -> (RedisCartItemDto) o).toList();
 
         redisTemplate.expire(GUEST_CART_KEY_PREFIX + cartToken, Duration.ofMinutes(15));
 
-        List<GuestCartItemResponse> cartItemResponses = list.stream()
+        List<GuestCartItemResponse> cartItemResponses = redisCartItemDtoList.stream()
                 .map(dto -> {
                     ProductDetail productDetail = productDetailRepository.findById(dto.getProductDetailId())
                             .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND));
@@ -112,13 +107,10 @@ public class GuestCartService {
     public void deleteCartItem(String cartToken, Long productDetailId) {
 
         String redisKey = GUEST_CART_KEY_PREFIX + cartToken;
-        String field = String.valueOf(productDetailId);
+        String strProductDetailId = String.valueOf(productDetailId);
 
-        if (!redisTemplate.opsForHash().hasKey(redisKey, field)) {
-            throw new NotFoundException(ErrorCode.CART_ITEM_NOT_FOUND);
-        }
-
-        redisTemplate.opsForHash().delete(redisKey, field);
+        if (!redisTemplate.opsForHash().hasKey(redisKey, strProductDetailId)) {throw new NotFoundException(ErrorCode.CART_ITEM_NOT_FOUND);}
+        redisTemplate.opsForHash().delete(redisKey, strProductDetailId);
     }
 
     public GuestCartResponse emptyCart(String cartToken) {

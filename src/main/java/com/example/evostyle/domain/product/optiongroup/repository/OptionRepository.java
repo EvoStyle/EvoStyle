@@ -42,21 +42,19 @@ public interface OptionRepository extends JpaRepository<Option, Long> {
     //프로덕트 디테일아이디를 가지고 있는 상세옵션을 찾고, 상세옵션이 가지고 있는 옵션을 가지고 온다
 
     @Query("""
-    SELECT o
-    FROM ProductDetailOption pdo
-    JOIN pdo.option o
-    WHERE pdo.productDetail.id = :productDetailId
-""")
+                SELECT o
+                FROM ProductDetailOption pdo
+                JOIN pdo.option o
+                WHERE pdo.productDetail.id = :productDetailId
+            """)
     List<Option> findByProductDetailId(@Param("productDetailId") Long productDetailId);
 
-//    @Query("""
-//            SELECT o
-//            FROM ProductDetail p JOIN FETCH ProductDetailOption pd
-//            ON p.id = pd.productDetail.id JOIN FETCH Option o
-//            ON pd.option.id = o.id
-//            WHERE p.id = :productDetailId
-//            """)
-//    List<Option> findByProductDetailId(@Param("productDetailId") Long productDetailId);
 
-
+    @Query("""
+                SELECT o
+                FROM ProductDetailOption pdo
+                JOIN pdo.option o
+                WHERE pdo.productDetail.id in (:productDetailId)
+            """)
+    List<Option> findByProductDetailIdIn(@Param("productDetailId") Long productDetailId);
 }

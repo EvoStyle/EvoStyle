@@ -34,11 +34,11 @@ public class GuestCartController {
 
        Cookie cookie = CookieUtil.getOrCreateCookie(servletRequest, servletResponse, GUEST_UUID);
 
-        GuestCartItemResponse response = guestCartService.addCartItemGuest(request, cookie.getValue());
+        GuestCartItemResponse response = guestCartService.addCartItem(request, cookie.getValue());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PatchMapping("/cart-items")
+    @PatchMapping("/cart-items/{productDetailId}")
     public ResponseEntity<GuestCartItemResponse> updateCartItemQuantity(@PathVariable(name = "productDetailId") Long productDetailId,
                                                                         @RequestBody UpdateCartItemRequest request,
                                                                          HttpServletRequest servletRequest,
@@ -51,12 +51,12 @@ public class GuestCartController {
     }
 
     @GetMapping
-    public ResponseEntity<GuestCartResponse> readCartByMember(HttpServletRequest servletRequest,
+    public ResponseEntity<GuestCartResponse> readCartByCookie(HttpServletRequest servletRequest,
                                                                HttpServletResponse servletResponse) {
 
         Cookie cookie = CookieUtil.getOrCreateCookie(servletRequest, servletResponse, GUEST_UUID);
 
-        GuestCartResponse cartResponse = guestCartService.readCartGuest(cookie.getValue());
+        GuestCartResponse cartResponse = guestCartService.readCart(cookie.getValue());
         return ResponseEntity.status(HttpStatus.OK).body(cartResponse);
     }
 

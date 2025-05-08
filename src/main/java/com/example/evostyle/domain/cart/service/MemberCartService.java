@@ -7,6 +7,7 @@ import com.example.evostyle.domain.cart.dto.response.MemberCartResponse;
 import com.example.evostyle.domain.cart.dto.service.RedisCartItemDto;
 import com.example.evostyle.domain.cart.entity.Cart;
 import com.example.evostyle.domain.cart.entity.CartItem;
+import com.example.evostyle.domain.cart.repository.CartItemQueryDslRepositoryImp;
 import com.example.evostyle.domain.cart.repository.CartItemRepository;
 import com.example.evostyle.domain.cart.repository.CartRepository;
 import com.example.evostyle.domain.member.entity.Member;
@@ -40,6 +41,7 @@ public class MemberCartService {
     private final MemberRepository memberRepository;
     private final CartItemRepository cartItemRepository;
     private final OptionRepository optionRepository;
+    private final CartItemQueryDslRepositoryImp cartItemQueryDslRepository;
     private final RedisTemplate<String, Object> redisTemplate;
 
     public final String GUEST_CART_KEY_PREFIX = "guest_cart::";
@@ -48,14 +50,9 @@ public class MemberCartService {
     @Transactional
     public MemberCartItemResponse addCartItem(Long memberId, AddCartItemRequest request) {
 
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
-
-        Cart cart = cartRepository.findByMemberId(memberId)
-                .orElseGet(() -> cartRepository.save(Cart.of(member)));
-
-        ProductDetail productDetail = productDetailRepository.findById(request.productDetailId())
-                .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND));
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
+        Cart cart = cartRepository.findByMemberId(memberId).orElseGet(() -> cartRepository.save(Cart.of(member)));
+        ProductDetail productDetail = productDetailRepository.findById(request.productDetailId()).orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND));
 
         if (cartItemRepository.existsByCartIdAndProductDetailId(cart.getId(), productDetail.getId())) {
             throw new ConflictException(ErrorCode.CART_ITEM_ALREADY_EXISTS);
@@ -64,8 +61,7 @@ public class MemberCartService {
         CartItem cartItem = CartItem.of(cart, productDetail, request.quantity());
         cartItemRepository.save(cartItem);
 
-        List<OptionResponse> optionResponseList = optionRepository.findByProductDetailId(productDetail.getId())
-                .stream().map(OptionResponse::from).toList();
+        List<OptionResponse> optionResponseList = optionRepository.findByProductDetailId(productDetail.getId()).stream().map(OptionResponse::from).toList();
 
         return MemberCartItemResponse.of(
                 ProductDetailResponse.from(productDetail, optionResponseList),
@@ -74,14 +70,15 @@ public class MemberCartService {
 
     public MemberCartResponse readCart(Long memberId) {
 
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
-        if (!memberRepository.existsById(memberId)) { throw new NotFoundException(ErrorCode.MEMBER_NOT_FOUND);}
+        if (!memberRepository.existsById(memberId)) {
+            throw new NotFoundException(ErrorCode.MEMBER_NOT_FOUND);
+        }
 
         Cart cart = cartRepository.findByMemberId(memberId).orElseGet(() -> cartRepository.save(Cart.of(member)));
 
-        List<MemberCartItemResponse> cartItemResponseList = cartItemRepository.findByCartId(cart.getId())
+        List<MemberCartItemResponse> cartItemResponseList = cartItemQueryDslRepository.findCartItemWithOptions(cart.getId())
                 .stream().map(c -> {
                     List<OptionResponse> optionList = optionRepository.findByProductDetailId(c.getProductDetail().getId())
                             .stream().map(OptionResponse::from).toList();
@@ -99,15 +96,12 @@ public class MemberCartService {
     @Transactional
     public MemberCartItemResponse updateCartItemQuantity(Long memberId, Long cartItemId, UpdateCartItemRequest request) {
 
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
         Cart cart = cartRepository.findByMemberId(memberId).orElseGet(() -> Cart.of(member));
         cartRepository.save(cart);
 
-        CartItem cartItem = cartItemRepository.findById(cartItemId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.CART_ITEM_NOT_FOUND));
-
+        CartItem cartItem = cartItemRepository.findById(cartItemId).orElseThrow(() -> new NotFoundException(ErrorCode.CART_ITEM_NOT_FOUND));
         cartItem.updateQuantity(request.quantity());
 
         List<OptionResponse> optionResponseList = optionRepository.findByProductDetailId(cartItem.getProductDetail().getId())
@@ -123,13 +117,11 @@ public class MemberCartService {
     @Transactional
     public void deleteCartItem(Long memberId, Long cartItemId) {
 
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
-
-        Cart cart = cartRepository.findByMemberId(memberId).orElseGet(() -> cartRepository.save(Cart.of(member)));
-
-        CartItem cartItem = cartItemRepository.findById(cartItemId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.CART_ITEM_NOT_FOUND));
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
+        if (cartRepository.existsByMemberId(memberId)) {
+            cartRepository.save(Cart.of(member));
+        }
+        CartItem cartItem = cartItemRepository.findById(cartItemId).orElseThrow(() -> new NotFoundException(ErrorCode.CART_ITEM_NOT_FOUND));
 
         if (!cartItem.getCart().getMember().getId().equals(memberId)) {
             throw new UnauthorizedException(ErrorCode.CART_ACCESS_DENIED);
@@ -139,11 +131,8 @@ public class MemberCartService {
 
     @Transactional
     public MemberCartResponse emptyCart(Long memberId) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
-
-        Cart cart = cartRepository.findByMemberId(memberId)
-                .orElseGet(() -> Cart.of(member));
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
+        Cart cart = cartRepository.findByMemberId(memberId).orElseGet(() -> Cart.of(member));
 
         List<CartItem> cartItems = cartItemRepository.findByCartId(cart.getId());
         cartItemRepository.deleteAll(cartItems);
@@ -156,8 +145,7 @@ public class MemberCartService {
     @Transactional
     public MemberCartResponse mergeCart(Long memberId, String cartToken) {
 
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
         Cart cart = cartRepository.findByMemberId(memberId).orElseGet(() -> Cart.of(member));
         cartRepository.save(cart);
@@ -166,7 +154,7 @@ public class MemberCartService {
                 .entries(GUEST_CART_KEY_PREFIX + cartToken).values().stream().map(r -> (RedisCartItemDto) r)
                 .toList());
 
-        List<CartItem> dbCartItemList = cartItemRepository.findByCartId(cart.getId());
+        List<CartItem> dbCartItemList = cartItemQueryDslRepository.findCartItemWithOptions(cart.getId());
 
         Iterator<RedisCartItemDto> iterator = redisCartItemList.iterator();
         while (iterator.hasNext()) {
