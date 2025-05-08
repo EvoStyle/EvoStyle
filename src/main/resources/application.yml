@@ -1,14 +1,16 @@
 spring:
   config:
     import: optional:application-secret.yml
+
   datasource:
-    url: jdbc:mysql://localhost:3306/${db.name}?serverTimezone=Asia/Seoul
-    username: ${db.username}
-    password: ${db.password}
+    url: jdbc:mysql://localhost:3306/evo_style
+    username: root
+    password: jmgptw13!
+
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: false
+    show-sql: true
     properties:
       hibernate:
         format_sql: true
@@ -16,13 +18,11 @@ spring:
 
   data:
     redis:
-      host: ${redis.host}
-      port: ${redis.port}
-
+      host: localhost
+      port: 6379
 
   kafka:
     bootstrap-servers: ${kafka.url}
-
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
     consumer:
@@ -31,10 +31,11 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
     listener:
       ack-mode: record
+
 delivery:
   api:
     base-url: ${delivery.url}
-    uri : ${delivery.uri}
+    uri: ${delivery.uri}
 
 logging:
   level:
@@ -50,4 +51,5 @@ jwt:
 
 payment:
   toss:
+    test-client-key: test_ck_24xLea5zVAz4kK5v0aY6rQAMYNwW
     test-secret-key: ${toss.test-secret-key}

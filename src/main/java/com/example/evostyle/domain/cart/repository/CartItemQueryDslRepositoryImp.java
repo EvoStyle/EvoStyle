@@ -5,9 +5,7 @@ import com.example.evostyle.domain.cart.entity.CartItem;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
-
 import static com.example.evostyle.domain.cart.entity.QCart.cart;
 import static com.example.evostyle.domain.cart.entity.QCartItem.cartItem;
 import static com.example.evostyle.domain.product.entity.QOption.option;

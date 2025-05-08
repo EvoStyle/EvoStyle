@@ -40,12 +40,6 @@ public class OrderItem {
     @Column(name = "product_description", nullable = false)
     private String productDescription;
 
-    @Column(name = "cancelled_at")
-    private LocalDateTime cancelledAt;
-
-    @Column(name = "is_cancelled", nullable = false)
-    private boolean isCancelled;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
@@ -104,8 +98,6 @@ public class OrderItem {
     };
 
     public void markAsCancelled() {
-        this.isCancelled = true;
-        this.cancelledAt = LocalDateTime.now();
         this.orderStatus = OrderStatus.CANCELED;
     }
 

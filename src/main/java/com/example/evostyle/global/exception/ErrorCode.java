@@ -96,16 +96,13 @@ public enum ErrorCode {
     REVIEW_NOT_ALLOWED(HttpStatus.FORBIDDEN, "리뷰는 배송이 완료된 상품에 대해서만 작성 가능합니다."),
     NOT_OWNER_OF_ORDER(HttpStatus.FORBIDDEN, "해당 주문에 대한 권한이 없습니다."),
     REVIEW_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "이미 해당 주문 상품에 대한 리뷰가 작성되었습니다."),
-
-    //즐겨찾기 관련
-
-
-
-
-
     // 즐겨찾기 관련
     BOOKMARK_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 등록된 즐겨찾기입니다."),
     BOOKMARK_NOT_FOUND(HttpStatus.NOT_FOUND, "즐겨찾기가 존재하지 않습니다."),
+
+    //좋아요 관련
+    PRODUCT_LIKE_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 등록된 좋아요입니다."),
+    PRODUCT_LIKE_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 좋아요입니다"),
 
     //결제관련
     PAYMENT_INVALID_AMOUNT(HttpStatus.CONFLICT, "주문 금액과 결제 금액이 일치하지 않습니다"),
