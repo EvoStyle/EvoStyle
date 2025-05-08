@@ -67,7 +67,7 @@ public class Order extends BaseEntity {
         this.orderItemList.add(orderItem);
     }
 
-    public void updateAmountAndPrice(
+    public void updateAmountSumAndPriceSum(
             int totalAmountSum,
             int totalPriceSum
     ) {

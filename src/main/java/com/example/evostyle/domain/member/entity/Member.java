@@ -42,6 +42,14 @@ public class Member extends BaseEntity {
     @Column(length = 5, name = "gender_type", nullable = false)
     private GenderType genderType;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "member_gradle", nullable = false)
+    private MemberGradle memberGradle = MemberGradle.MEMBER;
+
+    @Column(name = "purchase_sum")
+    @ColumnDefault("0")
+    private Long purchaseSum = 0L;
+
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 

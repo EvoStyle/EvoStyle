@@ -5,20 +5,8 @@ import com.example.evostyle.domain.brand.repository.BrandRepository;
 import com.example.evostyle.domain.product.dto.request.CreateProductRequest;
 import com.example.evostyle.domain.product.dto.request.UpdateProductRequest;
 import com.example.evostyle.domain.product.dto.response.ProductResponse;
-import com.example.evostyle.domain.product.entity.Product;
-import com.example.evostyle.domain.product.optiongroup.entity.Option;
-import com.example.evostyle.domain.product.optiongroup.entity.OptionGroup;
-import com.example.evostyle.domain.product.optiongroup.repository.OptionGroupRepository;
-import com.example.evostyle.domain.product.optiongroup.repository.OptionRepository;
-import com.example.evostyle.domain.product.productcategory.entity.ProductCategory;
-import com.example.evostyle.domain.product.productcategory.entity.ProductCategoryMapping;
-import com.example.evostyle.domain.product.productcategory.repository.ProductCategoryMappingRepository;
-import com.example.evostyle.domain.product.productcategory.repository.ProductCategoryRepository;
-import com.example.evostyle.domain.product.productdetail.entity.ProductDetail;
-import com.example.evostyle.domain.product.productdetail.entity.ProductDetailOption;
-import com.example.evostyle.domain.product.repository.ProductDetailOptionRepository;
-import com.example.evostyle.domain.product.repository.ProductDetailRepository;
-import com.example.evostyle.domain.product.repository.ProductRepository;
+import com.example.evostyle.domain.product.entity.*;
+import com.example.evostyle.domain.product.repository.*;
 import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -42,21 +30,19 @@ public class ProductService {
     private final ProductDetailOptionRepository productDetailOptionRepository;
 
     @Transactional
-    public ProductResponse createProduct(CreateProductRequest request){
+    public ProductResponse createProduct(Long memberId, CreateProductRequest request){
         Brand brand = brandRepository.findById(request.brandId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.BRAND_NOT_FOUND));
+
+        Long brandOwnerId = brand.getMember().getId();
+        if(!memberId.equals(brandOwnerId)){throw new NotFoundException(ErrorCode.NOT_BRAND_OWNER);}
 
         ProductCategory category = productCategoryRepository.findById(request.categoryId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_CATEGORY_NOT_FOUND));
 
-
-
         Product product = Product.of(brand, request.name(), request.price(), request.description());
+
         productRepository.save(product);
-
-
-
-
         categoryMappingRepository.save(ProductCategoryMapping.of(product, category));
 
         return ProductResponse.from(product);
@@ -70,11 +56,25 @@ public class ProductService {
         return ProductResponse.from(product);
     }
 
+    public List<ProductResponse> readByBrand(Long memberId, Long brandId){
+        Brand brand = brandRepository.findById(brandId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.BRAND_NOT_FOUND));
+
+        Long brandOwnerId = brand.getMember().getId();
+        if(!memberId.equals(brandOwnerId)){throw new NotFoundException(ErrorCode.NOT_BRAND_OWNER);}
+
+        return productRepository.findByBrandId(brandId)
+                .stream().map(ProductResponse::from).toList();
+    }
+
     @Transactional
-    public ProductResponse updateProduct(UpdateProductRequest request, Long productId){
+    public ProductResponse updateProduct(Long memberId, UpdateProductRequest request, Long productId){
 
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        Long brandOwnerId = product.getBrand().getMember().getId();
+        if(!memberId.equals(brandOwnerId)){throw new NotFoundException(ErrorCode.NOT_BRAND_OWNER);}
 
        product.update(request.name(), request.description(), request.price());
 
@@ -82,21 +82,24 @@ public class ProductService {
     }
 
     @Transactional
-   public void deleteProduct(Long productId){
-        if(!productRepository.existsById(productId)){
-            throw new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND);
-        }
+   public void deleteProduct(Long memberId, Long productId){
 
-        List<OptionGroup> optionGroupList = optionGroupRepository.findByProductId(productId);
+        Product product = productRepository.findById(productId).orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        Long brandOwnerId = product.getBrand().getMember().getId();
+        if(!memberId.equals(brandOwnerId)){throw new NotFoundException(ErrorCode.NOT_BRAND_OWNER);}
+
+        List<OptionGroup> optionGroupList = optionGroupRepository.findByProductIdAndIsDeletedFalse(productId);
+        optionGroupList.forEach(OptionGroup::delete);
+
         List<Option> optionList = optionRepository.findByOptionGroupId(optionGroupList.stream().map(OptionGroup::getId).toList());
-        List<ProductDetail> productDetailList = productDetailRepository.findByProductId(productId);
-        List<ProductDetailOption> productDetailOptionList = productDetailOptionRepository
-                .findByProductDetailIdIn(productDetailList.stream().map(ProductDetail::getId).toList());
+        optionList.forEach(Option::delete);
 
-        productDetailOptionRepository.deleteAll(productDetailOptionList);
-        productDetailRepository.deleteAll(productDetailList);
-        optionRepository.deleteAll(optionList);
-        optionGroupRepository.deleteAll(optionGroupList);
-        productRepository.deleteById(productId);
+        List<ProductDetail> productDetailList = productDetailRepository.findByProductId(productId);
+        productDetailList.forEach(ProductDetail::delete);
+
+        productDetailOptionRepository
+                .findByProductDetailIdIn(productDetailList.stream().map(ProductDetail::getId).toList())
+                .forEach(ProductDetailOption::delete);
    }
 }

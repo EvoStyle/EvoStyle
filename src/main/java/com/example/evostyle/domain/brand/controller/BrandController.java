@@ -1,11 +1,15 @@
 package com.example.evostyle.domain.brand.controller;
 
+import com.example.evostyle.common.util.JwtUtil;
 import com.example.evostyle.domain.brand.dto.request.CreateBrandRequest;
+import com.example.evostyle.domain.brand.dto.request.UpdateOwnerBrandCategoryRequest;
 import com.example.evostyle.domain.brand.dto.request.UpdateBrandNameRequest;
 import com.example.evostyle.domain.brand.dto.response.CreateBrandResponse;
 import com.example.evostyle.domain.brand.dto.response.ReadBrandResponse;
+import com.example.evostyle.domain.brand.dto.response.UpdateOwnerBrandCategoryResponse;
 import com.example.evostyle.domain.brand.dto.response.UpdateBrandNameResponse;
 import com.example.evostyle.domain.brand.service.BrandService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,10 +25,16 @@ import java.util.Map;
 public class BrandController {
 
     private final BrandService brandService;
+    private final JwtUtil jwtUtil;
 
     @PostMapping
-    public ResponseEntity<CreateBrandResponse> createBrand(@RequestBody CreateBrandRequest request) {
-        CreateBrandResponse response = brandService.createBrand(request);
+    public ResponseEntity<CreateBrandResponse> createBrand(
+            @RequestBody CreateBrandRequest request,
+            HttpServletRequest httpServletRequest
+    ) {
+        Long memberId = extractMemberId(httpServletRequest);
+
+        CreateBrandResponse response = brandService.createBrand(request, memberId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -47,17 +57,39 @@ public class BrandController {
     @PatchMapping("/{brandId}")
     public ResponseEntity<UpdateBrandNameResponse> updateBrand(
             @RequestBody @Valid UpdateBrandNameRequest request,
+            @PathVariable(name = "brandId") Long brandId,
+            HttpServletRequest httpServletRequest
+    ) {
+        Long memberId = extractMemberId(httpServletRequest);
+
+        UpdateBrandNameResponse response = brandService.updateBrand(request, brandId, memberId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PatchMapping("/{brandId}/categories")
+    public ResponseEntity<UpdateOwnerBrandCategoryResponse> updateBrandCategories(
+            @RequestBody @Valid UpdateOwnerBrandCategoryRequest request,
             @PathVariable(name = "brandId") Long brandId
     ) {
-        UpdateBrandNameResponse response = brandService.updateBrand(request, brandId);
+        UpdateOwnerBrandCategoryResponse response = brandService.updateBrandCategories(request, brandId);
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @DeleteMapping("/{brandId}")
-    public ResponseEntity<Map<String, Long>> deleteBrand(@PathVariable(name = "brandId") Long brandId) {
-        brandService.deleteBrand(brandId);
+    public ResponseEntity<Map<String, Long>> deleteBrand(
+            @PathVariable(name = "brandId") Long brandId,
+            HttpServletRequest httpServletRequest
+    ) {
+        Long memberId = extractMemberId(httpServletRequest);
+
+        brandService.deleteBrand(brandId, memberId);
 
         return ResponseEntity.status(HttpStatus.OK).body(Map.of("brandId", brandId));
+    }
+
+    private Long extractMemberId(HttpServletRequest httpServletRequest) {
+        return jwtUtil.getMemberId(httpServletRequest.getHeader("Authorization"));
     }
 }
