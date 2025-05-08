@@ -1,23 +1,24 @@
 package com.example.evostyle.domain.order.service;
 
-import com.example.evostyle.domain.brand.entity.Brand;
-import com.example.evostyle.domain.brand.repository.BrandRepository;
+import com.example.evostyle.domain.member.entity.Authority;
 import com.example.evostyle.domain.member.entity.Member;
 import com.example.evostyle.domain.member.repository.MemberRepository;
 import com.example.evostyle.domain.order.dto.request.CreateOrderItemRequest;
-import com.example.evostyle.domain.order.dto.request.UpdateOrderItemRequest;
-import com.example.evostyle.domain.order.dto.response.*;
+import com.example.evostyle.domain.order.dto.response.ReadOrderItemResponse;
+import com.example.evostyle.domain.order.dto.response.ReadOrderResponse;
 import com.example.evostyle.domain.order.entity.Order;
 import com.example.evostyle.domain.order.entity.OrderItem;
-import com.example.evostyle.domain.order.entity.OrderStatus;
-import com.example.evostyle.domain.order.repository.OrderItemRepository;
+import com.example.evostyle.domain.order.repository.OrderItemQueryDsl;
+import com.example.evostyle.domain.order.repository.OrderQueryDsl;
 import com.example.evostyle.domain.order.repository.OrderRepository;
 import com.example.evostyle.domain.product.entity.Product;
 import com.example.evostyle.domain.product.entity.ProductDetail;
+import com.example.evostyle.domain.product.productdetail.entity.ProductDetail;
 import com.example.evostyle.domain.product.repository.ProductDetailRepository;
 import com.example.evostyle.global.exception.BadRequestException;
 import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.NotFoundException;
+import com.mysema.commons.lang.Pair;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,14 +33,16 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class OrderService {
 
-    private final OrderItemRepository orderItemRepository;
-    private final ProductDetailRepository productDetailRepository;
-    private final MemberRepository memberRepository;
     private final OrderRepository orderRepository;
-    private final BrandRepository brandRepository;
+    private final MemberRepository memberRepository;
+    private final ProductDetailRepository productDetailRepository;
+    private final OrderItemQueryDsl orderItemQueryDsl;
+    private final OrderQueryDsl orderQueryDsl;
 
     @Transactional
-    public CreateOrderResponse createOrder(List<CreateOrderItemRequest> requestList) {
+    public Pair<Order, Map<Long, ProductDetail>> createOrder(Long memberId, List<CreateOrderItemRequest> requestList) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
         List<Long> productDetailIdList = requestList.stream()
                 .map(CreateOrderItemRequest::productDetailId)
@@ -47,95 +50,49 @@ public class OrderService {
 
         List<ProductDetail> productDetailList = productDetailRepository.findAllById(productDetailIdList);
 
-        if (productDetailIdList.size() != productDetailList.size()) {
+        if (productDetailList.size() != productDetailIdList.size()) {
             throw new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND);
         }
 
         Map<Long, ProductDetail> idToProductDetail = productDetailList.stream()
                 .collect(Collectors.toMap(ProductDetail::getId, productDetail -> productDetail));
 
-        // todo 인증/인가 적용 후 수정 예정
-        Member member = memberRepository.findById(1L)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
-
         int totalAmountSum = 0;
         int totalPriceSum = 0;
 
-        Order order = Order.of(
-                member,
-                totalAmountSum,
-                totalPriceSum
-        );
-
-        List<OrderItem> orderItemList = new ArrayList<>();
-
         for (CreateOrderItemRequest request : requestList) {
-            ProductDetail productDetail = idToProductDetail.get(request.productDetailId());
-            Product product = productDetail.getProduct();
-            Brand brand = product.getBrand();
             totalAmountSum += request.eachAmount();
-
-            int totalPrice = product.getPrice() * request.eachAmount();
-            totalPriceSum += totalPrice;
-
-            OrderItem orderItem = OrderItem.of(
-                    request.eachAmount(),
-                    totalPrice,
-                    order,
-                    brand,
-                    OrderStatus.PENDING,
-                    productDetail,
-                    product.getName(),
-                    product.getPrice(),
-                    product.getDescription()
-            );
-
-            orderItemList.add(orderItem);
-
-            order.addOrderItem(orderItem);
+            totalPriceSum += idToProductDetail.get(request.productDetailId()).getProduct().getPrice() * request.eachAmount();
         }
 
-        order.updateAmountAndPrice(totalAmountSum, totalPriceSum);
+        Order order = Order.of(member, totalAmountSum, totalPriceSum);
 
         orderRepository.save(order);
 
-        List<CreateOrderItemResponse> responseList = orderItemList.stream()
-                .map(CreateOrderItemResponse::from)
-                .toList();
-
-        return CreateOrderResponse.from(
-                order.getId(),
-                responseList,
-                totalAmountSum,
-                totalPriceSum
-        );
+        return Pair.of(order, idToProductDetail);
     }
 
-    public List<ReadOrderResponse> readAllOrders() {
+    public List<ReadOrderResponse> readAllOrders(Long memberId) {
 
-        // todo 인증/인가 적용 후 수정 예정
-        memberRepository.findById(1L)
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
-        // 사장님이 소유한 브랜드 ID 목록 조회
-        List<Long> brandIdList = brandRepository.findBrandIdsByMemberId(1L);
-
-        // 해당 브랜드들의 주문 세부 사항 조회
-        List<OrderItem> orderItemList = orderItemRepository.findOrderItemsByBrandIdList(brandIdList);
+        if (member.getAuthority() != Authority.OWNER) {
+            throw new BadRequestException(ErrorCode.FORBIDDEN_MEMBER_OPERATION);
+        }
+        List<OrderItem> orderItemList = orderItemQueryDsl.findByOwnerId(memberId);
 
         Map<Long, List<OrderItem>> idToOrderItemList = orderItemList.stream()
                 .collect(Collectors.groupingBy(orderItem -> orderItem.getOrder().getId()));
 
         List<Long> orderIdList = new ArrayList<>(idToOrderItemList.keySet());
 
-        List<ReadOrderResponse> orderResponseList = new ArrayList<>();
-
-        orderResponseList = orderIdList.stream()
+        return orderIdList.stream()
                 .map(orderId -> {
-
                     List<ReadOrderItemResponse> readOrderItemResponseList = idToOrderItemList.get(orderId)
                             .stream()
-                            .map(ReadOrderItemResponse::from).toList();
+                            .map(ReadOrderItemResponse::from)
+                            .toList();
 
                     int totalAmountSum = readOrderItemResponseList.stream()
                             .mapToInt(ReadOrderItemResponse::eachAmount)
@@ -152,79 +109,51 @@ public class OrderService {
                             totalPriceSum
                     );
                 }).toList();
-
-        return orderResponseList;
     }
 
     @Transactional
-    public UpdateOrderItemResponse updateOrderItem(
-            UpdateOrderItemRequest request,
-            Long orderId,
-            Long orderItemId
-    ) {
-        OrderItem orderItem = orderItemRepository.findByIdAndOrderStatus(orderItemId, OrderStatus.PENDING)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_ITEM_NOT_PENDING));
+    public void deleteOrder(Long orderId, Long memberId) {
+        Order order = orderQueryDsl.findByIdWithItems(orderId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_NOT_FOUND));
 
-        Order order = orderItem.getOrder();
+        validateOrderOwnedByMember(memberId, order);
 
-        boolean isOrderIdDifferent = !order.getId().equals(orderId);
-
-        if (isOrderIdDifferent) {
-            throw new NotFoundException(ErrorCode.ORDER_NOT_FOUND);
-        }
-
-        ProductDetail productDetail = orderItem.getProductDetail();
-
-        boolean isProductDetailIdDifferent = !productDetail.getId().equals(request.productDetailId());
-
-        if (isProductDetailIdDifferent) {
-            throw new BadRequestException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND);
-        }
-
-        // 이전 수량만큼 재고 복원
-        int previousAmount = orderItem.getEachAmount();
-        int newAmount = request.newAmount();
-        int previousTotalPrice = orderItem.getTotalPrice();
-
-        productDetail.adjustStock(previousAmount, newAmount);
-
-        // 새로운 수량 업데이트
-        orderItem.update(newAmount);
-
-        // Order 총 수량 및 총 가격 갱신
-        int newTotalAmountSum = order.getTotalAmountSum() - previousAmount + newAmount;
-        int newTotalPriceSum = order.getTotalPriceSum() - previousTotalPrice + (orderItem.getProductPrice() * newAmount);
-
-        order.updateAmountAndPrice(newTotalAmountSum, newTotalPriceSum);
-
-        return UpdateOrderItemResponse.from(orderItem);
+        orderRepository.delete(order);
     }
 
     @Transactional
-    public void deleteOrderItem(
-            Long orderId,
-            Long orderItemId
-    ) {
-        OrderItem orderItem = orderItemRepository.findByIdAndOrderStatus(orderItemId, OrderStatus.PENDING)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_ITEM_NOT_PENDING));
-
+    public void updateOrder(OrderItem orderItem, Long memberId, int newAmount) {
         Order order = orderItem.getOrder();
 
-        boolean isOrderIdDifferent = !order.getId().equals(orderId);
+        validateOrderOwnedByMember(memberId, order);
 
-        if (isOrderIdDifferent) {
-            throw new NotFoundException(ErrorCode.ORDER_NOT_FOUND);
-        }
+        int newTotalAmountSum = order.getTotalAmountSum() - orderItem.getEachAmount() + newAmount;
+        int newTotalPriceSum = order.getTotalPriceSum() - orderItem.getTotalPrice() + (orderItem.getProductPrice() * newAmount);
 
-        int updatedTotalAmountSum = order.getTotalAmountSum() - orderItem.getEachAmount();
-        int updatedTotalPriceSum = order.getTotalPriceSum() - orderItem.getTotalPrice();
+        order.updateAmountSumAndPriceSum(newTotalAmountSum, newTotalPriceSum);
+    }
 
-        order.updateAmountAndPrice(updatedTotalAmountSum, updatedTotalPriceSum);
+    @Transactional
+    public void adjustOrderAfterItemCancellation(OrderItem orderItem, Long memberId) {
+        Order order = orderItem.getOrder();
 
-        orderItem.markAsCancelled();
+        validateOrderOwnedByMember(memberId, order);
 
-        if (!orderItemRepository.existsByOrderIdAndIsCancelledFalse(orderId)) {
+        int updatedAmountSum = order.getTotalAmountSum() - orderItem.getEachAmount();
+        int updatedPriceSum = order.getTotalPriceSum() - orderItem.getTotalPrice();
+
+        order.updateAmountSumAndPriceSum(updatedAmountSum, updatedPriceSum);
+
+        if (order.getTotalAmountSum() == 0) {
             order.markAsCancelled();
+        }
+    }
+
+    private void validateOrderOwnedByMember(Long memberId, Order order) {
+        boolean isMemberIdDifferent = !order.getMember().getId().equals(memberId);
+
+        if (isMemberIdDifferent) {
+            throw new BadRequestException(ErrorCode.FORBIDDEN_MEMBER_OPERATION);
         }
     }
 }

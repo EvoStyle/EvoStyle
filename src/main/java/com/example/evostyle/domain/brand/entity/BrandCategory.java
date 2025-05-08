@@ -19,11 +19,15 @@ public class BrandCategory {
     @Column(name = "name", nullable = false)
     private String name;
 
-    private BrandCategory (String name) {
+    private BrandCategory(String name) {
         this.name = name;
     }
 
     public static BrandCategory of(String name) {
         return new BrandCategory(name);
+    }
+
+    public void update(String name) {
+        this.name = name;
     }
 }
