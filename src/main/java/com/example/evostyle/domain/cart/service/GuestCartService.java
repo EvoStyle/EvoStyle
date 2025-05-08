@@ -5,10 +5,11 @@ import com.example.evostyle.domain.cart.dto.request.UpdateCartItemRequest;
 import com.example.evostyle.domain.cart.dto.response.GuestCartItemResponse;
 import com.example.evostyle.domain.cart.dto.response.GuestCartResponse;
 import com.example.evostyle.domain.cart.dto.service.RedisCartItemDto;
+import com.example.evostyle.domain.product.dto.response.OptionResponse;
 import com.example.evostyle.domain.product.dto.response.ProductDetailResponse;
-import com.example.evostyle.domain.product.optiongroup.dto.response.OptionResponse;
-import com.example.evostyle.domain.product.optiongroup.repository.OptionRepository;
-import com.example.evostyle.domain.product.productdetail.entity.ProductDetail;
+
+import com.example.evostyle.domain.product.entity.ProductDetail;
+import com.example.evostyle.domain.product.repository.OptionRepository;
 import com.example.evostyle.domain.product.repository.ProductDetailRepository;
 import com.example.evostyle.global.exception.ConflictException;
 import com.example.evostyle.global.exception.ErrorCode;
