@@ -7,6 +7,7 @@ import com.example.evostyle.domain.member.dto.response.MemberResponse;
 public record DeliveryResponse(
         MemberResponse memberResponse,
         DeliveryStatus deliveryStatus,
+        Long deliveryId,
         String deliveryRequest,
         String address,
         String addressAssistant
@@ -16,6 +17,7 @@ public record DeliveryResponse(
         return new DeliveryResponse(
                 MemberResponse.from(savedDelivery.getMember()),
                 savedDelivery.getDeliveryStatus(),
+                savedDelivery.getId(),
                 savedDelivery.getDeliveryRequest(),
                 savedDelivery.getDeliveryAddress(),
                 savedDelivery.getDeliveryAddressAssistant()

@@ -6,6 +6,7 @@ import com.example.evostyle.domain.delivery.dto.DeliveryUserUpdateEvent;
 import com.example.evostyle.domain.delivery.dto.EventType;
 import com.example.evostyle.domain.delivery.dto.request.DeliveryRequest;
 import com.example.evostyle.domain.delivery.dto.response.DeliveryResponse;
+import com.example.evostyle.domain.delivery.dto.response.DeliveryResponseForBrand;
 import com.example.evostyle.domain.delivery.service.DeliveryService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -40,8 +41,14 @@ public class DeliveryController {
 
     @GetMapping("/members/{memberId}/delivery")
     public ResponseEntity<List<DeliveryResponse>> getAllDeliveryByMember(@PathVariable Long memberId) {
-        List<DeliveryResponse> deliveryResponses = deliveryService.getAllDeliveryByMember(memberId);
-        return ResponseEntity.status(HttpStatus.OK).body(deliveryResponses);
+        List<DeliveryResponse> deliveryResponseList = deliveryService.getAllDeliveryByMember(memberId);
+        return ResponseEntity.status(HttpStatus.OK).body(deliveryResponseList);
+    }
+
+    @GetMapping("/brands/{brandId}/delivery")
+    public ResponseEntity<List<DeliveryResponseForBrand>> getAllDeliveryByBrand(@PathVariable Long brandId) {
+        List<DeliveryResponseForBrand> deliveryResponseList = deliveryService.getAllDeliveryByBrand(brandId);
+        return ResponseEntity.status(HttpStatus.OK).body(deliveryResponseList);
     }
 
     @PatchMapping("/address/{addressId}/delivery/{deliveryId}/member/{memberId}")

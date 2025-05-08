@@ -49,7 +49,7 @@ public class ParcelApiService {
     }
 
     public ParcelResponse createTrackingNumber(Delivery delivery) {
-        SenderRequest senderRequest = SenderRequest.of(delivery.getOrderItem().getBrand().getName());
+        SenderRequest senderRequest = SenderRequest.of(delivery.getOrderItems().get(0).getBrand().getName());
         ReceiverRequest receiverRequest = ReceiverRequest.of(delivery.getMember().getNickname(), delivery.getDeliveryAddress(), delivery.getDeliveryAddressAssistant(), delivery.getMember().getPhoneNumber(), delivery.getPostCode());
         ParcelRequest parcelRequest = ParcelRequest.of(senderRequest, receiverRequest, delivery.getDeliveryRequest());
 

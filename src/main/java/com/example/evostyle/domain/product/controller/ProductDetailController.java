@@ -4,10 +4,12 @@ package com.example.evostyle.domain.product.controller;
 import com.example.evostyle.domain.product.dto.request.UpdateProductDetailRequest;
 import com.example.evostyle.domain.product.dto.response.ProductDetailResponse;
 import com.example.evostyle.domain.product.service.ProductDetailService;
+import com.example.evostyle.global.security.AuthUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,9 +23,9 @@ public class ProductDetailController {
 
     @PostMapping("/product-details")
     public ResponseEntity<List<ProductDetailResponse>> createProductDetail(@PathVariable(name = "productId")Long productId,
-                                                                           @RequestAttribute("memberId")Long memberId){
+                                                                           @AuthenticationPrincipal AuthUser authUser){
 
-        List<ProductDetailResponse> responseList = productDetailService.createProductDetail(productId, memberId);
+        List<ProductDetailResponse> responseList = productDetailService.createProductDetail(productId, authUser.memberId());
         return ResponseEntity.status(HttpStatus.CREATED).body(responseList);
     }
 

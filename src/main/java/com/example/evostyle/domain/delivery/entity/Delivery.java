@@ -9,6 +9,9 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @Table(name = "deliveries")
@@ -23,9 +26,8 @@ public class Delivery extends BaseEntity {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_item_id", nullable = false)
-    private OrderItem orderItem;
+    @OneToMany(mappedBy = "delivery",cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<OrderItem> orderItems= new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "brand_id", nullable = false)
@@ -51,13 +53,14 @@ public class Delivery extends BaseEntity {
 
     private Delivery(Member member, OrderItem orderItem,Brand brand, DeliveryStatus deliveryStatus, String deliveryRequest, String deliveryAddress, String deliveryAddressAssistant,String postCode) {
         this.member = member;
-        this.orderItem = orderItem;
         this.brand = brand;
         this.deliveryStatus = deliveryStatus;
         this.deliveryRequest = deliveryRequest;
         this.deliveryAddress = deliveryAddress;
         this.deliveryAddressAssistant = deliveryAddressAssistant;
         this.postCode = postCode;
+        this.orderItems.add(orderItem);
+        orderItem.updateDelivery(this);
     }
 
     public static Delivery of(Member member, OrderItem orderItem,Brand brand, String deliveryRequest, String deliveryAddress, String deliveryAddressAssistant,String postCode) {

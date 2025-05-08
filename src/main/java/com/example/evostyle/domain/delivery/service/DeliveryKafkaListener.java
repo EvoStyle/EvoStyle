@@ -8,6 +8,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -23,8 +25,11 @@ public class DeliveryKafkaListener {
         DeliveryUserEvent deliveryEvent = jsonHelper.fromJson(message, DeliveryUserEvent.class);
         switch (deliveryEvent.eventType()) {
             case USER_UPDATE -> {
-                String trackingNumber = deliveryUpdateService.updateDelivery(deliveryEvent);
-                UserNotificationEvent success = UserNotificationEvent.success(deliveryEvent.userId(), trackingNumber);
+                Optional<Long> delivery = deliveryUpdateService.updateDelivery(deliveryEvent);
+                if (delivery.isEmpty()) {
+                    return;
+                }
+                UserNotificationEvent success = UserNotificationEvent.success(deliveryEvent.userId(), delivery.get());
                 String payload = jsonHelper.toJson(success);
                 kafkaTemplate.send("user-notification-topic", deliveryEvent.userId().toString(), payload);
             }

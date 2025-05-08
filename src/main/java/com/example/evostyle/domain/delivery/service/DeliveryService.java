@@ -4,6 +4,7 @@ import com.example.evostyle.common.util.JsonHelper;
 import com.example.evostyle.domain.delivery.dto.*;
 import com.example.evostyle.domain.delivery.dto.request.*;
 import com.example.evostyle.domain.delivery.dto.response.DeliveryResponse;
+import com.example.evostyle.domain.delivery.dto.response.DeliveryResponseForBrand;
 import com.example.evostyle.domain.delivery.dto.response.ParcelResponse;
 import com.example.evostyle.domain.delivery.entity.Delivery;
 import com.example.evostyle.domain.delivery.entity.DeliveryStatus;
@@ -49,7 +50,7 @@ public class DeliveryService {
 
     @Transactional(readOnly = true)
     public List<DeliveryResponse> getAllDeliveryByMember(Long memberId) {
-        List<Delivery> allByMemberId = deliveryRepository.findAllByMemberId(memberId);
+        List<Delivery> allByMemberId = deliveryRepository.findAllWithMemberByMemberId(memberId);
         return allByMemberId.stream().map(DeliveryResponse::from).toList();
     }
 
@@ -80,5 +81,10 @@ public class DeliveryService {
     public void deleteDelivery(Long deliveryId) {
         Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(() -> new NotFoundException(ErrorCode.DELIVERY_NOT_FOUND));
         delivery.changeStatus(DeliveryStatus.CANCELLED);
+    }
+
+    public List<DeliveryResponseForBrand> getAllDeliveryByBrand(Long brandId) {
+        List<Delivery> deliveryList = deliveryRepository.findAllWithOrderItemAndMemberByBrandId(brandId);
+        return deliveryList.stream().map(DeliveryResponseForBrand::from).toList();
     }
 }

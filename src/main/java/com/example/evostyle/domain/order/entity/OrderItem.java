@@ -1,6 +1,7 @@
 package com.example.evostyle.domain.order.entity;
 
 import com.example.evostyle.domain.brand.entity.Brand;
+import com.example.evostyle.domain.delivery.entity.Delivery;
 import com.example.evostyle.domain.product.productdetail.entity.ProductDetail;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -55,6 +56,10 @@ public class OrderItem {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_detail_id", nullable = false)
     private ProductDetail productDetail;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "delivery_id")
+    private Delivery delivery;
 
     private OrderItem(
             Integer eachAmount,
@@ -111,5 +116,9 @@ public class OrderItem {
         this.isCancelled = true;
         this.cancelledAt = LocalDateTime.now();
         this.orderStatus = OrderStatus.CANCELED;
+    }
+
+    public void updateDelivery(Delivery delivery) {
+        this.delivery = delivery;
     }
 }

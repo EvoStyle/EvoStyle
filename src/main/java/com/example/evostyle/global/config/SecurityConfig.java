@@ -35,31 +35,31 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-            // CSRF 비활성화 (JWT 사용 시 필요 없음)
-            .csrf(AbstractHttpConfigurer::disable)
-            // 세션 비활성화
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .formLogin(AbstractHttpConfigurer::disable)
-            .httpBasic(AbstractHttpConfigurer::disable)
-            .anonymous(AbstractHttpConfigurer::disable)
-            .logout(AbstractHttpConfigurer::disable)
-            .rememberMe(AbstractHttpConfigurer::disable)
-            // 경로별 접근 권한 설정
-            .authorizeHttpRequests(auth -> auth
-                    .anyRequest().permitAll())
-//                .requestMatchers("/api/auth/**").permitAll()  // 로그인, 회원가입 등 인증 없이 허용
-//                .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()  // 상품 조회 전체 허용
-//                .requestMatchers(HttpMethod.GET, "/api/brands/**").permitAll()  // 브랜드 조회 전체 허용
-//                .requestMatchers("/api/products/**").hasRole("OWNER")  // 상품 관리는 OWNER만 허용
-//                .requestMatchers("/api/brands/**").hasRole("OWNER")  // 브랜드 관리는 OWNER만 허용
-//                .anyRequest().authenticated()  // 그 외 요청은 인증 필요
-//            )
-//            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-//            .exceptionHandling(exceptions -> exceptions
-//                .authenticationEntryPoint(customAuthEntryPoint)  // 로그인을 하지 않았을 때
-//                .accessDeniedHandler(customAccessDeniedHandler)  // 권한이 없을 때
-//            )
-            .build();
+                // CSRF 비활성화 (JWT 사용 시 필요 없음)
+                .csrf(AbstractHttpConfigurer::disable)
+                // 세션 비활성화
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .anonymous(AbstractHttpConfigurer::disable)
+                .logout(AbstractHttpConfigurer::disable)
+                .rememberMe(AbstractHttpConfigurer::disable)
+                // 경로별 접근 권한 설정
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/**").permitAll()  // 로그인, 회원가입 등 인증 없이 허용
+                        .requestMatchers("/api/parcel").permitAll() //외부 api용 패스 설정
+                        .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()  // 상품 조회 전체 허용
+                        .requestMatchers(HttpMethod.GET, "/api/brands/**").permitAll()  // 브랜드 조회 전체 허용
+                        .requestMatchers("/api/products/**").hasRole("OWNER")  // 상품 관리는 OWNER만 허용
+                        .requestMatchers("/api/brands/**").hasRole("OWNER")  // 브랜드 관리는 OWNER만 허용
+                        .anyRequest().authenticated()  // 그 외 요청은 인증 필요
+                )
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint(customAuthEntryPoint)  // 로그인을 하지 않았을 때
+                        .accessDeniedHandler(customAccessDeniedHandler)  // 권한이 없을 때
+                )
+                .build();
     }
 }

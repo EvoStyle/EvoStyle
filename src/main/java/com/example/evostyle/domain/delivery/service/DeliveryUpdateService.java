@@ -17,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class DeliveryUpdateService {
@@ -47,7 +49,7 @@ public class DeliveryUpdateService {
 
     }
 
-    public String updateDelivery(DeliveryUserEvent deliveryUserEvent) {
+    public Optional<Long> updateDelivery(DeliveryUserEvent deliveryUserEvent) {
         Delivery delivery = deliveryRepository.findById(deliveryUserEvent.deliveryId()).orElseThrow(() -> new NotFoundException(ErrorCode.DELIVERY_NOT_FOUND));
         Address address = addressRepository.findById(deliveryUserEvent.addressId()).orElseThrow(() -> new NotFoundException(ErrorCode.ADDRESS_NOT_FOUND));
 
@@ -56,9 +58,10 @@ public class DeliveryUpdateService {
                 UserNotificationEvent fail = UserNotificationEvent.fail(deliveryUserEvent.userId(), delivery.getTrackingNumber());
                 String payload = jsonHelper.toJson(fail);
                 kafkaTemplate.send("user-notification-topic", deliveryUserEvent.userId().toString(), payload);
+                return Optional.empty();
             }
         }
         Delivery savedDelivery = deliveryService.updateDelivery(deliveryUserEvent, delivery, address);
-        return savedDelivery.getTrackingNumber();
+        return Optional.of(savedDelivery.getId());
     }
 }
