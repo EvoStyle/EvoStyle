@@ -5,13 +5,14 @@ import com.example.evostyle.domain.auth.dto.request.SignUpRequest;
 import com.example.evostyle.domain.auth.dto.response.LoginResponse;
 import com.example.evostyle.domain.auth.dto.response.SignUpResponse;
 import com.example.evostyle.domain.auth.service.AuthService;
+import com.example.evostyle.global.security.AuthUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RequestMapping("/api/auth")
 @RestController
@@ -29,8 +30,27 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
-        LoginResponse login = authService.login(request);
+        LoginResponse loginResponse = authService.login(request);
 
-        return ResponseEntity.status(HttpStatus.OK).body(login);
+        return ResponseEntity.status(HttpStatus.OK).body(loginResponse);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<LoginResponse> refreshToken(@RequestHeader("Authorization") String refreshToken) {
+        LoginResponse loginResponse = authService.refreshAccessToken(refreshToken);
+
+        return ResponseEntity.status(HttpStatus.OK).body(loginResponse);
+    }
+
+    @DeleteMapping("/logout")
+    public ResponseEntity<Map<String, Long>> logout(
+        @RequestHeader("Authorization") String refreshToken,
+        @AuthenticationPrincipal AuthUser authUser
+    ) {
+        Long memberId = authUser.memberId();
+
+        authService.logout(refreshToken);
+
+        return ResponseEntity.status(HttpStatus.OK).body(Map.of("memberId", memberId));
     }
 }

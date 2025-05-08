@@ -22,6 +22,7 @@ public class JwtUtil {
 
     private static final String BEARER_PREFIX = "Bearer ";
     private static final long ACCESS_TOKEN_EXPIRATION = 30 * 60 * 1000;  // 30분
+    private static final long REFRESH_TOKEN_EXPIRATION = 7 * 24 * 60 * 60 * 1000L;  // 7일
 
     @Value("${jwt.secret.key}")
     private String secretKey;
@@ -60,6 +61,18 @@ public class JwtUtil {
             .compact();
     }
 
+    // Refresh Token 생성
+    public String createRefreshToken(Long memberId) {
+        Date now = new Date();
+
+        return BEARER_PREFIX + Jwts.builder()
+            .setSubject(String.valueOf(memberId))
+            .setIssuedAt(now)
+            .setExpiration(new Date(now.getTime() + REFRESH_TOKEN_EXPIRATION))
+            .signWith(key, signatureAlgorithm)
+            .compact();
+    }
+
     // 토큰 유효성 검증
     public boolean validateToken(String token) {
         try {
@@ -88,6 +101,19 @@ public class JwtUtil {
         }
     }
 
+    // 만료된 Refresh Token에서 memberId 추출
+    public Claims parseClaimsAllowExpired(String token) {
+        try {
+            return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(removeBearer(token))
+                .getBody();
+        } catch (ExpiredJwtException e) {
+            return e.getClaims();  // 만료되었어도 Claims는 꺼낼 수 있음
+        }
+    }
+
     // 토큰에서 사용자 Id 추출
     public Long getMemberId(String token) {
         token = removeBearer(token);
@@ -109,9 +135,8 @@ public class JwtUtil {
         return claims.get("authority", String.class);
     }
 
-    // enum으로 바로 변환
-    public Authority getAuthorityEnum(String token) {
-        return Authority.of(getAuthority(token));
+    public long getRefreshTokenExpiration() {
+        return REFRESH_TOKEN_EXPIRATION;
     }
 
     // "Bearer " 접두어 제거
