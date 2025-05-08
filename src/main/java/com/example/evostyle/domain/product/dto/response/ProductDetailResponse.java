@@ -13,11 +13,9 @@ public record ProductDetailResponse(
 ) {
     public static ProductDetailResponse from(ProductDetail productDetail,  List<OptionResponse> optionResponseList){
         return new ProductDetailResponse(productDetail.getId(),
-                                        productDetail.getProduct().getId(),
-                                        optionResponseList,
-                                        productDetail.getStock());
+
+                productDetail.getProduct().getId(),
+                optionResponseList,
+                productDetail.getStock());
     }
-
-
-
 }

@@ -18,6 +18,8 @@ public enum ErrorCode {
     DUPLICATE_PHONENUMBER(HttpStatus.CONFLICT, "이미 등록된 전화번호입니다."),
     USER_ALREADY_DELETED(HttpStatus.CONFLICT, "이미 탈퇴한 사용자입니다."),
 
+
+
     // JWT 관련
     MISSING_JWT_SECRET_KEY(HttpStatus.BAD_REQUEST, "JWT 시크릿 키가 누락되어 토큰 생성을 할 수 없습니다."),
     INVALID_JWT_SECRET_KEY(HttpStatus.INTERNAL_SERVER_ERROR, "JWT 시크릿 키 디코딩에 실패했습니다."),
@@ -64,6 +66,11 @@ public enum ErrorCode {
     STOCK_MODIFICATION_NOT_ALLOWED(HttpStatus.CONFLICT, "재고를 수정할 수 없는 상태입니다"),
     PRODUCT_DETAIL_MISMATCH(HttpStatus.CONFLICT, "해당 상품에 속하지 않는 상품 디테일입니다"),
 
+    //장바구니  관련
+    CART_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 장바구니 상품입니다"),
+    CART_ACCESS_DENIED(HttpStatus.FORBIDDEN, "본인의 장바구니 정보만 수정 가능합니다"),
+    CART_ITEM_ALREADY_EXISTS(HttpStatus.CONFLICT, "장바구니에 존재하는 상품입니다"),
+
     //상품 카테고리 관련
     PRODUCT_CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "상품 카테고리가 존재하지 않습니다"),
     PRODUCT_CATEGORY_DUPLICATE(HttpStatus.BAD_REQUEST, "이미 존재하는 상품 카테고리입니다"),
@@ -83,6 +90,7 @@ public enum ErrorCode {
     INVALID_STOCK_DECREASE_AMOUNT(HttpStatus.BAD_REQUEST, "재고 차감 수량은 0보다 커야 합니다"),
     OUT_OF_STOCK(HttpStatus.BAD_REQUEST, "재고가 부족합니다"),
 
+
     //리뷰 관련
     REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 리뷰입니다"),
     REVIEW_NOT_ALLOWED(HttpStatus.FORBIDDEN, "리뷰는 배송이 완료된 상품에 대해서만 작성 가능합니다."),
@@ -90,11 +98,19 @@ public enum ErrorCode {
     REVIEW_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "이미 해당 주문 상품에 대한 리뷰가 작성되었습니다."),
 
     //즐겨찾기 관련
+
+
+
+
+
+    // 즐겨찾기 관련
     BOOKMARK_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 등록된 즐겨찾기입니다."),
     BOOKMARK_NOT_FOUND(HttpStatus.NOT_FOUND, "즐겨찾기가 존재하지 않습니다."),
 
     //배송 관련
+    // 배송,딜리버리 관련
     DELIVERY_NOT_READY(HttpStatus.BAD_REQUEST,"배송이 이미 시작되었습니다. 택배회사에 문의해주세요"),
+//    DELIVERY_NOT_READY(HttpStatus.BAD_REQUEST,"배송이 준비상태가 아닙니다."),
     DELIVERY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 배송입니다."),
     PARCEL_API_FAIL(HttpStatus.UNPROCESSABLE_ENTITY, "택배 송장 등록에 실패했습니다."),
     DELIVERY_CONFLICT_MODIFIED_BY_ADMIN(HttpStatus.CONFLICT,"다른 관리자가 해당 배송을 출고하였습니다."),
