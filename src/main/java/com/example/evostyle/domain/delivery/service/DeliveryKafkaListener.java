@@ -22,7 +22,6 @@ public class DeliveryKafkaListener {
 
     @KafkaListener(id = "listener-1",topics = "delivery-event-topic", groupId = "delivery-update-group")
     public void updateDelivery(String message) {
-        try {
             DeliveryUserEvent deliveryEvent = jsonHelper.fromJson(message, DeliveryUserEvent.class);
             switch (deliveryEvent.eventType()) {
                 case USER_UPDATE -> {
@@ -36,33 +35,25 @@ public class DeliveryKafkaListener {
                 }
                 case ADMIN_UPDATE -> {
                     AdminDeliveryResponse adminDeliveryResponse = deliveryUpdateService.changeDeliveryStatusToShipped(deliveryEvent);
+                    if (adminDeliveryResponse == null) {
+                        return;
+                    }
                     AdminNotificationEvent success = AdminNotificationEvent.success(adminDeliveryResponse);
                     String payload = jsonHelper.toJson(success);
                     kafkaTemplate.send("admin-notification-topic", success.deliveryId().toString(), payload);
                 }
             }
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
         }
 
     @KafkaListener(topics = "user-notification-topic", groupId = "user-notification-group")
     public void sendUser(String message) {
-        try {
             UserNotificationEvent userNotificationEvent = jsonHelper.fromJson(message, UserNotificationEvent.class);
             kaKaoMessageService.sendMessage(userNotificationEvent);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
     }
 
     @KafkaListener(topics = "admin-notification-topic", groupId = "admin-notification-group")
     public void sendAdmin(String message) {
-        try {
             AdminNotificationEvent adminNotificationEvent = jsonHelper.fromJson(message, AdminNotificationEvent.class);
             slackMessageService.sendMessage(adminNotificationEvent);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
     }
 }

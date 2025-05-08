@@ -42,6 +42,7 @@ public class DeliveryUpdateService {
             AdminNotificationEvent fail = AdminNotificationEvent.fail(delivery);
             String payload = jsonHelper.toJson(fail);
             kafkaTemplate.send("admin-notification-topic",delivery.getId().toString(),payload);
+            return null;
         }
         ParcelResponse parcelResponse = parcelApiService.createTrackingNumber(delivery);
 

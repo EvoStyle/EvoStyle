@@ -8,12 +8,14 @@ import com.example.evostyle.domain.delivery.dto.request.DeliveryRequest;
 import com.example.evostyle.domain.delivery.dto.response.DeliveryResponse;
 import com.example.evostyle.domain.delivery.dto.response.DeliveryResponseForBrand;
 import com.example.evostyle.domain.delivery.service.DeliveryService;
+import com.example.evostyle.global.security.AuthUser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,21 +29,21 @@ public class DeliveryController {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final JsonHelper jsonHelper;
 
-    @PostMapping("/address/{addressId}/member/{memberId}/order-items/{orderItemId}/delivery")
+    @PostMapping("/address/{addressId}/order-items/{orderItemId}/delivery")
     public ResponseEntity<DeliveryResponse> createDelivery(
             @RequestBody DeliveryRequest deliveryRequest,
             @PathVariable Long addressId,
             @PathVariable Long orderItemId,
-            @PathVariable Long memberId
+            @AuthenticationPrincipal AuthUser authUser
     ) {
-        DeliveryResponse deliveryResponse = deliveryService.createDelivery(addressId, orderItemId,memberId,deliveryRequest);
+        DeliveryResponse deliveryResponse = deliveryService.createDelivery(addressId, orderItemId,authUser.memberId(),deliveryRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(deliveryResponse);
     }
 
 
-    @GetMapping("/members/{memberId}/delivery")
-    public ResponseEntity<List<DeliveryResponse>> getAllDeliveryByMember(@PathVariable Long memberId) {
-        List<DeliveryResponse> deliveryResponseList = deliveryService.getAllDeliveryByMember(memberId);
+    @GetMapping("/delivery")
+    public ResponseEntity<List<DeliveryResponse>> getAllDeliveryByMember(@AuthenticationPrincipal AuthUser authUser) {
+        List<DeliveryResponse> deliveryResponseList = deliveryService.getAllDeliveryByMember(authUser.memberId());
         return ResponseEntity.status(HttpStatus.OK).body(deliveryResponseList);
     }
 
@@ -51,15 +53,15 @@ public class DeliveryController {
         return ResponseEntity.status(HttpStatus.OK).body(deliveryResponseList);
     }
 
-    @PatchMapping("/address/{addressId}/delivery/{deliveryId}/member/{memberId}")
+    @PatchMapping("/address/{addressId}/delivery/{deliveryId}")
     public ResponseEntity<DeliveryResponse> updateDelivery(
             @RequestBody DeliveryRequest deliveryRequest,
             @PathVariable Long addressId,
             @PathVariable Long deliveryId,
-            @PathVariable Long memberId
+            @AuthenticationPrincipal AuthUser authUser
 
     ) {
-        DeliveryUserUpdateEvent deliveryUserUpdateEvent = DeliveryUserUpdateEvent.of(EventType.USER_UPDATE, memberId,deliveryId, addressId, deliveryRequest.deliveryRequest());
+        DeliveryUserUpdateEvent deliveryUserUpdateEvent = DeliveryUserUpdateEvent.of(EventType.USER_UPDATE, authUser.memberId(),deliveryId, addressId, deliveryRequest.deliveryRequest());
         String payload = jsonHelper.toJson(deliveryUserUpdateEvent);
         kafkaTemplate.send("delivery-event-topic", deliveryId.toString(), payload);
         return ResponseEntity.status(HttpStatus.OK).build();
