@@ -3,8 +3,11 @@ package com.example.evostyle.domain.product.service;
 import com.example.evostyle.domain.brand.entity.Brand;
 import com.example.evostyle.domain.brand.repository.BrandRepository;
 import com.example.evostyle.domain.product.dto.request.CreateProductRequest;
+import com.example.evostyle.domain.product.dto.request.UpdateOwnerProductCategoryRequest;
 import com.example.evostyle.domain.product.dto.request.UpdateProductRequest;
+import com.example.evostyle.domain.product.dto.response.ProductCategoryInfo;
 import com.example.evostyle.domain.product.dto.response.ProductResponse;
+import com.example.evostyle.domain.product.dto.response.UpdateOwnerProductCategoryResponse;
 import com.example.evostyle.domain.product.entity.*;
 import com.example.evostyle.domain.product.repository.*;
 import com.example.evostyle.global.exception.ErrorCode;
@@ -21,73 +24,115 @@ import java.util.List;
 public class ProductService {
 
     private final ProductCategoryRepository productCategoryRepository;
-    private final ProductCategoryMappingRepository categoryMappingRepository;
     private final ProductRepository productRepository;
     private final BrandRepository brandRepository;
-    private final OptionGroupRepository optionGroupRepository;
-    private final OptionRepository optionRepository;
     private final ProductDetailRepository productDetailRepository;
     private final ProductDetailOptionRepository productDetailOptionRepository;
+    private final OptionGroupRepository optionGroupRepository;
+    private final OptionRepository optionRepository;
 
     @Transactional
-    public ProductResponse createProduct(Long memberId, CreateProductRequest request){
+    public ProductResponse createProduct(Long memberId, CreateProductRequest request) {
         Brand brand = brandRepository.findById(request.brandId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.BRAND_NOT_FOUND));
 
         Long brandOwnerId = brand.getMember().getId();
-        if(!memberId.equals(brandOwnerId)){throw new NotFoundException(ErrorCode.NOT_BRAND_OWNER);}
+        if (!memberId.equals(brandOwnerId)) {
+            throw new NotFoundException(ErrorCode.NOT_BRAND_OWNER);
+        }
 
-        ProductCategory category = productCategoryRepository.findById(request.categoryId())
-                .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_CATEGORY_NOT_FOUND));
+        List<ProductCategory> productCategoryList = productCategoryRepository.findAllById(request.categoryIdList());
 
-        Product product = Product.of(brand, request.name(), request.price(), request.description());
+        Product product = Product.of(brand, request.name(), request.price(), request.description(), productCategoryList);
 
         productRepository.save(product);
-        categoryMappingRepository.save(ProductCategoryMapping.of(product, category));
 
-        return ProductResponse.from(product);
+        List<ProductCategoryMapping> productCategoryMappingList = productCategoryList.stream()
+                .map(productCategory -> ProductCategoryMapping.of(product, productCategory))
+                .toList();
+
+        productCategoryRepository.saveProductCategoryMappings(productCategoryMappingList);
+
+        List<ProductCategoryInfo> productCategoryInfoList = productCategoryList.stream()
+                .map(ProductCategoryInfo::from)
+                .toList();
+
+        return ProductResponse.from(product, productCategoryInfoList);
     }
 
+    public ProductResponse readProduct(Long productId) {
+        Product product = findProductById(productId);
 
-    public ProductResponse readProduct(Long productId){
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND));
+        List<ProductCategoryInfo> productCategoryInfoList = productCategoryRepository.findCategoryInfoByProduct(product);
 
-        return ProductResponse.from(product);
+        return ProductResponse.from(product, productCategoryInfoList);
     }
 
-    public List<ProductResponse> readByBrand(Long memberId, Long brandId){
+    public List<ProductResponse> readByBrand(Long memberId, Long brandId) {
         Brand brand = brandRepository.findById(brandId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.BRAND_NOT_FOUND));
 
         Long brandOwnerId = brand.getMember().getId();
-        if(!memberId.equals(brandOwnerId)){throw new NotFoundException(ErrorCode.NOT_BRAND_OWNER);}
+        if (!memberId.equals(brandOwnerId)) {
+            throw new NotFoundException(ErrorCode.NOT_BRAND_OWNER);
+        }
 
-        return productRepository.findByBrandId(brandId)
-                .stream().map(ProductResponse::from).toList();
+        return null;
+    }
+
+    // todo
+//        return productRepository.findByBrandId(brandId)
+//                .stream().map(ProductResponse::from)
+//                .toList();
+
+
+    @Transactional
+    public ProductResponse updateProduct(Long memberId, UpdateProductRequest request, Long productId) {
+
+        Product product = findProductById(productId);
+
+        Long brandOwnerId = product.getBrand().getMember().getId();
+        if (!memberId.equals(brandOwnerId)) {
+            throw new NotFoundException(ErrorCode.NOT_BRAND_OWNER);
+        }
+
+        product.update(request.name(), request.description(), request.price());
+
+        List<ProductCategoryInfo> productCategoryInfoList = productCategoryRepository.findCategoryInfoByProduct(product);
+
+        return ProductResponse.from(product, productCategoryInfoList);
     }
 
     @Transactional
-    public ProductResponse updateProduct(Long memberId, UpdateProductRequest request, Long productId){
+    public UpdateOwnerProductCategoryResponse updateProductCategories(UpdateOwnerProductCategoryRequest request, Long productId) {
+        Product product = findProductById(productId);
 
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND));
+        productCategoryRepository.deleteAllByProductId(productId);
 
-        Long brandOwnerId = product.getBrand().getMember().getId();
-        if(!memberId.equals(brandOwnerId)){throw new NotFoundException(ErrorCode.NOT_BRAND_OWNER);}
+        List<ProductCategory> productCategoryList = productCategoryRepository.findAllById(request.categoryIdList());
 
-       product.update(request.name(), request.description(), request.price());
+        List<ProductCategoryMapping> productCategoryMappingList = productCategoryList.stream()
+                .map(category -> ProductCategoryMapping.of(product, category))
+                .toList();
 
-       return ProductResponse.from(product);
+        productCategoryRepository.saveProductCategoryMappings(productCategoryMappingList);
+
+        List<ProductCategoryInfo> productCategoryInfoList = productCategoryList.stream()
+                .map(ProductCategoryInfo::from)
+                .toList();
+
+        return UpdateOwnerProductCategoryResponse.from(product, productCategoryInfoList);
     }
 
     @Transactional
-   public void deleteProduct(Long memberId, Long productId){
+    public void deleteProduct(Long memberId, Long productId) {
 
-        Product product = productRepository.findById(productId).orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND));
+        Product product = findProductById(productId);
 
         Long brandOwnerId = product.getBrand().getMember().getId();
-        if(!memberId.equals(brandOwnerId)){throw new NotFoundException(ErrorCode.NOT_BRAND_OWNER);}
+        if (!memberId.equals(brandOwnerId)) {
+            throw new NotFoundException(ErrorCode.NOT_BRAND_OWNER);
+        }
 
         List<OptionGroup> optionGroupList = optionGroupRepository.findByProductIdAndIsDeletedFalse(productId);
         optionGroupList.forEach(OptionGroup::delete);
@@ -101,5 +146,10 @@ public class ProductService {
         productDetailOptionRepository
                 .findByProductDetailIdIn(productDetailList.stream().map(ProductDetail::getId).toList())
                 .forEach(ProductDetailOption::delete);
-   }
+    }
+
+    private Product findProductById(Long productId) {
+        return productRepository.findById(productId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND));
+    }
 }

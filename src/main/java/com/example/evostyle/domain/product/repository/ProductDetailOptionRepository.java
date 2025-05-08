@@ -10,5 +10,4 @@ public interface ProductDetailOptionRepository extends JpaRepository<ProductDeta
     List<ProductDetailOption> findByProductDetailId(Long productDetailId);
 
     List<ProductDetailOption> findByProductDetailIdIn(List<Long> productDetailIdList);
-
 }

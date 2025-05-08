@@ -5,6 +5,7 @@ import java.util.Arrays;
 public enum OrderStatus {
     PENDING, // 주문 생성 시, 즉 수락 대기 상태
     ACCEPTED, // 주문 수락
+    PAID,
     CANCELED, // 주문 취소
     DELIVERING, // ACCEPTED 이후 배송 중
     DELIVERED; // DELIVERING 이후 배송 완료

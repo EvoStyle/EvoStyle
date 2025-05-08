@@ -43,7 +43,7 @@ public enum ErrorCode {
     //브랜드 관련
     BRAND_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 브랜드입니다"),
     BRAND_NAME_DUPLICATED(HttpStatus.BAD_REQUEST, "이미 존재하는 브랜드 이름입니다."),
-    NON_EXISTENT_BRAND_CATEGORY(HttpStatus.BAD_REQUEST, "요청한 카테고리 중 유효한 항목이 없습니다."),
+    NON_EXISTENT_CATEGORY(HttpStatus.BAD_REQUEST, "요청한 카테고리 중 유효한 항목이 없습니다."),
     CATEGORY_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "브랜드 카테고리는 최대 3개까지입니다."),
     NOT_BRAND_OWNER(HttpStatus.FORBIDDEN, "해당 브랜드 관련 권한이 없습니다"),
     BRAND_CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 브랜드 카테고리입니다."),
@@ -104,9 +104,18 @@ public enum ErrorCode {
     PRODUCT_LIKE_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 등록된 좋아요입니다."),
     PRODUCT_LIKE_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 좋아요입니다"),
 
-    //배송 관련
+    //결제관련
+    PAYMENT_INVALID_AMOUNT(HttpStatus.CONFLICT, "주문 금액과 결제 금액이 일치하지 않습니다"),
+    ORDER_ALREADY_PAID(HttpStatus.CONFLICT, "이미 결제된 주문건입니다"),
+    NOT_FOUND_PAYMENT(HttpStatus.NOT_FOUND, "존재하지 않는 결제내역입니다"),
+    PAYMENT_SYSTEM_ERROR(HttpStatus.CONFLICT, "시스템 오류로 결제가 실패했습니다"),
+    PAYMENT_NOT_APPROVED(HttpStatus.CONFLICT, "결제 승인이 실패되었습니다"),
+    PAYMENT_CANCEL_FAILED(HttpStatus.CONFLICT, "결제 취소가 실패되었습니다"),
+    PAYMENT_CANNOT_BE_CANCELED(HttpStatus.BAD_REQUEST, "해당 주문은 결제 취소가 허용되지 않습니다."),
 
-    DELIVERY_NOT_READY(HttpStatus.BAD_REQUEST,"배송이 준비상태가 아닙니다."),
+
+    // 배송,
+    DELIVERY_NOT_READY(HttpStatus.BAD_REQUEST,"배송이 이미 시작되었습니다. 택배회사에 문의해주세요"),
     DELIVERY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 배송입니다."),
     PARCEL_API_FAIL(HttpStatus.UNPROCESSABLE_ENTITY, "택배 송장 등록에 실패했습니다."),
     DELIVERY_CONFLICT_MODIFIED_BY_ADMIN(HttpStatus.CONFLICT,"다른 관리자가 해당 배송을 출고하였습니다."),

@@ -116,4 +116,8 @@ public class OrderItem {
             throw new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND);
         }
     }
+
+    public void updateOrderStatus(OrderStatus orderStatus){
+        this.orderStatus = orderStatus;
+    }
 }

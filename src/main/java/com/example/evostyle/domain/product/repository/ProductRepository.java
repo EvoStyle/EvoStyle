@@ -8,15 +8,9 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
-
-    @Query("SELECT p FROM Product p WHERE p.id IN :idList")
-    List<Product> findByIdList(@Param("idList") List<Long> idList);
-
-
     List<Product> findByBrandId(Long brandId);
 
 
