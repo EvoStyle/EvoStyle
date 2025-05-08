@@ -7,16 +7,16 @@ import java.util.List;
 public record UpdateBrandNameResponse(
         Long id,
         String updatedName,
-        List<CategoryInfo> brandCategoryInfoList
+        List<BrandCategoryInfo> brandBrandCategoryInfoList
 ) {
     public static UpdateBrandNameResponse from(
             Brand brand,
-            List<CategoryInfo> brandCategoryInfoList
+            List<BrandCategoryInfo> brandBrandCategoryInfoList
     ) {
         return new UpdateBrandNameResponse(
                 brand.getId(),
                 brand.getName(),
-                brandCategoryInfoList
+                brandBrandCategoryInfoList
         );
     }
 }

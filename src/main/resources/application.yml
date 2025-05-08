@@ -1,6 +1,7 @@
 spring:
   config:
     import: optional:application-secret.yml
+
   datasource:
     url: jdbc:mysql://localhost:3306/${db.name}?serverTimezone=Asia/Seoul
     username: ${db.username}
@@ -38,7 +39,7 @@ spring:
 delivery:
   api:
     base-url: ${delivery.url}
-    uri : ${delivery.uri}
+    uri: ${delivery.uri}
 
 logging:
   level:
@@ -55,3 +56,7 @@ jwt:
 kakao:
   token: ${kakao.accesstoken}
 
+payment:
+  toss:
+    test-client-key: test_ck_24xLea5zVAz4kK5v0aY6rQAMYNwW
+    test-secret-key: ${toss.test-secret-key}

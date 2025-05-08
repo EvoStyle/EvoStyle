@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @Table(name = "members")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Member extends BaseEntity{
+public class Member extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,6 +42,14 @@ public class Member extends BaseEntity{
     @Column(length = 5, name = "gender_type", nullable = false)
     private GenderType genderType;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "member_gradle", nullable = false)
+    private MemberGrade memberGrade = MemberGrade.MEMBER;
+
+    @Column(name = "purchase_sum")
+    @ColumnDefault("0")
+    private Long purchaseSum = 0L;
+
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
@@ -50,8 +58,8 @@ public class Member extends BaseEntity{
     private boolean isDeleted = false;
 
     private Member(
-        String email, String password, String nickname,
-        Integer age, String phoneNumber, Authority authority, GenderType genderType
+            String email, String password, String nickname,
+            Integer age, String phoneNumber, Authority authority, GenderType genderType
     ) {
         this.email = email;
         this.password = password;
@@ -63,8 +71,8 @@ public class Member extends BaseEntity{
     }
 
     public static Member of(
-        String email, String password, String nickname,
-        Integer age, String phoneNumber, Authority authority, GenderType genderType
+            String email, String password, String nickname,
+            Integer age, String phoneNumber, Authority authority, GenderType genderType
     ) {
         return new Member(email, password, nickname, age, phoneNumber, authority, genderType);
     }
@@ -79,4 +87,19 @@ public class Member extends BaseEntity{
         this.isDeleted = true;
         this.deletedAt = LocalDateTime.now();
     }
+
+    public void addToPurchaseSum(int amount) {
+        this.purchaseSum += amount;
+    }
+    public void minusToPurchaseSum(int amount){this.purchaseSum -= amount;}
+
+    public void promoteGrade() {
+        MemberGrade[] values = MemberGrade.values();
+        int nextOrdinal = this.memberGrade.ordinal() + 1;
+
+        if (values[nextOrdinal].purchaseSum <= this.purchaseSum) {
+            this.memberGrade = this.memberGrade.nextGrade();
+        }
+    }
+
 }

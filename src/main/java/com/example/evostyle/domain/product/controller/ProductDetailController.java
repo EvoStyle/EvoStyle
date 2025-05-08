@@ -15,21 +15,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/products/{productId}")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class ProductDetailController {
 
     private final ProductDetailService productDetailService;
 
-    @PostMapping("/product-details")
-    public ResponseEntity<List<ProductDetailResponse>> createProductDetail(@PathVariable(name = "productId")Long productId,
-                                                                           @AuthenticationPrincipal AuthUser authUser){
-
-        List<ProductDetailResponse> responseList = productDetailService.createProductDetail(productId, authUser.memberId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(responseList);
-    }
-
-    @GetMapping("/product-details")
+    @GetMapping("/products/{productId}/product-details")
     public ResponseEntity<List<ProductDetailResponse>> readByProductId(@PathVariable(name = "productId")Long productId){
 
         List<ProductDetailResponse> responseList = productDetailService.readByProductId(productId);
@@ -43,12 +35,13 @@ public class ProductDetailController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @PatchMapping("/product-details")
+    @PatchMapping("/products/{productId}/product-details")
     public ResponseEntity<List<ProductDetailResponse>> updateProductDetailStock(@RequestBody List<@Valid UpdateProductDetailRequest> requestList,
-                                                                                @RequestAttribute("memberId") Long memberId,
+                                                                                @AuthenticationPrincipal AuthUser authUser,
                                                                                 @PathVariable(name = "productId")Long productId){
 
-        List<ProductDetailResponse> responseList = productDetailService.updateProductDetailStock(requestList, productId, memberId);
+        List<ProductDetailResponse> responseList = productDetailService.updateProductDetailStock(requestList, productId, authUser.memberId());
         return ResponseEntity.status(HttpStatus.OK).body(responseList);
     }
+
 }

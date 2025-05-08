@@ -48,13 +48,13 @@ public class Brand extends BaseEntity {
         return new Brand(name, member,slackWebHookUrl);
     }
 
-    public static void validateBrandCategoryLimit(List<BrandCategory> brandCategoryList) {
+    private static void validateBrandCategoryLimit(List<BrandCategory> brandCategoryList) {
         if (brandCategoryList.size() > BrandCategoryLimit.MAX_CATEGORY_COUNT) {
             throw new BadRequestException(ErrorCode.CATEGORY_LIMIT_EXCEEDED);
         }
 
         if (brandCategoryList.isEmpty()) {
-            throw new BadRequestException(ErrorCode.NON_EXISTENT_BRAND_CATEGORY);
+            throw new BadRequestException(ErrorCode.NON_EXISTENT_CATEGORY);
         }
     }
 

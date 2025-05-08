@@ -1,6 +1,9 @@
 package com.example.evostyle.domain.order.entity;
 
 import com.example.evostyle.domain.brand.entity.Brand;
+import com.example.evostyle.global.exception.ErrorCode;
+import com.example.evostyle.global.exception.NotFoundException;
+import com.example.evostyle.domain.product.entity.ProductDetail;
 import com.example.evostyle.domain.delivery.entity.Delivery;
 import com.example.evostyle.domain.product.productdetail.entity.ProductDetail;
 import jakarta.persistence.*;
@@ -38,12 +41,6 @@ public class OrderItem {
 
     @Column(name = "product_description", nullable = false)
     private String productDescription;
-
-    @Column(name = "cancelled_at")
-    private LocalDateTime cancelledAt;
-
-    @Column(name = "is_cancelled", nullable = false)
-    private boolean isCancelled;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
@@ -85,25 +82,19 @@ public class OrderItem {
 
     public static OrderItem of(
             Integer eachAmount,
-            Integer totalPrice,
             Order order,
-            Brand brand,
-            OrderStatus orderStatus,
-            ProductDetail productDetail,
-            String productName,
-            Integer productPrice,
-            String productDescription
+            ProductDetail productDetail
     ) {
         return new OrderItem(
                 eachAmount,
-                totalPrice,
+                productDetail.getProduct().getPrice() * eachAmount,
                 order,
-                brand,
-                orderStatus,
+                productDetail.getProduct().getBrand(),
+                OrderStatus.PENDING,
                 productDetail,
-                productName,
-                productPrice,
-                productDescription
+                productDetail.getProduct().getName(),
+                productDetail.getProduct().getPrice(),
+                productDetail.getProduct().getDescription()
         );
     }
 
@@ -113,12 +104,30 @@ public class OrderItem {
     };
 
     public void markAsCancelled() {
-        this.isCancelled = true;
-        this.cancelledAt = LocalDateTime.now();
         this.orderStatus = OrderStatus.CANCELED;
     }
 
     public void updateDelivery(Delivery delivery) {
         this.delivery = delivery;
+    }
+
+    public void validateOrderIdMatch(Long orderId) {
+        boolean isDifferent = !this.order.getId().equals(orderId);
+
+        if (isDifferent) {
+            throw new NotFoundException(ErrorCode.ORDER_NOT_FOUND);
+        }
+    }
+
+    public void validateProductDetailIdMatch(Long productDetailId) {
+        boolean isDifferent = !this.productDetail.getId().equals(productDetailId);
+
+        if (isDifferent) {
+            throw new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND);
+        }
+    }
+
+    public void updateOrderStatus(OrderStatus orderStatus){
+        this.orderStatus = orderStatus;
     }
 }

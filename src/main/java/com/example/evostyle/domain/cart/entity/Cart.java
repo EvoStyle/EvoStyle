@@ -1,13 +1,16 @@
 package com.example.evostyle.domain.cart.entity;
 
 import com.example.evostyle.common.entity.BaseEntity;
-import com.example.evostyle.domain.cart.cartitem.CartItem;
+import com.example.evostyle.domain.member.entity.Member;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Entity
@@ -20,18 +23,21 @@ public class Cart extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id")
-    private Long userId;
+    @OneToOne
+    private Member member;
 
     @ColumnDefault("0")
     private Integer totalPrice = 0;
 
-    private Cart(Long userId){
-        this.userId = userId;
+    @ColumnDefault("0")
+    private Integer discountPrice = 0;
+
+    private Cart(Member member){
+        this.member = member;
 
     }
 
-    public static Cart of(Long userId, List<CartItem> cartItemList){
-        return new Cart(userId);
+    public static Cart of(Member member){
+        return new Cart(member);
     }
 }
