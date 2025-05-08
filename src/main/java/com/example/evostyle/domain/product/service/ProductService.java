@@ -2,24 +2,11 @@ package com.example.evostyle.domain.product.service;
 
 import com.example.evostyle.domain.brand.entity.Brand;
 import com.example.evostyle.domain.brand.repository.BrandRepository;
-import com.example.evostyle.domain.member.repository.MemberRepository;
 import com.example.evostyle.domain.product.dto.request.CreateProductRequest;
 import com.example.evostyle.domain.product.dto.request.UpdateProductRequest;
 import com.example.evostyle.domain.product.dto.response.ProductResponse;
-import com.example.evostyle.domain.product.entity.Product;
-import com.example.evostyle.domain.product.entity.Option;
-import com.example.evostyle.domain.product.entity.OptionGroup;
-import com.example.evostyle.domain.product.repository.OptionGroupRepository;
-import com.example.evostyle.domain.product.repository.OptionRepository;
-import com.example.evostyle.domain.product.productcategory.entity.ProductCategory;
-import com.example.evostyle.domain.product.productcategory.entity.ProductCategoryMapping;
-import com.example.evostyle.domain.product.productcategory.repository.ProductCategoryMappingRepository;
-import com.example.evostyle.domain.product.productcategory.repository.ProductCategoryRepository;
-import com.example.evostyle.domain.product.entity.ProductDetail;
-import com.example.evostyle.domain.product.entity.ProductDetailOption;
-import com.example.evostyle.domain.product.repository.ProductDetailOptionRepository;
-import com.example.evostyle.domain.product.repository.ProductDetailRepository;
-import com.example.evostyle.domain.product.repository.ProductRepository;
+import com.example.evostyle.domain.product.entity.*;
+import com.example.evostyle.domain.product.repository.*;
 import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -57,6 +44,7 @@ public class ProductService {
 
         productRepository.save(product);
         categoryMappingRepository.save(ProductCategoryMapping.of(product, category));
+
         return ProductResponse.from(product);
     }
 
