@@ -2,7 +2,6 @@ package com.example.evostyle.domain.delivery.service;
 
 import com.example.evostyle.common.util.JsonHelper;
 import com.example.evostyle.domain.delivery.dto.*;
-import com.example.evostyle.domain.delivery.dto.response.DeliveryResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -14,7 +13,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class DeliveryKafkaListener {
     private final JsonHelper jsonHelper;
-    private final DeliveryUpdateService deliveryService;
+    private final DeliveryUpdateService deliveryUpdateService;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final KaKaoMessageService kaKaoMessageService;
     private final SlackMessageService slackMessageService;
@@ -24,13 +23,13 @@ public class DeliveryKafkaListener {
         DeliveryUserEvent deliveryEvent = jsonHelper.fromJson(message, DeliveryUserEvent.class);
         switch (deliveryEvent.eventType()) {
             case USER_UPDATE -> {
-                String trackingNumber = deliveryService.updateDelivery(deliveryEvent);
+                String trackingNumber = deliveryUpdateService.updateDelivery(deliveryEvent);
                 UserNotificationEvent success = UserNotificationEvent.success(deliveryEvent.userId(), trackingNumber);
                 String payload = jsonHelper.toJson(success);
                 kafkaTemplate.send("user-notification-topic", deliveryEvent.userId().toString(), payload);
             }
             case ADMIN_UPDATE -> {
-                AdminDeliveryResponse adminDeliveryResponse = deliveryService.changeDeliveryStatusToShipped(deliveryEvent);
+                AdminDeliveryResponse adminDeliveryResponse = deliveryUpdateService.changeDeliveryStatusToShipped(deliveryEvent);
                AdminNotificationEvent success = AdminNotificationEvent.success(adminDeliveryResponse);
                 String payload = jsonHelper.toJson(success);
                 kafkaTemplate.send("admin-notification-topic", success.deliveryId().toString(), payload);

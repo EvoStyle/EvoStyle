@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 import java.util.Optional;
 
-public interface AddressRepository extends JpaRepository<Address, Long> {
+public interface AddressRepository extends JpaRepository<Address, Long> ,AddressRepositoryCustom{
 
     Optional<Address> findByIdAndMemberId(Long Id, Long memberId);
 

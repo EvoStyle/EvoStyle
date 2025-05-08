@@ -39,11 +39,10 @@ public class DeliveryService {
 
     @Transactional
     public DeliveryResponse createDelivery(Long addressId, Long orderItemId, Long memberId, DeliveryRequest deliveryRequest) {
-        Address address = addressRepository.findById(addressId).orElseThrow(() -> new NotFoundException(ErrorCode.ADDRESS_NOT_FOUND));
+        Address address = addressRepository.findWithMemberById(addressId);
         OrderItem orderItem = orderItemRepository.findById(orderItemId).orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_NOT_FOUND));
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
-        Delivery delivery = Delivery.of(member, orderItem,orderItem.getBrand() ,deliveryRequest.deliveryRequest(), address.getFullAddress(), address.getDetailAddress(), address.getPostCode());
+        Delivery delivery = Delivery.of(address.getMember(), orderItem,orderItem.getBrand() ,deliveryRequest.deliveryRequest(), address.getFullAddress(), address.getDetailAddress(), address.getPostCode());
         Delivery savedDelivery = deliveryRepository.save(delivery);
         return DeliveryResponse.from(savedDelivery);
     }
@@ -63,19 +62,15 @@ public class DeliveryService {
 
 
     @Transactional
-    public AdminDeliveryResponse performShipping(ParcelResponse parcelResponse, Delivery managed) {
-//        Delivery managed = entityManager.contains(delivery) ? delivery : entityManager.merge(delivery);
-        managed.changeStatus(DeliveryStatus.SHIPPED);
+    public AdminDeliveryResponse performShipping(ParcelResponse parcelResponse, Delivery delivery) {
+        delivery.changeStatus(DeliveryStatus.SHIPPED);
 
-        managed.insertTrackingNumber(parcelResponse.trackingNumber());
+        delivery.insertTrackingNumber(parcelResponse.trackingNumber());
 
-        deliveryRepository.save(managed);
+        deliveryRepository.save(delivery);
 
-        return AdminDeliveryResponse.from(managed);
-
+        return AdminDeliveryResponse.from(delivery);
     }
-
-
 
     private void cancelParcelApi(String trackingNumber) {
 
