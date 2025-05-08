@@ -1,12 +1,15 @@
 package com.example.evostyle.domain.order.entity;
 
 import com.example.evostyle.common.entity.BaseEntity;
-import com.example.evostyle.domain.brand.entity.Brand;
 import com.example.evostyle.domain.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -25,9 +28,18 @@ public class Order extends BaseEntity {
     @Column(name = "total_price_sum", nullable = false)
     private int totalPriceSum;
 
+    @Column(name = "cancelled_at")
+    private LocalDateTime cancelledAt;
+
+    @Column(name = "is_cancelled", nullable = false)
+    private boolean isCancelled;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderItem> orderItemList = new ArrayList<>();
 
     private Order(
             Member member,
@@ -49,5 +61,22 @@ public class Order extends BaseEntity {
                 totalAmountSum,
                 totalPriceSum
         );
+    }
+
+    public void addOrderItem(OrderItem orderItem) {
+        this.orderItemList.add(orderItem);
+    }
+
+    public void updateAmountSumAndPriceSum(
+            int totalAmountSum,
+            int totalPriceSum
+    ) {
+        this.totalAmountSum = totalAmountSum;
+        this.totalPriceSum = totalPriceSum;
+    }
+
+    public void markAsCancelled() {
+        this.isCancelled = true;
+        this.cancelledAt = LocalDateTime.now();
     }
 }

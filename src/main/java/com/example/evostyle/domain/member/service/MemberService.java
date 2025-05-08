@@ -7,7 +7,6 @@ import com.example.evostyle.domain.member.repository.MemberRepository;
 import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.ForbiddenException;
 import com.example.evostyle.global.exception.NotFoundException;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,20 +18,16 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
 
-    public MemberResponse readMember(HttpServletRequest request) {
-        Long loginMemberId = (Long) request.getAttribute("memberId");
-
-        Member member = memberRepository.findByIdAndIsDeletedFalse(loginMemberId)
+    public MemberResponse readMember(Long memberId) {
+        Member member = memberRepository.findByIdAndIsDeletedFalse(memberId)
             .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
         return MemberResponse.from(member);
     }
 
     @Transactional
-    public MemberResponse updateMember(UpdateMemberRequest request, HttpServletRequest httpServletRequest) {
-        Long loginMemberId = (Long) httpServletRequest.getAttribute("memberId");
-
-        Member member = memberRepository.findByIdAndIsDeletedFalse(loginMemberId)
+    public MemberResponse updateMember(UpdateMemberRequest request, Long memberId) {
+        Member member = memberRepository.findByIdAndIsDeletedFalse(memberId)
             .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 
         member.updateMember(request.nickname(), request.age(), request.phoneNumber());
@@ -41,9 +36,7 @@ public class MemberService {
     }
 
     @Transactional
-    public void deleteMember(Long memberId, HttpServletRequest request) {
-        Long loginMemberId = (Long) request.getAttribute("memberId");
-
+    public void deleteMember(Long memberId, Long loginMemberId) {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
 

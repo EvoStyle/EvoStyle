@@ -1,24 +1,26 @@
 package com.example.evostyle.domain.order.dto.response;
 
 import com.example.evostyle.domain.order.entity.OrderItem;
+import com.example.evostyle.domain.order.entity.OrderStatus;
 
 public record CreateOrderItemResponse(
         Long orderItemId,
+        Long brandId,
         Long productDetailId,
         String productName,
         Integer eachAmount,
-        Integer totalPrice
+        Integer totalPrice,
+        OrderStatus orderStatus
 ) {
-    public static CreateOrderItemResponse from(
-            OrderItem orderItem,
-            Long productDetailId
-    ) {
+    public static CreateOrderItemResponse from(OrderItem orderItem) {
         return new CreateOrderItemResponse(
                 orderItem.getId(),
-                productDetailId,
+                orderItem.getBrand().getId(),
+                orderItem.getProductDetail().getId(),
                 orderItem.getProductName(),
                 orderItem.getEachAmount(),
-                orderItem.getTotalPrice()
+                orderItem.getTotalPrice(),
+                OrderStatus.PENDING
         );
     }
 }

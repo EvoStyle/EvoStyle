@@ -1,11 +1,18 @@
 package com.example.evostyle.domain.delivery.controller;
 
+import com.example.evostyle.common.util.JsonHelper;
+import com.example.evostyle.domain.delivery.dto.DeliveryAdminUpdateEvent;
+import com.example.evostyle.domain.delivery.dto.DeliveryUserUpdateEvent;
+import com.example.evostyle.domain.delivery.dto.EventType;
 import com.example.evostyle.domain.delivery.dto.request.DeliveryRequest;
 import com.example.evostyle.domain.delivery.dto.response.DeliveryResponse;
 import com.example.evostyle.domain.delivery.service.DeliveryService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,6 +23,8 @@ import java.util.List;
 public class DeliveryController {
 
     private final DeliveryService deliveryService;
+    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final JsonHelper jsonHelper;
 
     @PostMapping("/address/{addressId}/member/{memberId}/order-items/{orderItemId}/delivery")
     public ResponseEntity<DeliveryResponse> createDelivery(
@@ -41,15 +50,19 @@ public class DeliveryController {
             @PathVariable Long addressId,
             @PathVariable Long deliveryId
     ) {
-        DeliveryResponse deliveryResponse = deliveryService.updateDelivery(deliveryRequest,addressId,deliveryId);
-        return ResponseEntity.status(HttpStatus.OK).body(deliveryResponse);
+        DeliveryUserUpdateEvent deliveryUserUpdateEvent = DeliveryUserUpdateEvent.of(EventType.USER_UPDATE, deliveryId, addressId, deliveryRequest.deliveryRequest());
+        String payload = jsonHelper.toJson(deliveryUserUpdateEvent);
+        kafkaTemplate.send("delivery-event-topic", deliveryId.toString(), payload);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
 
     // 권한설정필요 관리자용
     @PatchMapping("/delivery/{deliveryId}")
     public ResponseEntity<DeliveryResponse> changeDeliveryStatusToShipped(@PathVariable Long deliveryId) {
-        DeliveryResponse deliveryResponse = deliveryService.changeDeliveryStatusToShipped(deliveryId);
-        return ResponseEntity.status(HttpStatus.OK).body(deliveryResponse);
+        DeliveryAdminUpdateEvent deliveryAdminUpdateEvent = DeliveryAdminUpdateEvent.of(EventType.ADMIN_UPDATE, deliveryId);
+        String payload = jsonHelper.toJson(deliveryAdminUpdateEvent);
+        kafkaTemplate.send("delveiry-event-topic", deliveryId.toString(), payload);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

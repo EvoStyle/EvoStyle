@@ -1,10 +1,15 @@
 package com.example.evostyle.domain.order.entity;
 
+import com.example.evostyle.domain.brand.entity.Brand;
+import com.example.evostyle.global.exception.ErrorCode;
+import com.example.evostyle.global.exception.NotFoundException;
 import com.example.evostyle.domain.product.entity.ProductDetail;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -40,6 +45,10 @@ public class OrderItem {
     private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "brand_id", nullable = false)
+    private Brand brand;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_detail_id", nullable = false)
     private ProductDetail productDetail;
 
@@ -47,6 +56,7 @@ public class OrderItem {
             Integer eachAmount,
             Integer totalPrice,
             Order order,
+            Brand brand,
             OrderStatus orderStatus,
             ProductDetail productDetail,
             String productName,
@@ -56,6 +66,7 @@ public class OrderItem {
         this.eachAmount = eachAmount;
         this.totalPrice = totalPrice;
         this.order = order;
+        this.brand = brand;
         this.orderStatus = orderStatus;
         this.productDetail = productDetail;
         this.productName = productName;
@@ -65,23 +76,44 @@ public class OrderItem {
 
     public static OrderItem of(
             Integer eachAmount,
-            Integer totalPrice,
             Order order,
-            OrderStatus orderStatus,
-            ProductDetail productDetail,
-            String productName,
-            Integer productPrice,
-            String productDescription
+            ProductDetail productDetail
     ) {
         return new OrderItem(
                 eachAmount,
-                totalPrice,
+                productDetail.getProduct().getPrice() * eachAmount,
                 order,
-                orderStatus,
+                productDetail.getProduct().getBrand(),
+                OrderStatus.PENDING,
                 productDetail,
-                productName,
-                productPrice,
-                productDescription
+                productDetail.getProduct().getName(),
+                productDetail.getProduct().getPrice(),
+                productDetail.getProduct().getDescription()
         );
+    }
+
+    public void update(int newAmount) {
+        this.eachAmount = newAmount;
+        this.totalPrice = this.productPrice * newAmount;
+    };
+
+    public void markAsCancelled() {
+        this.orderStatus = OrderStatus.CANCELED;
+    }
+
+    public void validateOrderIdMatch(Long orderId) {
+        boolean isDifferent = !this.order.getId().equals(orderId);
+
+        if (isDifferent) {
+            throw new NotFoundException(ErrorCode.ORDER_NOT_FOUND);
+        }
+    }
+
+    public void validateProductDetailIdMatch(Long productDetailId) {
+        boolean isDifferent = !this.productDetail.getId().equals(productDetailId);
+
+        if (isDifferent) {
+            throw new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND);
+        }
     }
 }

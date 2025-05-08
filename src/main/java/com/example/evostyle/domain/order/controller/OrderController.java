@@ -1,14 +1,16 @@
 package com.example.evostyle.domain.order.controller;
 
-import com.example.evostyle.domain.order.dto.request.CreateOrderItemRequest;
-import com.example.evostyle.domain.order.dto.response.CreateOrderResponse;
+import com.example.evostyle.common.util.JwtUtil;
+import com.example.evostyle.domain.order.dto.response.ReadOrderResponse;
 import com.example.evostyle.domain.order.service.OrderService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -16,20 +18,30 @@ import java.util.List;
 public class OrderController {
 
     private final OrderService orderService;
+    private final JwtUtil jwtUtil;
 
-    @PostMapping
-    public ResponseEntity<CreateOrderResponse> createOrder(@RequestBody List<CreateOrderItemRequest> requestList) {
+    @GetMapping
+    public ResponseEntity<List<ReadOrderResponse>> readAllOrders(HttpServletRequest httpServletRequest) {
+        Long memberId = extractMemberId(httpServletRequest);
 
-        CreateOrderResponse createOrderResponse = orderService.createOrder(requestList);
+        List<ReadOrderResponse> orderResponseList = orderService.readAllOrders(memberId);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(createOrderResponse);
+        return ResponseEntity.status(HttpStatus.OK).body(orderResponseList);
     }
 
-//    @GetMapping
-//    public ResponseEntity<List<ReadOrderItemWrapper>> readOrders() {
-//
-//        List<ReadOrderItemWrapper> wrapperList = orderService.readAllOrders();
-//
-//        return ResponseEntity.status(HttpStatus.OK).body(wrapperList);
-//    }
+    @DeleteMapping("/{orderId}")
+    public ResponseEntity<Map<String, Long>> deleteOrder(
+            @PathVariable(name = "orderId") Long orderId,
+            HttpServletRequest httpServletRequest
+    ) {
+        Long memberId = extractMemberId(httpServletRequest);
+
+        orderService.deleteOrder(orderId, memberId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(Map.of("orderId", orderId));
+    }
+
+    private Long extractMemberId(HttpServletRequest httpServletRequest) {
+        return jwtUtil.getMemberId(httpServletRequest.getHeader("Authorization"));
+    }
 }

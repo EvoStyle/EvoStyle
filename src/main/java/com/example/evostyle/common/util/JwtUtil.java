@@ -22,6 +22,7 @@ public class JwtUtil {
 
     private static final String BEARER_PREFIX = "Bearer ";
     private static final long ACCESS_TOKEN_EXPIRATION = 30 * 60 * 1000;  // 30분
+    private static final long REFRESH_TOKEN_EXPIRATION = 7 * 24 * 60 * 60 * 1000L;  // 7일
 
     @Value("${jwt.secret.key}")
     private String secretKey;
@@ -53,9 +54,21 @@ public class JwtUtil {
             .setSubject(String.valueOf(memberId))
             .claim("email", email)
             .claim("nickname", nickname)
-            .claim("authority", authority)
+            .claim("authority", authority.getRoleName())  // "ROLE_OWNER" 같은 문자열로 저장
             .setIssuedAt(new Date())
             .setExpiration(new Date(date.getTime() + ACCESS_TOKEN_EXPIRATION))
+            .signWith(key, signatureAlgorithm)
+            .compact();
+    }
+
+    // Refresh Token 생성
+    public String createRefreshToken(Long memberId) {
+        Date now = new Date();
+
+        return BEARER_PREFIX + Jwts.builder()
+            .setSubject(String.valueOf(memberId))
+            .setIssuedAt(now)
+            .setExpiration(new Date(now.getTime() + REFRESH_TOKEN_EXPIRATION))
             .signWith(key, signatureAlgorithm)
             .compact();
     }
@@ -88,6 +101,19 @@ public class JwtUtil {
         }
     }
 
+    // 만료된 Refresh Token에서 memberId 추출
+    public Claims parseClaimsAllowExpired(String token) {
+        try {
+            return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(removeBearer(token))
+                .getBody();
+        } catch (ExpiredJwtException e) {
+            return e.getClaims();  // 만료되었어도 Claims는 꺼낼 수 있음
+        }
+    }
+
     // 토큰에서 사용자 Id 추출
     public Long getMemberId(String token) {
         token = removeBearer(token);
@@ -107,6 +133,10 @@ public class JwtUtil {
         token = removeBearer(token);
         Claims claims = parseClaims(token);
         return claims.get("authority", String.class);
+    }
+
+    public long getRefreshTokenExpiration() {
+        return REFRESH_TOKEN_EXPIRATION;
     }
 
     // "Bearer " 접두어 제거

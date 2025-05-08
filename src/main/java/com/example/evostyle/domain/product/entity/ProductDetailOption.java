@@ -1,12 +1,11 @@
 package com.example.evostyle.domain.product.entity;
 
 
-import com.example.evostyle.domain.product.optiongroup.entity.OptionGroup;
-import com.example.evostyle.domain.product.optiongroup.entity.Option;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 @Getter
 @Entity
@@ -16,27 +15,30 @@ public class ProductDetailOption {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id ;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "product_detail_id")
     private ProductDetail productDetail;
 
-    @ManyToOne
-    @JoinColumn(name = "product_option_group_id")
-    private OptionGroup optionGroup;
 
     @ManyToOne
     @JoinColumn(name = "product_option_id")
-    private Option option ;
+    private Option option;
 
-    private ProductDetailOption(ProductDetail productDetail, OptionGroup optionGroup, Option option){
-        this.productDetail = productDetail ;
-        this.optionGroup = optionGroup ;
-        this.option = option ;
+    @ColumnDefault("false")
+    private boolean isDeleted = false;
+
+    private ProductDetailOption(ProductDetail productDetail, Option option) {
+        this.productDetail = productDetail;
+        this.option = option;
     }
 
-    public static ProductDetailOption of(ProductDetail productDetail, OptionGroup optionGroup, Option option){
-        return new ProductDetailOption(productDetail, optionGroup, option);
+    public static ProductDetailOption of(ProductDetail productDetail, Option option) {
+        return new ProductDetailOption(productDetail, option);
+    }
+
+    public void delete(){
+        this.isDeleted = false;
     }
 }
