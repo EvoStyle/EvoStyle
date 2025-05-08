@@ -1,9 +1,12 @@
-package com.example.evostyle.domain.product.optiongroup.entity;
+package com.example.evostyle.domain.product.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Entity
@@ -22,6 +25,10 @@ public class Option {
     @Column(nullable = false)
     private String type;
 
+    @ColumnDefault("false")
+    private boolean isDeleted = false;
+
+
     private Option (OptionGroup optionGroup, String type){
         this.optionGroup = optionGroup;
         this.type = type;
@@ -35,4 +42,5 @@ public class Option {
         this.type = type;
     }
 
+    public void delete(){this.isDeleted = false;}
 }

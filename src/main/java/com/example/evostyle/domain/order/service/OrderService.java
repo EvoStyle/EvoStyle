@@ -9,9 +9,10 @@ import com.example.evostyle.domain.order.dto.response.ReadOrderResponse;
 import com.example.evostyle.domain.order.entity.Order;
 import com.example.evostyle.domain.order.entity.OrderItem;
 import com.example.evostyle.domain.order.repository.OrderItemQueryDsl;
+import com.example.evostyle.domain.order.repository.OrderItemRepository;
 import com.example.evostyle.domain.order.repository.OrderQueryDsl;
 import com.example.evostyle.domain.order.repository.OrderRepository;
-import com.example.evostyle.domain.product.productdetail.entity.ProductDetail;
+import com.example.evostyle.domain.product.entity.ProductDetail;
 import com.example.evostyle.domain.product.repository.ProductDetailRepository;
 import com.example.evostyle.global.exception.BadRequestException;
 import com.example.evostyle.global.exception.ErrorCode;
@@ -20,7 +21,6 @@ import com.mysema.commons.lang.Pair;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final OrderItemRepository orderItemRepository;
     private final MemberRepository memberRepository;
     private final ProductDetailRepository productDetailRepository;
     private final OrderItemQueryDsl orderItemQueryDsl;

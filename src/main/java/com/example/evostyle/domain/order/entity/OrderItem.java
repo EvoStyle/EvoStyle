@@ -1,9 +1,9 @@
 package com.example.evostyle.domain.order.entity;
 
 import com.example.evostyle.domain.brand.entity.Brand;
-import com.example.evostyle.domain.product.productdetail.entity.ProductDetail;
 import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.NotFoundException;
+import com.example.evostyle.domain.product.entity.ProductDetail;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -101,7 +101,7 @@ public class OrderItem {
     public void update(int newAmount) {
         this.eachAmount = newAmount;
         this.totalPrice = this.productPrice * newAmount;
-    }
+    };
 
     public void markAsCancelled() {
         this.isCancelled = true;

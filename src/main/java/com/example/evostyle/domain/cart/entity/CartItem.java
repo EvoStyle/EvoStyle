@@ -1,16 +1,11 @@
 package com.example.evostyle.domain.cart.entity;
 
 import com.example.evostyle.common.entity.BaseEntity;
-import com.example.evostyle.domain.product.entity.Product;
-import com.example.evostyle.domain.product.productdetail.entity.ProductDetail;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.example.evostyle.domain.product.entity.ProductDetail;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.io.Serializable;
 
 @Entity
 @Getter

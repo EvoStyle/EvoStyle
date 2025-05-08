@@ -4,12 +4,14 @@ import com.example.evostyle.domain.product.dto.request.CreateProductRequest;
 import com.example.evostyle.domain.product.dto.request.UpdateProductRequest;
 import com.example.evostyle.domain.product.dto.response.ProductResponse;
 import com.example.evostyle.domain.product.service.ProductService;
-import jakarta.servlet.http.HttpServletRequest;
+import com.example.evostyle.global.security.AuthUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RequestMapping("/api")
@@ -21,36 +23,40 @@ public class ProductController {
 
     @PostMapping("/products")
     public ResponseEntity<ProductResponse> createProduct(@RequestBody CreateProductRequest request,
-                                                         HttpServletRequest servletRequest){
+                                                         @AuthenticationPrincipal AuthUser authUser){
 
-        Long memberId = (Long) servletRequest.getAttribute("memberId");
-        ProductResponse response = productService.createProduct(request, memberId);
+
+        ProductResponse response = productService.createProduct(authUser.memberId(), request);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @GetMapping("/products/{productId}")
     public ResponseEntity<ProductResponse> readProduct(@PathVariable(name = "productId") Long productId){
         ProductResponse response = productService.readProduct(productId);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 
+    @GetMapping("/brands/{brandId}/products")
+    public ResponseEntity<List<ProductResponse>> readByBrand(@PathVariable(name = "brandId")Long brandId,
+                                                             @AuthenticationPrincipal AuthUser authUser){
+        List<ProductResponse> response = productService.readByBrand(authUser.memberId(),brandId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PatchMapping("/products/{productId}")
-    public ResponseEntity<ProductResponse> updateProduct(@RequestBody UpdateProductRequest request,
-                                                         @PathVariable (name = "productId") Long productId,
-                                                         HttpServletRequest servletRequest){
+    public ResponseEntity<ProductResponse> updateProduct(@AuthenticationPrincipal AuthUser authUser,
+                                                         @RequestBody UpdateProductRequest request,
+                                                         @PathVariable (name = "productId") Long productId){
 
-        Long memberId = (Long) servletRequest.getAttribute("memberId");
-        ProductResponse response = productService.updateProduct(request, productId, memberId);
+        ProductResponse response = productService.updateProduct(authUser.memberId(), request, productId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @DeleteMapping("/products/{productId}")
     public ResponseEntity<Map<String, Long>> deleteProduct(@PathVariable(name = "productId") Long productId,
-                                                           HttpServletRequest servletRequest){
+                                                           @AuthenticationPrincipal AuthUser authUser){
+        productService.deleteProduct(authUser.memberId(), productId);
 
-        Long memberId = (Long) servletRequest.getAttribute("memberId");
-        productService.deleteProduct(productId, memberId);
         return  ResponseEntity.status(HttpStatus.OK).body(Map.of("productDetailId", productId));
     }
 }

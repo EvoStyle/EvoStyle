@@ -1,24 +1,19 @@
-package com.example.evostyle.domain.product.productdetail.entity;
+package com.example.evostyle.domain.product.entity;
 
 import com.example.evostyle.common.entity.BaseEntity;
-import com.example.evostyle.domain.product.entity.Product;
+import com.example.evostyle.domain.brand.entity.Brand;
 import com.example.evostyle.global.exception.BadRequestException;
 import com.example.evostyle.global.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
-
-import java.time.LocalDateTime;
-
-import java.io.Serializable;
 
 @Entity
 @Getter
 @Table(name = "product_details")
 @NoArgsConstructor
-public class ProductDetail extends BaseEntity implements Serializable {
+public class ProductDetail extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,6 +23,10 @@ public class ProductDetail extends BaseEntity implements Serializable {
     @JoinColumn(name = "product_id")
     private Product product;
 
+   @ManyToOne
+    @JoinColumn(name = "brand_id")
+    private Brand brand;
+
     @Column(name = "product_stock")
     @ColumnDefault("0")
     private Integer stock = 0;
@@ -36,12 +35,13 @@ public class ProductDetail extends BaseEntity implements Serializable {
     private boolean isDeleted = false;
 
 
-    private ProductDetail(Product product) {
+    private ProductDetail(Brand brand, Product product) {
+        this.brand = brand;
         this.product = product;
     }
 
-    public static ProductDetail of(Product product) {
-        return new ProductDetail(product);
+    public static ProductDetail of(Brand brand, Product product) {
+        return new ProductDetail(brand, product);
     }
 
     public void setStock(Integer stock){
@@ -62,5 +62,9 @@ public class ProductDetail extends BaseEntity implements Serializable {
             // 수량이 감소하면, 감소된 수량만큼 재고 증가
             this.stock += Math.abs(difference);
         }
+    }
+
+    public void delete(){
+        this.isDeleted = false;
     }
 }

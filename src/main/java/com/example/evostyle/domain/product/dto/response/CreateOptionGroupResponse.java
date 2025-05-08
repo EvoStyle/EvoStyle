@@ -1,6 +1,6 @@
-package com.example.evostyle.domain.product.optiongroup.dto.response;
+package com.example.evostyle.domain.product.dto.response;
 
-import com.example.evostyle.domain.product.optiongroup.entity.OptionGroup;
+import com.example.evostyle.domain.product.entity.OptionGroup;
 
 import java.util.List;
 
