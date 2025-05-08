@@ -9,7 +9,7 @@ import com.example.evostyle.domain.order.entity.Order;
 import com.example.evostyle.domain.order.entity.OrderItem;
 import com.example.evostyle.domain.order.repository.OrderItemQueryDsl;
 import com.example.evostyle.domain.order.repository.OrderItemRepository;
-import com.example.evostyle.domain.product.productdetail.entity.ProductDetail;
+import com.example.evostyle.domain.product.entity.ProductDetail;
 import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.NotFoundException;
 import com.mysema.commons.lang.Pair;
