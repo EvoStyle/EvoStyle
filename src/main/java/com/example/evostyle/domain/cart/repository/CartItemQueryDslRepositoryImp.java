@@ -2,6 +2,7 @@ package com.example.evostyle.domain.cart.repository;
 
 
 import com.example.evostyle.domain.cart.entity.CartItem;
+import com.example.evostyle.domain.product.productdetail.entity.ProductDetailOption;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -20,19 +21,19 @@ public class CartItemQueryDslRepositoryImp implements CartItemQueryDslRepository
 
 
     private final JPAQueryFactory queryFactory;
-
-
-
     @Override
     public List<CartItem> findCartItemWithOptions(Long cartId) {
-        return  queryFactory
+        List<CartItem> results = queryFactory
                 .selectDistinct(cartItem)
                 .from(cartItem)
                 .join(cartItem.cart, cart).fetchJoin()
                 .join(cartItem.productDetail, productDetail).fetchJoin()
-                .join(productDetailOption).on(productDetailOption.productDetail.id.eq(productDetail.id))
-                .join(productDetailOption.option, option).fetchJoin()
+                .join(productDetailOption).on(productDetailOption.productDetail.id.eq(productDetail.id)).fetchJoin()
+                .join(productDetailOption.option, option)
                 .where(cart.id.eq(cartId))
                 .fetch();
+
+        return results;
+
     }
 }

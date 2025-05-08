@@ -118,9 +118,7 @@ public class MemberCartService {
     public void deleteCartItem(Long memberId, Long cartItemId) {
 
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
-        if (cartRepository.existsByMemberId(memberId)) {
-            cartRepository.save(Cart.of(member));
-        }
+        Cart cart = cartRepository.findByMemberId(memberId).orElseGet(() -> cartRepository.save(Cart.of(member)));
         CartItem cartItem = cartItemRepository.findById(cartItemId).orElseThrow(() -> new NotFoundException(ErrorCode.CART_ITEM_NOT_FOUND));
 
         if (!cartItem.getCart().getMember().getId().equals(memberId)) {
