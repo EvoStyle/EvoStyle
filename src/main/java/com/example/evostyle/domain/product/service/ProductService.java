@@ -4,20 +4,12 @@ import com.example.evostyle.domain.brand.entity.Brand;
 import com.example.evostyle.domain.brand.repository.BrandRepository;
 import com.example.evostyle.domain.product.dto.request.CreateProductRequest;
 import com.example.evostyle.domain.product.dto.request.UpdateProductRequest;
+import com.example.evostyle.domain.product.dto.response.ProductCategoryInfo;
 import com.example.evostyle.domain.product.dto.response.ProductResponse;
 import com.example.evostyle.domain.product.entity.Product;
-import com.example.evostyle.domain.product.optiongroup.entity.Option;
-import com.example.evostyle.domain.product.optiongroup.entity.OptionGroup;
-import com.example.evostyle.domain.product.optiongroup.repository.OptionGroupRepository;
-import com.example.evostyle.domain.product.optiongroup.repository.OptionRepository;
 import com.example.evostyle.domain.product.entity.ProductCategory;
 import com.example.evostyle.domain.product.entity.ProductCategoryMapping;
-import com.example.evostyle.domain.product.repository.ProductCategoryMappingRepository;
 import com.example.evostyle.domain.product.repository.ProductCategoryRepository;
-import com.example.evostyle.domain.product.productdetail.entity.ProductDetail;
-import com.example.evostyle.domain.product.productdetail.entity.ProductDetailOption;
-import com.example.evostyle.domain.product.repository.ProductDetailOptionRepository;
-import com.example.evostyle.domain.product.repository.ProductDetailRepository;
 import com.example.evostyle.domain.product.repository.ProductRepository;
 import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.NotFoundException;
@@ -33,70 +25,64 @@ import java.util.List;
 public class ProductService {
 
     private final ProductCategoryRepository productCategoryRepository;
-    private final ProductCategoryMappingRepository categoryMappingRepository;
     private final ProductRepository productRepository;
     private final BrandRepository brandRepository;
-    private final OptionGroupRepository optionGroupRepository;
-    private final OptionRepository optionRepository;
-    private final ProductDetailRepository productDetailRepository;
-    private final ProductDetailOptionRepository productDetailOptionRepository;
 
     @Transactional
-    public ProductResponse createProduct(CreateProductRequest request){
+    public ProductResponse createProduct(CreateProductRequest request) {
         Brand brand = brandRepository.findById(request.brandId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.BRAND_NOT_FOUND));
 
-        ProductCategory category = productCategoryRepository.findById(request.categoryId())
-                .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_CATEGORY_NOT_FOUND));
+        List<ProductCategory> productCategoryList = productCategoryRepository.findAllById(request.categoryIdList());
 
+        Product product = Product.of(brand, request.name(), request.price(), request.description(), productCategoryList);
 
-
-        Product product = Product.of(brand, request.name(), request.price(), request.description());
         productRepository.save(product);
 
+        List<ProductCategoryMapping> productCategoryMappingList = productCategoryList.stream()
+                .map(productCategory -> ProductCategoryMapping.of(product, productCategory))
+                .toList();
 
+        productCategoryRepository.saveBrandCategoryMappings(productCategoryMappingList);
 
+        List<ProductCategoryInfo> productCategoryInfoList = productCategoryList.stream()
+                .map(ProductCategoryInfo::from)
+                .toList();
 
-        categoryMappingRepository.save(ProductCategoryMapping.of(product, category));
-
-        return ProductResponse.from(product);
+        return ProductResponse.from(product, productCategoryInfoList);
     }
 
+    public ProductResponse readProduct(Long productId) {
+        Product product = findProductById(productId);
 
-    public ProductResponse readProduct(Long productId){
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND));
+        List<ProductCategoryInfo> productCategoryInfoList = productCategoryRepository.findCategoryInfoByProduct(product);
 
-        return ProductResponse.from(product);
-    }
-
-    @Transactional
-    public ProductResponse updateProduct(UpdateProductRequest request, Long productId){
-
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND));
-
-       product.update(request.name(), request.description(), request.price());
-
-       return ProductResponse.from(product);
+        return ProductResponse.from(product, productCategoryInfoList);
     }
 
     @Transactional
-   public void deleteProduct(Long productId){
-        if(!productRepository.existsById(productId)){
+    public ProductResponse updateProduct(UpdateProductRequest request, Long productId) {
+
+        Product product = findProductById(productId);
+
+        product.update(request.name(), request.description(), request.price());
+
+        List<ProductCategoryInfo> productCategoryInfoList = productCategoryRepository.findCategoryInfoByProduct(product);
+
+        return ProductResponse.from(product, productCategoryInfoList);
+    }
+
+    @Transactional
+    public void deleteProduct(Long productId) {
+        if (!productRepository.existsById(productId)) {
             throw new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND);
         }
 
-        List<OptionGroup> optionGroupList = optionGroupRepository.findByProductId(productId);
-        List<Option> optionList = optionRepository.findByOptionGroupId(optionGroupList.stream().map(OptionGroup::getId).toList());
-        List<ProductDetail> productDetailList = productDetailRepository.findByProductId(productId);
-        List<ProductDetailOption> productDetailOptionList = productDetailOptionRepository
-                .findByProductDetailIdIn(productDetailList.stream().map(ProductDetail::getId).toList());
+        productRepository.deleteProductById(productId);
+    }
 
-        productDetailOptionRepository.deleteAll(productDetailOptionList);
-        productDetailRepository.deleteAll(productDetailList);
-        optionRepository.deleteAll(optionList);
-        optionGroupRepository.deleteAll(optionGroupList);
-        productRepository.deleteById(productId);
-   }
+    private Product findProductById(Long productId) {
+        return productRepository.findById(productId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND));
+    }
 }

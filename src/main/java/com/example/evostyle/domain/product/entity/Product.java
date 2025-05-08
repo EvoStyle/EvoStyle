@@ -2,11 +2,15 @@ package com.example.evostyle.domain.product.entity;
 
 import com.example.evostyle.common.entity.BaseEntity;
 import com.example.evostyle.domain.brand.entity.Brand;
+import com.example.evostyle.global.exception.BadRequestException;
+import com.example.evostyle.global.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
+
+import java.util.List;
 
 @Getter
 @Entity
@@ -45,8 +49,26 @@ public class Product extends BaseEntity {
         this.description = description;
     }
 
-    public static Product of(Brand brand, String name, Integer price, String description){
+    public static Product of(
+            Brand brand,
+            String name,
+            Integer price,
+            String description,
+            List<ProductCategory> productCategoryList
+    ){
+        validateProductCategoryLimit(productCategoryList);
+
         return new Product(brand, name, price, description);
+    }
+
+    private static void validateProductCategoryLimit(List<ProductCategory> productCategoryList) {
+        if (productCategoryList.size() > ProductCategoryLimit.MAX_CATEGORY_COUNT) {
+            throw new BadRequestException(ErrorCode.CATEGORY_LIMIT_EXCEEDED);
+        }
+
+        if (productCategoryList.isEmpty()) {
+            throw new BadRequestException(ErrorCode.NON_EXISTENT_CATEGORY);
+        }
     }
 
     public void update(String name, String description, Integer price){
