@@ -1,5 +1,7 @@
 package com.example.evostyle.domain.order.dto.response;
 
+import com.example.evostyle.domain.order.entity.Order;
+
 import java.util.List;
 
 public record CreateOrderResponse(
@@ -9,16 +11,14 @@ public record CreateOrderResponse(
         Integer totalPriceSum
 ) {
     public static CreateOrderResponse from(
-            Long orderId,
-            List<CreateOrderItemResponse> orderItemResponseList,
-            Integer totalAmountSum,
-            Integer totalPriceSum
+            Order order,
+            List<CreateOrderItemResponse> orderItemResponseList
     ) {
         return new CreateOrderResponse(
-                orderId,
+                order.getId(),
                 orderItemResponseList,
-                totalAmountSum,
-                totalPriceSum
+                order.getTotalAmountSum(),
+                order.getTotalPriceSum()
         );
     }
 }

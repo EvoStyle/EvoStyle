@@ -1,11 +1,9 @@
 package com.example.evostyle.domain.order.controller;
 
-import com.example.evostyle.domain.order.dto.request.CreateOrderItemRequest;
-import com.example.evostyle.domain.order.dto.request.UpdateOrderItemRequest;
-import com.example.evostyle.domain.order.dto.response.CreateOrderResponse;
+import com.example.evostyle.common.util.JwtUtil;
 import com.example.evostyle.domain.order.dto.response.ReadOrderResponse;
-import com.example.evostyle.domain.order.dto.response.UpdateOrderItemResponse;
 import com.example.evostyle.domain.order.service.OrderService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,45 +18,30 @@ import java.util.Map;
 public class OrderController {
 
     private final OrderService orderService;
-
-    @PostMapping
-    public ResponseEntity<CreateOrderResponse> createOrder(@RequestBody List<CreateOrderItemRequest> requestList) {
-
-        CreateOrderResponse createOrderResponse = orderService.createOrder(requestList);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(createOrderResponse);
-    }
+    private final JwtUtil jwtUtil;
 
     @GetMapping
-    public ResponseEntity<List<ReadOrderResponse>> readAllOrders() {
+    public ResponseEntity<List<ReadOrderResponse>> readAllOrders(HttpServletRequest httpServletRequest) {
+        Long memberId = extractMemberId(httpServletRequest);
 
-        List<ReadOrderResponse> orderResponseList = orderService.readAllOrders();
+        List<ReadOrderResponse> orderResponseList = orderService.readAllOrders(memberId);
 
         return ResponseEntity.status(HttpStatus.OK).body(orderResponseList);
     }
 
-    @PatchMapping("/{orderId}/order-items/{orderItemId}")
-    public ResponseEntity<UpdateOrderItemResponse> updateOrderItem(
-            @RequestBody UpdateOrderItemRequest request,
+    @DeleteMapping("/{orderId}")
+    public ResponseEntity<Map<String, Long>> deleteOrder(
             @PathVariable(name = "orderId") Long orderId,
-            @PathVariable(name = "orderItemId") Long orderItemId
+            HttpServletRequest httpServletRequest
     ) {
-        UpdateOrderItemResponse response = orderService.updateOrderItem(
-                request,
-                orderId,
-                orderItemId
-        );
+        Long memberId = extractMemberId(httpServletRequest);
 
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        orderService.deleteOrder(orderId, memberId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(Map.of("orderId", orderId));
     }
 
-    @DeleteMapping("/{orderId}/order-items/{orderItemId}")
-    public ResponseEntity<Map<String, Long>> deleteOrderItem(
-            @PathVariable(name = "orderId") Long orderId,
-            @PathVariable(name = "orderItemId") Long orderItemId
-    ) {
-        orderService.deleteOrderItem(orderId, orderItemId);
-
-        return ResponseEntity.status(HttpStatus.OK).body(Map.of("orderItemId", orderItemId));
+    private Long extractMemberId(HttpServletRequest httpServletRequest) {
+        return jwtUtil.getMemberId(httpServletRequest.getHeader("Authorization"));
     }
 }
