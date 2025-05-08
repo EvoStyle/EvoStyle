@@ -36,6 +36,7 @@ public enum ErrorCode {
 
     //주소 관련
     ADDRESS_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 주소입니다"),
+    MAX_ADDRESS_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "주소는 최대 5개까지만 등록할 수 있습니다."),
 
     //브랜드 관련
     BRAND_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 브랜드입니다"),
