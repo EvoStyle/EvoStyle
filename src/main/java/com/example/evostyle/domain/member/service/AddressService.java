@@ -9,6 +9,7 @@ import com.example.evostyle.domain.member.entity.Address;
 import com.example.evostyle.domain.member.repository.AddressRepository;
 import com.example.evostyle.domain.member.entity.Member;
 import com.example.evostyle.domain.member.repository.MemberRepository;
+import com.example.evostyle.global.exception.BadRequestException;
 import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,10 @@ public class AddressService {
     public CreateAddressResponse createAddress(Long memberId, CreateAddressRequest request) {
         Member member = memberRepository.findByIdAndIsDeletedFalse(memberId)
             .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
+
+        if (addressRepository.countByMemberId(memberId) >= 5) {
+            throw new BadRequestException(ErrorCode.MAX_ADDRESS_LIMIT_EXCEEDED);
+        }
 
         Address address = Address.of(
             request.postCode(), request.fullAddress(),
