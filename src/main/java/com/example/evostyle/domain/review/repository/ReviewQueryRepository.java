@@ -8,5 +8,5 @@ import java.util.Optional;
 public interface ReviewQueryRepository {
     List<Review> findByProductId(Long productId);
 
-    Optional<Review> findByIdAndMemberIdAndProductId(Long reviewId, Long memberId, Long productId);
+    Optional<Review> findByIdAndMemberId(Long reviewId, Long memberId);
 }

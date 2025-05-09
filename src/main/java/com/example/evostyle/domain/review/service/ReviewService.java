@@ -67,8 +67,8 @@ public class ReviewService {
     }
 
     @Transactional
-    public UpdateReviewResponse updateReview(Long memberId, Long productId, Long reviewId, UpdateReviewRequest request) {
-        Review review = reviewRepository.findByIdAndMemberIdAndProductId(reviewId, memberId, productId)
+    public UpdateReviewResponse updateReview(Long memberId, Long reviewId, UpdateReviewRequest request) {
+        Review review = reviewRepository.findByIdAndMemberId(reviewId, memberId)
             .orElseThrow(() -> new NotFoundException(ErrorCode.REVIEW_NOT_FOUND));
 
         review.update(request.title(), request.rating(), request.contents());
@@ -77,8 +77,8 @@ public class ReviewService {
     }
 
     @Transactional
-    public void deleteReview(Long memberId, Long productId, Long reviewId) {
-        Review review = reviewRepository.findByIdAndMemberIdAndProductId(reviewId, memberId, productId)
+    public void deleteReview(Long memberId, Long reviewId) {
+        Review review = reviewRepository.findByIdAndMemberId(reviewId, memberId)
             .orElseThrow(() -> new NotFoundException(ErrorCode.REVIEW_NOT_FOUND));
 
         review.delete();
