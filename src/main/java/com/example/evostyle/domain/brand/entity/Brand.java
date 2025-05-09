@@ -29,18 +29,26 @@ public class Brand extends BaseEntity {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    private Brand(String name, Member member) {
+    @Column(name = "url",nullable = false)
+    private String slackWebHookUrl;
+
+    private boolean isDeleted;
+
+    private Brand(String name, Member member,String slackWebHookUrl) {
         this.name = name;
         this.member = member;
+        this.slackWebHookUrl = slackWebHookUrl;
+        this.isDeleted = false;
     }
 
     public static Brand of(
             String name,
             Member member,
+            String slackWebHookUrl,
             List<BrandCategory> brandCategoryList
     ) {
         validateBrandCategoryLimit(brandCategoryList);
-        return new Brand(name, member);
+        return new Brand(name, member,slackWebHookUrl);
     }
 
     private static void validateBrandCategoryLimit(List<BrandCategory> brandCategoryList) {
@@ -55,5 +63,9 @@ public class Brand extends BaseEntity {
 
     public void update(String name) {
         this.name = name;
+    }
+
+    public void deleteBrand() {
+        this.isDeleted = true;
     }
 }

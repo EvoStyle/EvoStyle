@@ -75,7 +75,7 @@ public class ProductDetailService {
             Set<Long> newCombination = new HashSet<>(combinationList);
             if (existingCombinationSet.contains(newCombination)) {return;}
 
-            ProductDetail productDetail = ProductDetail.of(brand, product); //새로운 옵션 디테일을 만들고
+            ProductDetail productDetail = ProductDetail.of(product); //새로운 옵션 디테일을 만들고
             productDetailList.add(productDetail);
 
             for (Long optionId : combinationList) {

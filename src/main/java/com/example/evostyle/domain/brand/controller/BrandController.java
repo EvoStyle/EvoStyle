@@ -9,44 +9,46 @@ import com.example.evostyle.domain.brand.dto.response.ReadBrandResponse;
 import com.example.evostyle.domain.brand.dto.response.UpdateOwnerBrandCategoryResponse;
 import com.example.evostyle.domain.brand.dto.response.UpdateBrandNameResponse;
 import com.example.evostyle.domain.brand.service.BrandService;
+import com.example.evostyle.global.security.AuthUser;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/brands")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class BrandController {
 
     private final BrandService brandService;
     private final JwtUtil jwtUtil;
 
-    @PostMapping
+    @PostMapping("/brands")
     public ResponseEntity<CreateBrandResponse> createBrand(
             @RequestBody CreateBrandRequest request,
-            HttpServletRequest httpServletRequest
+            @AuthenticationPrincipal AuthUser authUser
     ) {
-        Long memberId = extractMemberId(httpServletRequest);
 
-        CreateBrandResponse response = brandService.createBrand(request, memberId);
+
+        CreateBrandResponse response = brandService.createBrand(request, authUser.memberId());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping
+    @GetMapping("/brands")
     public ResponseEntity<List<ReadBrandResponse>> readAllBrands() {
         List<ReadBrandResponse> responseList = brandService.readAllBrands();
 
         return ResponseEntity.status(HttpStatus.OK).body(responseList);
     }
 
-    @GetMapping("/{brandId}")
+    @GetMapping("/brands/{brandId}")
     public ResponseEntity<ReadBrandResponse> readBrandById(@PathVariable(name = "brandId") Long brandId) {
 
         ReadBrandResponse response = brandService.readBrandById(brandId);
@@ -54,20 +56,19 @@ public class BrandController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @PatchMapping("/{brandId}")
+    @PatchMapping("/brands/{brandId}")
     public ResponseEntity<UpdateBrandNameResponse> updateBrand(
             @RequestBody @Valid UpdateBrandNameRequest request,
             @PathVariable(name = "brandId") Long brandId,
-            HttpServletRequest httpServletRequest
+            @AuthenticationPrincipal AuthUser authUser
     ) {
-        Long memberId = extractMemberId(httpServletRequest);
 
-        UpdateBrandNameResponse response = brandService.updateBrand(request, brandId, memberId);
+        UpdateBrandNameResponse response = brandService.updateBrand(request, brandId, authUser.memberId());
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @PatchMapping("/{brandId}/categories")
+    @PatchMapping("/categories/brands/{brandId}")
     public ResponseEntity<UpdateOwnerBrandCategoryResponse> updateBrandCategories(
             @RequestBody @Valid UpdateOwnerBrandCategoryRequest request,
             @PathVariable(name = "brandId") Long brandId
@@ -77,7 +78,7 @@ public class BrandController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @DeleteMapping("/{brandId}")
+    @DeleteMapping("/brands/{brandId}")
     public ResponseEntity<Map<String, Long>> deleteBrand(
             @PathVariable(name = "brandId") Long brandId,
             HttpServletRequest httpServletRequest

@@ -1,31 +1,59 @@
 package com.example.evostyle.domain.delivery.service;
 
 import com.example.evostyle.common.util.JsonHelper;
-import com.example.evostyle.domain.delivery.dto.DeliveryAdminEvent;
-import com.example.evostyle.domain.delivery.dto.DeliveryEventWrapper;
-import com.example.evostyle.domain.delivery.dto.DeliveryUserEvent;
+import com.example.evostyle.domain.delivery.dto.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class DeliveryKafkaListener {
     private final JsonHelper jsonHelper;
-    private final DeliveryService deliveryService;
+    private final DeliveryUpdateService deliveryUpdateService;
+    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final KaKaoMessageService kaKaoMessageService;
+    private final SlackMessageService slackMessageService;
 
-    @KafkaListener(topics = "delivery-event-topic", groupId = "delivery-update-group")
+    @KafkaListener(id = "listener-1",topics = "delivery-event-topic", groupId = "delivery-update-group")
     public void updateDelivery(String message) {
-        DeliveryEventWrapper deliveryEventWrapper = jsonHelper.fromJson(message, DeliveryEventWrapper.class);
-        switch (deliveryEventWrapper.eventType()) {
-            case USER_UPDATE -> {
-                DeliveryUserEvent deliveryUserEvent = jsonHelper.convert(deliveryEventWrapper.payload(), DeliveryUserEvent.class);
-                deliveryService.updateDelivery(deliveryUserEvent);
-            }
-            case ADMIN_UPDATE -> {
-                DeliveryAdminEvent deliveryAdminEvent = jsonHelper.convert(deliveryEventWrapper.payload(), DeliveryAdminEvent.class);
-                deliveryService.changeDeliveryStatusToShipped(deliveryAdminEvent);
+            DeliveryUserEvent deliveryEvent = jsonHelper.fromJson(message, DeliveryUserEvent.class);
+            switch (deliveryEvent.eventType()) {
+                case USER_UPDATE -> {
+                    Optional<Long> delivery = deliveryUpdateService.updateDelivery(deliveryEvent);
+                    if (delivery.isEmpty()) {
+                        return;
+                    }
+                    UserNotificationEvent success = UserNotificationEvent.success(deliveryEvent.userId(), delivery.get());
+                    String payload = jsonHelper.toJson(success);
+                    kafkaTemplate.send("user-notification-topic", deliveryEvent.userId().toString(), payload);
+                }
+                case ADMIN_UPDATE -> {
+                    AdminDeliveryResponse adminDeliveryResponse = deliveryUpdateService.changeDeliveryStatusToShipped(deliveryEvent);
+                    if (adminDeliveryResponse == null) {
+                        return;
+                    }
+                    AdminNotificationEvent success = AdminNotificationEvent.success(adminDeliveryResponse);
+                    String payload = jsonHelper.toJson(success);
+                    kafkaTemplate.send("admin-notification-topic", success.deliveryId().toString(), payload);
+                }
             }
         }
+
+    @KafkaListener(topics = "user-notification-topic", groupId = "user-notification-group")
+    public void sendUser(String message) {
+            UserNotificationEvent userNotificationEvent = jsonHelper.fromJson(message, UserNotificationEvent.class);
+            kaKaoMessageService.sendMessage(userNotificationEvent);
+    }
+
+    @KafkaListener(topics = "admin-notification-topic", groupId = "admin-notification-group")
+    public void sendAdmin(String message) {
+            AdminNotificationEvent adminNotificationEvent = jsonHelper.fromJson(message, AdminNotificationEvent.class);
+            slackMessageService.sendMessage(adminNotificationEvent);
     }
 }

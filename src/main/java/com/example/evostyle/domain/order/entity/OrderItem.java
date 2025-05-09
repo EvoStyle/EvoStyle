@@ -4,12 +4,12 @@ import com.example.evostyle.domain.brand.entity.Brand;
 import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.NotFoundException;
 import com.example.evostyle.domain.product.entity.ProductDetail;
+import com.example.evostyle.domain.delivery.entity.Delivery;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -51,6 +51,10 @@ public class OrderItem {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_detail_id", nullable = false)
     private ProductDetail productDetail;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "delivery_id")
+    private Delivery delivery;
 
     private OrderItem(
             Integer eachAmount,
@@ -99,6 +103,10 @@ public class OrderItem {
 
     public void markAsCancelled() {
         this.orderStatus = OrderStatus.CANCELED;
+    }
+
+    public void updateDelivery(Delivery delivery) {
+        this.delivery = delivery;
     }
 
     public void validateOrderIdMatch(Long orderId) {
