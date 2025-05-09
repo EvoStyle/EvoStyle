@@ -26,15 +26,14 @@ public class ReviewQueryRepositoryImpl implements ReviewQueryRepository{
     }
 
     @Override
-    public Optional<Review> findByIdAndMemberIdAndProductId(Long reviewId, Long memberId, Long productId) {
+    public Optional<Review> findByIdAndMemberId(Long reviewId, Long memberId) {
         QReview review = QReview.review;
 
         return Optional.ofNullable(
             queryFactory
             .selectFrom(review)
             .where(review.id.eq(reviewId)
-                .and(review.member.id.eq(memberId))
-                .and(review.orderItem.productDetail.product.id.eq(productId)))
+                .and(review.member.id.eq(memberId)))
             .fetchOne());
     }
 }
