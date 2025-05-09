@@ -45,29 +45,27 @@ public class ReviewController {
         return ResponseEntity.status(HttpStatus.OK).body(reviewResponseList);
     }
 
-    @PatchMapping("/products/{productId}/reviews/{reviewId}")//음..?
+    @PatchMapping("/products/reviews/{reviewId}")
     public ResponseEntity<UpdateReviewResponse> updateReview(
-        @PathVariable(name = "productId") Long productId,
         @PathVariable(name = "reviewId") Long reviewId,
         @RequestBody UpdateReviewRequest request,
         @AuthenticationPrincipal AuthUser authUser
     ) {
         Long memberId = authUser.memberId();
 
-        UpdateReviewResponse updateReviewResponse = reviewService.updateReview(memberId, productId, reviewId, request);
+        UpdateReviewResponse updateReviewResponse = reviewService.updateReview(memberId, reviewId, request);
 
         return ResponseEntity.status(HttpStatus.OK).body(updateReviewResponse);
     }
 
-    @DeleteMapping("/products/{productId}/reviews/{reviewId}")
+    @DeleteMapping("/products/reviews/{reviewId}")
     public ResponseEntity<Map<String, Long>> deleteReview(
-        @PathVariable(name = "productId") Long productId,
         @PathVariable(name = "reviewId") Long reviewId,
         @AuthenticationPrincipal AuthUser authUser
     ) {
         Long memberId = authUser.memberId();
 
-        reviewService.deleteReview(memberId, productId, reviewId);
+        reviewService.deleteReview(memberId, reviewId);
 
         return ResponseEntity.status(HttpStatus.OK).body(Map.of("reviewId", reviewId));
     }
