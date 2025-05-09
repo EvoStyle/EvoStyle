@@ -13,7 +13,6 @@ import java.util.Optional;
 public interface OptionRepository extends JpaRepository<Option, Long> {
 
 
-
     List<Option> findByOptionGroupId(Long optionGroupId);
 
 
@@ -37,7 +36,6 @@ public interface OptionRepository extends JpaRepository<Option, Long> {
 
     List<Option> findByOptionGroupIdIn(@Param("optionGroupId") List<Long> optionGroupId);
 
-    //프로덕트 디테일아이디를 가지고 있는 상세옵션을 찾고, 상세옵션이 가지고 있는 옵션을 가지고 온다
 
     @Query("""
                 SELECT o
