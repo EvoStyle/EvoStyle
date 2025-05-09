@@ -50,7 +50,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()  // 로그인, 회원가입 등 인증 없이 허용
                         .requestMatchers("/api/parcel").permitAll() //외부 api용 패스 설정
                         .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()  // 상품 조회 전체 허용
-                        .requestMatchers(HttpMethod.GET, "/api/brands/**").permitAll()  // 브랜드 조회 전체 허용
+                        .requestMatchers(HttpMethod.GET, "/api/brands/**").permitAll()// 브랜드 조회 전체 허용
                         .requestMatchers("/api/products/**").hasRole("OWNER")  // 상품 관리는 OWNER만 허용
                         .requestMatchers("/api/brands/**").hasRole("OWNER")  // 브랜드 관리는 OWNER만 허용
                         .anyRequest().authenticated()  // 그 외 요청은 인증 필요

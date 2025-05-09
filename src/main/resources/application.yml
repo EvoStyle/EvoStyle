@@ -59,4 +59,4 @@ kakao:
 payment:
   toss:
     test-client-key: test_ck_24xLea5zVAz4kK5v0aY6rQAMYNwW
-    test-secret-key: ${toss.test-secret-key}
+    test-secret-key: ${toss.test.secret.key}

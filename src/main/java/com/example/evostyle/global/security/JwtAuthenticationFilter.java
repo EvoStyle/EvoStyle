@@ -78,6 +78,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             } catch (JwtException e) {
                 throw new UnauthorizedException(ErrorCode.JWT_EXCEPTION);
             } catch (Exception e) {
+                log.error("뭐래"+e.getMessage());
                 throw new InternalServerException(ErrorCode.INTERNAL_SERVER_ERROR);
             }
         }

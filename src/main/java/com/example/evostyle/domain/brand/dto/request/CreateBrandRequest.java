@@ -13,6 +13,8 @@ public record CreateBrandRequest(
 
         @NotNull
         @Size(max = 3)
-        List<Long> categoryIdList
+        List<Long> categoryIdList,
+
+        String slackWebHookUrl
 ) {
 }

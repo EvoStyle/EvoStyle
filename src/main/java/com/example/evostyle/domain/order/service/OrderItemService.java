@@ -62,7 +62,7 @@ public class OrderItemService {
     public UpdateOrderItemResponse updateOrderItem(UpdateOrderItemRequest request, Long orderId, Long orderItemId, Long memberId) {
         OrderItem orderItem = findOrderItemById(orderItemId);
 
-        orderItem.validateOrderIdMatch(orderId);
+        orderItem.validateOrderIdMatch(orderId); // 주문상태 검증 로직 추가
 
         orderItem.validateProductDetailIdMatch(request.productDetailId());
 

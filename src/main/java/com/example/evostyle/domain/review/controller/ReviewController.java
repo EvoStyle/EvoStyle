@@ -23,7 +23,7 @@ public class ReviewController {
 
     private final ReviewService reviewService;
 
-    @PostMapping("/orderItems/{orderItemId}/reviews")
+    @PostMapping("/order-items/{orderItemId}/reviews")
     public ResponseEntity<CreateReviewResponse> createReview(
         @PathVariable(name = "orderItemId") Long orderItemId,
         @RequestBody CreateReviewRequest request,
@@ -45,7 +45,7 @@ public class ReviewController {
         return ResponseEntity.status(HttpStatus.OK).body(reviewResponseList);
     }
 
-    @PatchMapping("/products/{productId}/reviews/{reviewId}")
+    @PatchMapping("/products/{productId}/reviews/{reviewId}")//음..?
     public ResponseEntity<UpdateReviewResponse> updateReview(
         @PathVariable(name = "productId") Long productId,
         @PathVariable(name = "reviewId") Long reviewId,

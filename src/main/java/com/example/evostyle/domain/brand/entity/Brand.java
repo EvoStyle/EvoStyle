@@ -32,10 +32,13 @@ public class Brand extends BaseEntity {
     @Column(name = "url",nullable = false)
     private String slackWebHookUrl;
 
+    private boolean isDeleted;
+
     private Brand(String name, Member member,String slackWebHookUrl) {
         this.name = name;
         this.member = member;
         this.slackWebHookUrl = slackWebHookUrl;
+        this.isDeleted = false;
     }
 
     public static Brand of(
@@ -60,5 +63,9 @@ public class Brand extends BaseEntity {
 
     public void update(String name) {
         this.name = name;
+    }
+
+    public void deleteBrand() {
+        this.isDeleted = true;
     }
 }

@@ -148,12 +148,9 @@ public class BrandService {
             throw new BadRequestException(ErrorCode.FORBIDDEN_MEMBER_OPERATION);
         }
 
-        if (!brandRepository.existsById(brandId)) {
-            throw new NotFoundException(ErrorCode.BRAND_NOT_FOUND);
-        }
-        brandCategoryRepository.deleteAllByBrandId(brandId);
+        // brandCategoryRepository.deleteAllByBrandId(brandId); // 소프트 딜리트인데 삭제할필요가없을듯
 
-        brandRepository.deleteById(brandId);
+        brand.deleteBrand();
     }
 
     private Brand findById(Long brandId) {
