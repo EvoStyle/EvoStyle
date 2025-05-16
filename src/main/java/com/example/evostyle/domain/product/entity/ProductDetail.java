@@ -28,6 +28,10 @@ public class ProductDetail extends BaseEntity {
     @JoinColumn(name = "brand_id")
     private Brand brand;
 
+    @Enumerated(EnumType.STRING)
+    @ColumnDefault("COMING_SOON")
+    private ProductDetailStatus productDetailStatus = ProductDetailStatus.COMING_SOON;
+
     @Column(name = "product_stock")
     @ColumnDefault("0")
     private Integer stock = 0;
@@ -49,22 +53,6 @@ public class ProductDetail extends BaseEntity {
         this.stock = stock;
     }
 
-    public void adjustStock(int previousAmount, int newAmount) {
-        int difference = newAmount - previousAmount;
-
-        if (difference > 0) {
-            // 수량이 증가하면, 재고가 충분한지 확인 후 차감
-            if (this.stock < difference) {
-                throw new BadRequestException(ErrorCode.OUT_OF_STOCK);
-            }
-            this.stock -= difference;
-        } else if (difference < 0) {
-
-            // 수량이 감소하면, 감소된 수량만큼 재고 증가
-            this.stock += Math.abs(difference);
-        }
-    }
-
     public void delete(){
         this.isDeleted = false;
     }
@@ -72,4 +60,6 @@ public class ProductDetail extends BaseEntity {
     public void deductStock(int quantity){
         this.stock -= quantity;
     }
+
+    public void restoreInventory(int quantity){this.stock += quantity; }
 }
