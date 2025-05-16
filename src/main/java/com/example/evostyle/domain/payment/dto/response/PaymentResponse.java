@@ -10,13 +10,13 @@ public record PaymentResponse(
         Integer totalAmount
 ) {
 
-    public static PaymentResponse from(Payment payment) {
+    public static PaymentResponse from(TossPaymentResponse response) {
         return new PaymentResponse(
-                payment.getPaymentKey(),
-                "order-" + payment.getOrder().getId(),
-                payment.getOrderName(),
-                payment.getMethod(),
-                payment.getTotalAmount()
+                response.paymentKey(),
+                "order-" + response.orderId(),
+                response.orderName(),
+                response.method(),
+                response.totalAmount()
         );
     }
 }

@@ -1,97 +1,110 @@
 package com.example.evostyle.domain.payment.service;
 
-import com.example.evostyle.domain.brand.entity.Brand;
-import com.example.evostyle.domain.brand.repository.BrandRepository;
-import com.example.evostyle.domain.member.entity.Member;
-import com.example.evostyle.domain.member.repository.MemberRepository;
+import com.example.evostyle.common.util.JsonHelper;
 import com.example.evostyle.domain.order.entity.Order;
-import com.example.evostyle.domain.order.entity.OrderItem;
 import com.example.evostyle.domain.order.entity.OrderStatus;
 import com.example.evostyle.domain.order.repository.OrderRepository;
+import com.example.evostyle.domain.payment.dto.event.PaymentCanceledEvent;
+import com.example.evostyle.domain.payment.dto.event.PaymentConfirmEvent;
 import com.example.evostyle.domain.payment.dto.request.PaymentCancelRequest;
 import com.example.evostyle.domain.payment.dto.request.PaymentConfirmRequest;
 import com.example.evostyle.domain.payment.dto.response.PaymentCancelResponse;
-import com.example.evostyle.domain.payment.dto.response.PaymentCheckoutResponse;
 import com.example.evostyle.domain.payment.dto.response.PaymentResponse;
 import com.example.evostyle.domain.payment.dto.response.TossPaymentResponse;
 import com.example.evostyle.domain.payment.entity.Payment;
 import com.example.evostyle.domain.payment.repository.PaymentRepository;
-import com.example.evostyle.global.exception.ConflictException;
-import com.example.evostyle.global.exception.ErrorCode;
-import com.example.evostyle.global.exception.InvalidException;
-import com.example.evostyle.global.exception.NotFoundException;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
+import com.example.evostyle.global.exception.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.Base64;
-import java.util.List;
 
-@Service
+@Component
 @Slf4j
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class PaymentService {
 
-    private final PaymentRepository paymentRepository;
-    private final MemberRepository memberRepository;
+    private final WebClient webClient;
     private final OrderRepository orderRepository;
+    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final JsonHelper jsonHelper;
 
-    @PersistenceContext
-    private EntityManager em;
+    @Value("${toss.test.secret.key}")
+    private String secretKey;
 
-    @Transactional
-    public PaymentResponse completeConfirmFlow(TossPaymentResponse tossResponse, Long orderId) {
+    final String TOSS_CONFIRM_URL = "https://api.tosspayments.com/v1/payments/confirm";
 
-        Order order = orderRepository.findById(orderId)
-                        .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_NOT_FOUND));
 
-        order.getOrderItemList().forEach(orderItem -> {orderItem.updateOrderStatus(OrderStatus.PAID);});
 
-        for (OrderItem orderItem : order.getOrderItemList()) {
-            orderItem.getProductDetail().deductStock(orderItem.getEachAmount());
-        }
+    final String encodedAuth = Base64.getEncoder().encodeToString(("test_sk_yL0qZ4G1VOlGMeM4w2xvroWb2MQY" + ":").getBytes());
+    private final PaymentRepository paymentRepository;
 
-        Member member = order.getMember();
-        member.addToPurchaseSum(order.getTotalAmountSum());
-        member.promoteGrade();
 
-        Payment payment = Payment.of(order, tossResponse);
+    public PaymentResponse confirmPayment(PaymentConfirmRequest request, Long orderId) {
 
-        paymentRepository.save(payment);
-        return PaymentResponse.from(payment);
+        Order order = orderRepository.findOrderWithDetails(orderId);
+
+        if (order == null){throw new NotFoundException(ErrorCode.ORDER_NOT_FOUND);}
+        if (order.getTotalPriceSum() != request.amount()) {throw new InvalidException(ErrorCode.PAYMENT_INVALID_AMOUNT);}
+
+        TossPaymentResponse tossResponse = webClient.post()
+                .uri(TOSS_CONFIRM_URL)
+                .header("Authorization", "Basic " + encodedAuth)
+                .bodyValue(request)
+                .retrieve()
+                .onStatus(
+                        status -> status.is4xxClientError() || status.is5xxServerError(),
+                        response -> response.bodyToMono(String.class)
+                                .flatMap(errorBody -> {
+                                    log.error("Toss API 에러 발생: {}", errorBody); //
+                                    return Mono.error(new InternalServerException(ErrorCode.PAYMENT_SYSTEM_ERROR)); // 예외 던지기
+                                })
+                )
+                .bodyToMono(TossPaymentResponse.class)
+                .block();
+
+        String payload = jsonHelper.toJson(PaymentConfirmEvent.from(order, tossResponse));
+        kafkaTemplate.send("payment-completed", payload);
+
+        paymentRepository.save(Payment.of(order, tossResponse));
+
+        return PaymentResponse.from(tossResponse);
     }
 
-    @Transactional
-    public void completeCancelFlow(String paymentKey){
-        //payment 키로 결제를 찾아서 오더 상품을 찾은다음에 그게 가지고 있는 상품디테일의 재고를 돌려놓는다
+
+    public PaymentCancelResponse cancelPayment(PaymentCancelRequest request, String paymentKey) {
         Payment payment = paymentRepository.findByPaymentKey(paymentKey)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_PAYMENT));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PAYMENT_CANCEL_FAILED));
 
-        Member member = payment.getOrder().getMember();
-        member.minusToPurchaseSum(payment.getTotalAmount());
-        payment.getOrder().getOrderItemList().forEach(o -> o.updateOrderStatus(OrderStatus.CANCELED));
-    }
+        boolean hasInvalidStatus = payment.getOrder().getOrderItemList().stream()
+                .anyMatch(o -> o.getOrderStatus() != OrderStatus.PAID && o.getOrderStatus() != OrderStatus.PENDING);
 
+        if (hasInvalidStatus) {throw new ConflictException(ErrorCode.PAYMENT_CANNOT_BE_CANCELED);}
 
+        PaymentCancelResponse cancelResponse = webClient.post()
+                .uri("https://api.tosspayments.com/v1/payments/{paymentKey}/cancel", paymentKey)
+                .header("Authorization", "Basic " + encodedAuth)
+                .bodyValue(request)
+                .retrieve()
+                .onStatus(
+                        status -> status.is4xxClientError() || status.is5xxServerError(),
+                        response -> response.bodyToMono(String.class)
+                                .flatMap(errorBody -> {
+                                    log.error("Toss 결제 취소 API 에러 발생: {}", errorBody);
+                                    return Mono.error(new InternalServerException(ErrorCode.PAYMENT_CANCEL_FAILED));
+                                })
+                )
+                .bodyToMono(PaymentCancelResponse.class)
+                .block();
 
-    public List<PaymentResponse> findByMember(Long memberId) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
+        String payload = jsonHelper.toJson(PaymentCanceledEvent.of(payment.getOrder().getMember().getId(), payment.getOrder().getId(), paymentKey));
+        kafkaTemplate.send("payment-canceled", payload);
 
-        return paymentRepository.findByMemberId(memberId)
-                .stream().map(PaymentResponse::from).toList();
-    }
-
-    public PaymentResponse findByPaymentKey(String paymentKey) {
-        Payment payment =  paymentRepository.findByPaymentKey(paymentKey)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_PAYMENT));
-
-        return PaymentResponse.from(payment);
+        return cancelResponse;
     }
 }

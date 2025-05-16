@@ -20,7 +20,15 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
             """)
     List<Payment> findByMemberId(@Param("memberId") Long memberId);
 
-    Optional<Payment> findByPaymentKey(String paymentKey);
+
+    @Query("""
+            SELECT DISTINCT p
+            FROM Payment p
+            JOIN FETCH p.order o
+            JOIN FETCH o.orderItemList i
+            WHERE p.paymentKey = :paymentKey
+            """)
+    Optional<Payment> findByPaymentKey(@Param("paymentKey") String paymentKey);
 
 
 }
