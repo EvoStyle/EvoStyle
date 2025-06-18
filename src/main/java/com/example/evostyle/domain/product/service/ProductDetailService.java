@@ -2,6 +2,9 @@ package com.example.evostyle.domain.product.service;
 
 import com.example.evostyle.domain.brand.entity.Brand;
 import com.example.evostyle.domain.member.repository.MemberRepository;
+import com.example.evostyle.domain.order.entity.OrderItem;
+import com.example.evostyle.domain.order.repository.OrderItemRepository;
+import com.example.evostyle.domain.payment.dto.event.StockEvent;
 import com.example.evostyle.domain.product.dto.request.UpdateProductDetailRequest;
 import com.example.evostyle.domain.product.dto.response.ProductDetailResponse;
 import com.example.evostyle.domain.product.entity.Product;
@@ -36,6 +39,7 @@ public class ProductDetailService {
     private final ProductDetailOptionRepository productDetailOptionRepository;
     private final OptionRepository optionRepository;
     private final MemberRepository memberRepository;
+    private final OrderItemRepository orderItemRepository;
 
     @Transactional
     public void createProductDetail(Long memberId, Long productId) {
@@ -140,33 +144,45 @@ public class ProductDetailService {
     @Transactional
     public List<ProductDetailResponse> updateProductDetailStock(List<UpdateProductDetailRequest> requestList, Long productId, Long memberId) {
 
-        if (!memberRepository.existsById(memberId)) {
-            throw new NotFoundException(ErrorCode.MEMBER_NOT_FOUND);
-        }
+        if (!memberRepository.existsById(memberId)) {throw new NotFoundException(ErrorCode.MEMBER_NOT_FOUND);}
         Product product = productRepository.findById(productId).orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_NOT_FOUND));
 
         Long brandOwnerId = product.getBrand().getMember().getId();
-        if (!brandOwnerId.equals(memberId)) {
-            throw new ForbiddenException(ErrorCode.NOT_BRAND_OWNER);
-        }
+        if (!brandOwnerId.equals(memberId)) {throw new ForbiddenException(ErrorCode.NOT_BRAND_OWNER);}
 
         Map<Long, Integer> requestMap = requestList.stream().collect(Collectors.toMap(UpdateProductDetailRequest::productDetailId, UpdateProductDetailRequest::stock));
 
         List<ProductDetail> productDetailList = productDetailRepository.findAllById(requestMap.keySet());
-        if (requestList.size() != productDetailList.size()) {
-            throw new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND);
-        }
+        if (requestList.size() != productDetailList.size()) {throw new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND);}
 
         productDetailList.forEach(p -> {
-            if (p.getStock() != 0) {
-                throw new ConflictException(ErrorCode.STOCK_MODIFICATION_NOT_ALLOWED);
-            }
-            if (!p.getProduct().getId().equals(productId)) {
-                throw new ConflictException(ErrorCode.PRODUCT_DETAIL_MISMATCH);
-            }
+            if (p.getStock() != 0) {throw new ConflictException(ErrorCode.STOCK_MODIFICATION_NOT_ALLOWED);}
+            if (!p.getProduct().getId().equals(productId)) {throw new ConflictException(ErrorCode.PRODUCT_DETAIL_MISMATCH);}
 
             p.setStock(requestMap.get(p.getId()));
         });
         return readByProductId(productId);
+    }
+
+    @Transactional
+    public void decreaseStock(StockEvent stockEvent){
+        ProductDetail productDetail = productDetailRepository.findById(stockEvent.productDetailId())
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND));
+
+        OrderItem orderItem = orderItemRepository.findById(stockEvent.orderItemId())
+                        .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_ITEM_NOT_FOUND));
+
+        productDetail.decreaseStock(orderItem.getEachAmount());
+    }
+
+    @Transactional
+    public void increaseStock(StockEvent stockEvent){
+        ProductDetail productDetail = productDetailRepository.findById(stockEvent.productDetailId())
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND));
+
+        OrderItem orderItem = orderItemRepository.findById(stockEvent.orderItemId())
+                .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_ITEM_NOT_FOUND));
+
+        productDetail.decreaseStock(orderItem.getEachAmount());
     }
 }
