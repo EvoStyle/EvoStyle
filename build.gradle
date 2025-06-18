@@ -90,6 +90,8 @@ dependencies {
 
     //Redisson
     implementation 'org.redisson:redisson-spring-boot-starter:3.27.2'
+
+    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
 }
 
 tasks.named('test') {
