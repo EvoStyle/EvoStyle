@@ -7,12 +7,12 @@ import com.example.evostyle.domain.payment.dto.response.TossPaymentResponse;
 import com.example.evostyle.global.config.PaymentProperties;
 import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.InternalServerException;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+
 import java.util.Base64;
 
 @Slf4j
@@ -44,9 +44,9 @@ public class TossPaymentClient {
     }
 
 
-    public PaymentCancelResponse sendCancelRequest(PaymentCancelRequest request, String paymentKey) {
+    public PaymentCancelResponse sendCancelRequest(PaymentCancelRequest request) {
       return webClient.post()
-                .uri(paymentProperties.getCancelUri(), paymentKey)
+                .uri(paymentProperties.getCancelUri(), request.paymentKey())
                 .header(AUTH_HEADER, generateAuthHeader())
                 .bodyValue(request)
                 .retrieve()

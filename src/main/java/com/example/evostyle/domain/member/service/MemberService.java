@@ -4,6 +4,8 @@ import com.example.evostyle.domain.member.dto.request.UpdateMemberRequest;
 import com.example.evostyle.domain.member.dto.response.MemberResponse;
 import com.example.evostyle.domain.member.entity.Member;
 import com.example.evostyle.domain.member.repository.MemberRepository;
+import com.example.evostyle.domain.order.entity.OrderItem;
+import com.example.evostyle.domain.order.repository.OrderItemRepository;
 import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.ForbiddenException;
 import com.example.evostyle.global.exception.NotFoundException;
@@ -11,12 +13,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final OrderItemRepository orderItemRepository;
 
     public MemberResponse readMember(Long memberId) {
         Member member = memberRepository.findByIdAndIsDeletedFalse(memberId)
@@ -45,5 +50,28 @@ public class MemberService {
         }
 
         member.deleteMember();
+    }
+
+    @Transactional
+    public void increasePurchaseSum(Long memberId, List<Long> orderItemIdList) {
+        List<OrderItem> orderItemList = orderItemRepository.findAllById(orderItemIdList);
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
+
+        int amount = orderItemList.stream().mapToInt(OrderItem::getTotalPrice).sum();
+
+        member.increasePurchaseSum(amount);
+    }
+
+    @Transactional
+    public void decreasePurchaseSum(Long memberId, List<Long> orderItemIdList) {
+        List<OrderItem> orderItemList = orderItemRepository.findAllById(orderItemIdList);
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
+        int amount = orderItemList.stream().mapToInt(OrderItem::getTotalPrice).sum();
+
+        member.decreasePurchaseSum(amount);
     }
 }

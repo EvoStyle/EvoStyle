@@ -2,9 +2,6 @@ package com.example.evostyle.domain.product.entity;
 
 import com.example.evostyle.common.entity.BaseEntity;
 import com.example.evostyle.domain.brand.entity.Brand;
-import com.example.evostyle.domain.product.entity.Product;
-import com.example.evostyle.global.exception.BadRequestException;
-import com.example.evostyle.global.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -51,15 +48,12 @@ public class ProductDetail extends BaseEntity {
 
     public void setStock(Integer stock){
         this.stock = stock;
-    }
+    }// 관리자용
 
     public void delete(){
         this.isDeleted = false;
     }
 
-    public void deductStock(int quantity){
-        this.stock -= quantity;
-    }
-
-    public void restoreInventory(int quantity){this.stock += quantity; }
+    public void increaseStock(int quantity){this.stock += quantity;}
+    public void decreaseStock(int quantity){this.stock -= quantity;}
 }

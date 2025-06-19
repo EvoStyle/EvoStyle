@@ -1,106 +1,47 @@
 package com.example.evostyle.domain.payment.service;
 
 import com.example.evostyle.common.util.JsonHelper;
-import com.example.evostyle.domain.member.entity.Member;
-import com.example.evostyle.domain.member.repository.MemberRepository;
-import com.example.evostyle.domain.order.entity.Order;
-import com.example.evostyle.domain.order.entity.OrderItem;
+import com.example.evostyle.domain.member.service.MemberService;
 import com.example.evostyle.domain.order.entity.OrderStatus;
-import com.example.evostyle.domain.order.repository.OrderRepository;
-import com.example.evostyle.domain.payment.dto.event.PaymentCanceledEvent;
-import com.example.evostyle.domain.payment.dto.event.PaymentConfirmEvent;
-import com.example.evostyle.domain.product.entity.ProductDetail;
-import com.example.evostyle.global.exception.ErrorCode;
-import com.example.evostyle.global.exception.NotFoundException;
+import com.example.evostyle.domain.order.service.OrderItemService;
+import com.example.evostyle.domain.payment.dto.event.PaymentEvent;
+import com.example.evostyle.domain.product.service.ProductDetailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
 public class PaymentKafkaListener {
 
     private final JsonHelper jsonHelper;
-    private final OrderRepository orderRepository;
-    private final MemberRepository memberRepository;
+    private final ProductDetailService productDetailService;
+    private final MemberService memberService;
+    private final OrderItemService orderItemService;
 
-    //주문완료
-    @Transactional
-    @KafkaListener(topics = "payment-completed", groupId = "stock-deduction-group")
-    public void decreaseStock(String payload){
-        PaymentConfirmEvent paymentConfirmEvent = jsonHelper.fromJson(payload, PaymentConfirmEvent.class);
+    @KafkaListener(topics = "payment-event", groupId = "stock-handler")
+    public void stockHandler(String payload) {
+        PaymentEvent paymentEvent = jsonHelper.fromJson(payload, PaymentEvent.class);
 
-        Order order = orderRepository.findById(paymentConfirmEvent.orderId())
-                .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_NOT_FOUND));
-
-        order.getOrderItemList().forEach(i -> {
-            ProductDetail productDetail = i.getProductDetail();
-            productDetail.deductStock(i.getEachAmount());
-        });
-    }
-
-    @Transactional
-    @KafkaListener(topics = "payment-completed", groupId = "order-status-group")
-    public void updateOrderStatusUpdate(String payload){
-
-        PaymentConfirmEvent paymentConfirmEvent = jsonHelper.fromJson(payload, PaymentConfirmEvent.class);
-
-        Order order = orderRepository.findOrderWithDetails(paymentConfirmEvent.orderId());
-
-        order.getOrderItemList().forEach(i -> i.updateOrderStatus(OrderStatus.PAID));
-
-    }
-
-    @Transactional
-    @KafkaListener(topics = "payment-completed", groupId = "member-grade-group")
-    public void handleMemberGrade(String payload){
-        PaymentConfirmEvent paymentConfirmEvent = jsonHelper.fromJson(payload, PaymentConfirmEvent.class);
-
-        Order order = orderRepository.findById(paymentConfirmEvent.orderId())
-                .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_NOT_FOUND));
-
-        Member member = memberRepository.findById(paymentConfirmEvent.memberId())
-                .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
-
-        member.addToPurchaseSum(order.getTotalPriceSum());
-        member.promoteGrade();
-    }
-
-
-    //결제 취소 완료
-    @Transactional
-    @KafkaListener(topics = "payment-canceled", groupId = "stock-restore-group")
-    public void restoreStockAfterCancel(String payload){
-        //재고 차감 내용 작성하기
-
-        PaymentCanceledEvent canceledEvent = jsonHelper.fromJson(payload, PaymentCanceledEvent.class);
-
-        Order order = orderRepository.findOrderWithDetails(canceledEvent.orderId());
-
-        for(OrderItem orderItem : order.getOrderItemList()){
-            orderItem.getProductDetail().restoreInventory(orderItem.getEachAmount());
+        switch (paymentEvent.paymentEventType()){
+            case CONFIRM -> productDetailService.decreaseStock(paymentEvent.orderItemIdList());
+            case CANCEL -> productDetailService.increaseStock(paymentEvent.orderItemIdList());
         }
     }
 
-    @Transactional
-    @KafkaListener(topics = "payment-canceled", groupId = "member-restore-group")
-    public void rollbackMemberGradeAndAmount(String payload){
+    @KafkaListener(topics = "payment-event", groupId = "member-grade-handler")
+    public void member(String payload) {
+        PaymentEvent paymentEvent = jsonHelper.fromJson(payload, PaymentEvent.class);
 
-        PaymentCanceledEvent canceledEvent = jsonHelper.fromJson(payload, PaymentCanceledEvent.class);
-        Order order = orderRepository.findOrderWithDetails(canceledEvent.orderId());
-        Member member = order.getMember();
-
-        member.minusToPurchaseSum(order.getTotalPriceSum());
-        member.promoteGrade();
+        switch (paymentEvent.paymentEventType()){
+            case CONFIRM -> memberService.increasePurchaseSum(paymentEvent.memberId(), paymentEvent.orderItemIdList());
+            case CANCEL -> memberService.decreasePurchaseSum(paymentEvent.memberId(), paymentEvent.orderItemIdList());
+        }
     }
 
-    @Transactional
-    @KafkaListener(topics = "payment-canceled", groupId = "order-cancel-group")
-    public void changeStatusToCanceled(String payload){
-        PaymentCanceledEvent canceledEvent = jsonHelper.fromJson(payload, PaymentCanceledEvent.class);
-        Order order = orderRepository.findOrderWithDetails(canceledEvent.orderId());
-
-        order.getOrderItemList().forEach(i -> i.updateOrderStatus(OrderStatus.CANCELED));
+    @KafkaListener(topics = "payment-event",  groupId = "order-status-handler")
+    public void orderStatus(String payload) {
+        PaymentEvent paymentEvent = jsonHelper.fromJson(payload, PaymentEvent.class);
+        orderItemService.changeOrderItemStatus(paymentEvent.orderItemIdList(), OrderStatus.PAID);
     }
 }
