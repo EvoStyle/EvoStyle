@@ -2,6 +2,7 @@ package com.example.evostyle.domain.product.service;
 
 import com.example.evostyle.domain.brand.entity.Brand;
 import com.example.evostyle.domain.member.repository.MemberRepository;
+import com.example.evostyle.domain.order.entity.Order;
 import com.example.evostyle.domain.order.entity.OrderItem;
 import com.example.evostyle.domain.order.repository.OrderItemRepository;
 import com.example.evostyle.domain.product.dto.request.UpdateProductDetailRequest;
@@ -164,14 +165,12 @@ public class ProductDetailService {
     }
 
     @Transactional
-    public void decreaseStock(List<Long> orderItemIdList){
-        List<OrderItem> orderItemList = orderItemRepository.findAllById(orderItemIdList);
-        orderItemList.forEach(i -> i.getProductDetail().decreaseStock(i.getEachAmount()));
+    public void decreaseStock(Order order){
+        order.getOrderItemList().forEach(i -> i.getProductDetail().decreaseStock(i.getEachAmount()));
     }
 
     @Transactional
-    public void increaseStock(List<Long> orderItemIdList){
-        List<OrderItem> orderItemList = orderItemRepository.findAllById(orderItemIdList);
-        orderItemList.forEach(i -> i.getProductDetail().increaseStock(i.getEachAmount()));
+    public void increaseStock(Order order){
+        order.getOrderItemList().forEach(i -> i.getProductDetail().decreaseStock(i.getEachAmount()));
     }
 }

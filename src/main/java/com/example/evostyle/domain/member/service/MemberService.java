@@ -53,24 +53,19 @@ public class MemberService {
     }
 
     @Transactional
-    public void increasePurchaseSum(Long memberId, List<Long> orderItemIdList) {
-        List<OrderItem> orderItemList = orderItemRepository.findAllById(orderItemIdList);
+    public void increasePurchaseSum(Long memberId, Integer amount) {
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
-
-        int amount = orderItemList.stream().mapToInt(OrderItem::getTotalPrice).sum();
 
         member.increasePurchaseSum(amount);
     }
 
     @Transactional
-    public void decreasePurchaseSum(Long memberId, List<Long> orderItemIdList) {
-        List<OrderItem> orderItemList = orderItemRepository.findAllById(orderItemIdList);
+    public void decreasePurchaseSum(Long memberId, Integer amount) {
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
-        int amount = orderItemList.stream().mapToInt(OrderItem::getTotalPrice).sum();
 
         member.decreasePurchaseSum(amount);
     }

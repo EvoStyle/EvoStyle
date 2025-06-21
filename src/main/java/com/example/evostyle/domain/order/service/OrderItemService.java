@@ -91,8 +91,7 @@ public class OrderItemService {
     }
 
     @Transactional
-    public void changeOrderItemStatus(List<Long> orderItemIdList, OrderStatus orderStatus){
-        List<OrderItem> orderItemList = orderItemRepository.findAllById(orderItemIdList);
+    public void changeOrderItemStatus(List<OrderItem> orderItemList, OrderStatus orderStatus){
         orderItemList.forEach(i -> i.updateOrderStatus(orderStatus));
     }
 }
