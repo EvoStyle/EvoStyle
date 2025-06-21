@@ -58,5 +58,7 @@ kakao:
 
 payment:
   toss:
-    test-client-key: test_ck_24xLea5zVAz4kK5v0aY6rQAMYNwW
-    test-secret-key: ${toss.test.secret.key}
+    test-client-key: ${payment.toss.test-client-key}
+    test-secret-key: ${payment.toss.test-secret-key}
+    confirm-uri: ${payment.toss.confirm-uri}
+    cancel-uri: ${payment.toss.cancel-uri}
