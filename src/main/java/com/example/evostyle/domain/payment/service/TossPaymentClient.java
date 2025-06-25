@@ -26,7 +26,7 @@ public class TossPaymentClient {
     private final String AUTH_HEADER =  "Authorization";
 
     public TossPaymentResponse sendConfirmRequest(PaymentConfirmRequest request) {
-       return webClient.post()
+        return webClient.post()
                 .uri(paymentProperties.getConfirmUri())
                 .header(AUTH_HEADER, generateAuthHeader())
                 .bodyValue(request)
@@ -35,7 +35,7 @@ public class TossPaymentClient {
                         status -> status.is4xxClientError() || status.is5xxServerError(),
                         response -> response.bodyToMono(String.class)
                                 .flatMap(errorBody -> {
-                                    log.error("Toss API 에러 발생: {}", errorBody); //
+                                    log.error("Toss confirm API 에러 발생: {}", errorBody); //
                                     return Mono.error(new InternalServerException(ErrorCode.PAYMENT_SYSTEM_ERROR)); // 예외 던지기
                                 })
                 )
@@ -44,7 +44,7 @@ public class TossPaymentClient {
     }
 
 
-    public PaymentCancelResponse sendCancelRequest(PaymentCancelRequest request) {
+    public TossPaymentResponse sendCancelRequest(PaymentCancelRequest request) {
       return webClient.post()
                 .uri(paymentProperties.getCancelUri(), request.paymentKey())
                 .header(AUTH_HEADER, generateAuthHeader())
@@ -58,11 +58,11 @@ public class TossPaymentClient {
                                     return Mono.error(new InternalServerException(ErrorCode.PAYMENT_CANCEL_FAILED));
                                 })
                 )
-                .bodyToMono(PaymentCancelResponse.class)
+                .bodyToMono(TossPaymentResponse.class)
                 .block();
     }
 
     private String generateAuthHeader(){
-        return "Basic " + Base64.getEncoder().encodeToString((paymentProperties.getTestClientKey() + ":").getBytes());
+        return  "Basic " + Base64.getEncoder().encodeToString((paymentProperties.getTestSecretKey() + ":").getBytes());
     }
 }
