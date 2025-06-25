@@ -46,14 +46,22 @@ public class ProductDetail extends BaseEntity {
         return new ProductDetail(product,product.getBrand());
     }
 
-    public void setStock(Integer stock){
+    public void delete(){this.isDeleted = false;}
+
+    public boolean updateStock(Integer stock){
+        if(this.getProductDetailStatus().equals(ProductDetailStatus.ON_SALE)){return false;}
         this.stock = stock;
+        return true;
     }// 관리자용
 
-    public void delete(){
-        this.isDeleted = false;
+    public boolean decreaseStock(int quantity){
+        if(this.stock < quantity || this.productDetailStatus.equals(ProductDetailStatus.SOLD_OUT)){return false;}
+        this.stock -= quantity;
+        if(this.stock == 0){this.productDetailStatus = ProductDetailStatus.SOLD_OUT;}
+        return true;
     }
 
-    public void increaseStock(int quantity){this.stock += quantity;}
-    public void decreaseStock(int quantity){this.stock -= quantity;}
+    public void increaseStock(int quantity){
+        this.stock += quantity;
+    }
 }

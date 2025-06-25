@@ -10,6 +10,7 @@ import com.example.evostyle.domain.order.entity.OrderItem;
 import com.example.evostyle.domain.order.entity.OrderStatus;
 import com.example.evostyle.domain.order.repository.OrderItemQueryDsl;
 import com.example.evostyle.domain.order.repository.OrderItemRepository;
+import com.example.evostyle.domain.order.repository.OrderRepository;
 import com.example.evostyle.domain.product.entity.ProductDetail;
 import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.NotFoundException;
@@ -30,6 +31,7 @@ public class OrderItemService {
     private final OrderItemRepository orderItemRepository;
     private final OrderItemQueryDsl orderItemQueryDsl;
     private final OrderService orderService;
+    private final OrderRepository orderRepository;
 
     @Transactional
     public CreateOrderResponse createOrderItems(List<CreateOrderItemRequest> requestList, Long memberId) {
@@ -91,7 +93,8 @@ public class OrderItemService {
     }
 
     @Transactional
-    public void changeOrderItemStatus(List<OrderItem> orderItemList, OrderStatus orderStatus){
-        orderItemList.forEach(i -> i.updateOrderStatus(orderStatus));
+    public void changeOrderItemStatus(Long orderId, OrderStatus orderStatus){
+        Order order = orderRepository.findOrderWithDetails(orderId);
+        order.getOrderItemList().forEach(i -> i.updateOrderStatus(orderStatus));
     }
 }

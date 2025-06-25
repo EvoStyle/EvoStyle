@@ -7,4 +7,5 @@ import java.util.Optional;
 public interface OrderQueryDsl {
 
     Optional<Order> findByIdWithItems(Long orderId);
+    Optional<Order> findByIdWithItemsAndProductDetail(Long orderId);
 }
