@@ -4,6 +4,9 @@ import com.example.evostyle.domain.member.dto.request.UpdateMemberRequest;
 import com.example.evostyle.domain.member.dto.response.MemberResponse;
 import com.example.evostyle.domain.member.entity.Member;
 import com.example.evostyle.domain.member.repository.MemberRepository;
+import com.example.evostyle.domain.order.entity.Order;
+import com.example.evostyle.domain.order.repository.OrderItemRepository;
+import com.example.evostyle.domain.order.repository.OrderRepository;
 import com.example.evostyle.global.exception.ErrorCode;
 import com.example.evostyle.global.exception.ForbiddenException;
 import com.example.evostyle.global.exception.NotFoundException;
@@ -17,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final OrderItemRepository orderItemRepository;
+    private final OrderRepository orderRepository;
 
     public MemberResponse readMember(Long memberId) {
         Member member = memberRepository.findByIdAndIsDeletedFalse(memberId)
@@ -45,5 +50,18 @@ public class MemberService {
         }
 
         member.deleteMember();
+    }
+
+    @Transactional
+    public void increasePurchaseSum(Long orderId) {
+        Order order = orderRepository.findOrderWithDetails(orderId);
+        order.getMember().increasePurchaseSum(order.getTotalPriceSum());
+    }
+
+    @Transactional
+    public void decreasePurchaseSum(Long orderId) {
+
+        Order order = orderRepository.findOrderWithDetails(orderId);
+        order.getMember().decreasePurchaseSum(order.getTotalPriceSum());
     }
 }

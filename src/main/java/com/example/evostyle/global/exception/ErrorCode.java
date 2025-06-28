@@ -65,6 +65,7 @@ public enum ErrorCode {
     //상품 디테일 관련
     STOCK_MODIFICATION_NOT_ALLOWED(HttpStatus.CONFLICT, "재고를 수정할 수 없는 상태입니다"),
     PRODUCT_DETAIL_MISMATCH(HttpStatus.CONFLICT, "해당 상품에 속하지 않는 상품 디테일입니다"),
+    INSUFFICIENT_STOCK_PAYMENT_FAILED(HttpStatus.BAD_REQUEST, "해당 상품의 재고가 부족하여 결제가 취소되었습니다."),
 
     //장바구니  관련
     CART_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 장바구니 상품입니다"),

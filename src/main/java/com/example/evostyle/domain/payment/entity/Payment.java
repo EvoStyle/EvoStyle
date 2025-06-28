@@ -1,7 +1,7 @@
 package com.example.evostyle.domain.payment.entity;
 
 import com.example.evostyle.domain.order.entity.Order;
-import com.example.evostyle.domain.payment.dto.response.TossPaymentResponse;
+import com.example.evostyle.domain.payment.dto.event.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -29,8 +29,8 @@ public class Payment {
     @Column(name = "method")
     private String method;
 
-    @Column(name = "order_name")
-    private String orderName;
+    @Enumerated(EnumType.STRING)
+    public PaymentStatus paymentStatus;
 
     @ColumnDefault("0")
     private Integer totalAmount = 0;
@@ -38,16 +38,28 @@ public class Payment {
     @Column(name = "approved_at")
     private LocalDateTime approvedAt;
 
-    private Payment(Order order, TossPaymentResponse tossResponse) {
+    @Column(name = "canceled_at")
+    private LocalDateTime canceledAt;
+
+    private Payment(Order order, String paymentKey, Integer totalAmount) {
         this.order = order;
-        this.paymentKey = tossResponse.paymentKey();
-        this.method = tossResponse.method();
-        this.orderName = tossResponse.orderName();
-        this.totalAmount = tossResponse.totalAmount();
-        this.approvedAt = LocalDateTime.now();
+        this.paymentKey = paymentKey;
+        this.totalAmount = totalAmount;
+        this.paymentStatus = PaymentStatus.IN_PROGRESS;
     }
 
-    public static Payment of(Order order, TossPaymentResponse tossResponse) {
-        return new Payment(order, tossResponse);
+    public static Payment of(Order order, String paymentKey, Integer totalAmount) {
+        return new Payment(order, paymentKey, totalAmount);
+    }
+
+    public void syncState(String paymentKey, PaymentStatus paymentStatus, Integer totalAmount, String method,
+                          LocalDateTime approvedAt, LocalDateTime canceledAt
+    ){
+        this.paymentKey = paymentKey;
+        this.paymentStatus = paymentStatus;
+        this.totalAmount = totalAmount;
+        this.method = method;
+        this.approvedAt = approvedAt;
+        this.canceledAt = canceledAt;
     }
 }

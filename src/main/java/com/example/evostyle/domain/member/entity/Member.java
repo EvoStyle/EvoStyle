@@ -88,12 +88,17 @@ public class Member extends BaseEntity {
         this.deletedAt = LocalDateTime.now();
     }
 
-    public void addToPurchaseSum(int amount) {
+    public void increasePurchaseSum(int amount) {
         this.purchaseSum += amount;
+        promoteGrade();
     }
-    public void minusToPurchaseSum(int amount){this.purchaseSum -= amount;}
 
-    public void promoteGrade() {
+    public void decreasePurchaseSum(int amount) {
+        this.purchaseSum -= amount;
+        promoteGrade();
+    }
+
+    private void promoteGrade() {
         MemberGrade[] values = MemberGrade.values();
         int nextOrdinal = this.memberGrade.ordinal() + 1;
 

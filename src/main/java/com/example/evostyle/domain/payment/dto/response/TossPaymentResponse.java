@@ -6,6 +6,7 @@ public record TossPaymentResponse(
         String method,
         String orderName,
         Integer totalAmount,
-        String approvedAt
+        String approvedAt,
+        String canceledAt
 ) {
 }

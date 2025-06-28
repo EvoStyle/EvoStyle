@@ -8,6 +8,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+import static com.example.evostyle.domain.order.entity.QOrderItem.orderItem;
+
 @Repository
 @RequiredArgsConstructor
 public class OrderQueryDslImpl implements OrderQueryDsl {
@@ -21,6 +23,18 @@ public class OrderQueryDslImpl implements OrderQueryDsl {
                         .leftJoin(order.orderItemList).fetchJoin()
                         .where(order.id.eq(orderId))
                         .fetchOne()
+        );
+    }
+
+    @Override
+    public Optional<Order> findByIdWithItemsAndProductDetail(Long orderId) {
+        return Optional.ofNullable(jpaQueryFactory.select(order)
+                .from(order)
+                .distinct()
+                .leftJoin(order.orderItemList, orderItem).fetchJoin()
+                .leftJoin(orderItem.productDetail).fetchJoin()
+                .where(order.id.eq(orderId))
+                .fetchOne()
         );
     }
 }

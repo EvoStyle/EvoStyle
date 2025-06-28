@@ -1,114 +1,65 @@
 package com.example.evostyle.domain.payment.service;
 
+import com.example.evostyle.common.util.JsonHelper;
+import com.example.evostyle.common.util.KafkaPublisher;
 import com.example.evostyle.domain.order.entity.Order;
 import com.example.evostyle.domain.order.entity.OrderStatus;
-import com.example.evostyle.domain.order.repository.OrderRepository;
+import com.example.evostyle.domain.payment.dto.event.PaymentEvent;
+import com.example.evostyle.domain.payment.dto.event.PaymentStatus;
+import com.example.evostyle.domain.payment.dto.event.StockRestoreEvent;
 import com.example.evostyle.domain.payment.dto.request.PaymentCancelRequest;
 import com.example.evostyle.domain.payment.dto.request.PaymentConfirmRequest;
 import com.example.evostyle.domain.payment.dto.response.PaymentCancelResponse;
 import com.example.evostyle.domain.payment.dto.response.PaymentResponse;
 import com.example.evostyle.domain.payment.dto.response.TossPaymentResponse;
 import com.example.evostyle.domain.payment.entity.Payment;
-import com.example.evostyle.domain.payment.repository.PaymentRepository;
-import com.example.evostyle.global.exception.*;
+import com.example.evostyle.domain.product.service.ProductDetailService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
-
-import java.util.Base64;
 
 @Component
-@Slf4j
 @RequiredArgsConstructor
 public class PaymentManager {
 
-    private final WebClient webClient;
     private final PaymentService paymentService;
-    private final OrderRepository orderRepository;
+    private final TossPaymentClient tossPaymentClient;
+    private final ProductDetailService productDetailService;
+    private final KafkaPublisher kafkaPublisher;
+    private final JsonHelper jsonHelper;
 
-    @Value("${payment.toss.test-secret-key}")
-    private String secretKey;
+    @Value("${spring.kafka.topic.payment-topic}")
+    private String paymentTopic;
 
-    final String TOSS_CONFIRM_URL = "https://api.tosspayments.com/v1/payments/confirm";
+    @Value("${spring.kafka.topic.stock-restore-topic}")
+    private String stockRestoreTopic;
 
+    public PaymentResponse handlePaymentConfirmationFlow(PaymentConfirmRequest request, Long orderId) {
 
-
-    final String encodedAuth = Base64.getEncoder().encodeToString(("test_sk_yL0qZ4G1VOlGMeM4w2xvroWb2MQY" + ":").getBytes());
-    private final PaymentRepository paymentRepository;
-
-
-    public PaymentResponse confirmPayment(PaymentConfirmRequest request, Long orderId) {
-
-        Order order = orderRepository.findOrderWithDetails(orderId);
-
-        if (order == null){throw new NotFoundException(ErrorCode.ORDER_NOT_FOUND);}
-        if (order.getTotalPriceSum() != request.amount()) {throw new InvalidException(ErrorCode.PAYMENT_INVALID_AMOUNT);}
-
-        TossPaymentResponse tossResponse = webClient.post()
-                .uri(TOSS_CONFIRM_URL)
-                .header("Authorization", "Basic " + encodedAuth)
-                .bodyValue(request)
-                .retrieve()
-                .onStatus(
-                        status -> status.is4xxClientError() || status.is5xxServerError(),
-                        response -> response.bodyToMono(String.class)
-                                .flatMap(errorBody -> {
-                                    log.error("Toss API 에러 발생: {}", errorBody); //
-                                    return Mono.error(new InternalServerException(ErrorCode.PAYMENT_SYSTEM_ERROR)); // 예외 던지기
-                                })
-                )
-                .bodyToMono(TossPaymentResponse.class)
-                .block();
+        Order order = paymentService.validateOrderElseThrowException(orderId, request.amount());
+        productDetailService.decreaseStock(order.getId());
+        paymentService.findOrElseSavePayment(order, request);
 
         try {
-            return paymentService.completeConfirmFlow(tossResponse, order.getId());
-        } catch (Exception e) {
-            revertPayment(PaymentCancelRequest.of("시스템 오류로 인해 결제가 실패했습니다"), tossResponse.paymentKey());
-            throw new ConflictException(ErrorCode.PAYMENT_SYSTEM_ERROR);
+            TossPaymentResponse tossPaymentResponse = tossPaymentClient.sendConfirmRequest(request);
+            PaymentEvent paymentEvent = PaymentEvent.of(orderId, OrderStatus.PAID, PaymentStatus.CONFIRMED, tossPaymentResponse);
+            kafkaPublisher.sendWithCallBack(paymentTopic, orderId.toString(), jsonHelper.toJson(paymentEvent));
+            return PaymentResponse.from(tossPaymentResponse);
+
+        } catch (Exception ex) {
+            StockRestoreEvent restoreEvent = StockRestoreEvent.from(orderId);
+            kafkaPublisher.sendWithCallBack(stockRestoreTopic, orderId.toString(), jsonHelper.toJson(restoreEvent));
+            throw ex;
         }
     }
 
+    public PaymentCancelResponse handlePaymentCancelFlow(PaymentCancelRequest request) {
 
-    @Transactional(readOnly = true)
-    public PaymentCancelResponse cancelPayment(PaymentCancelRequest request, String paymentKey) {
-        Payment payment = paymentRepository.findByPaymentKey(paymentKey)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.PAYMENT_CANCEL_FAILED));
-
-        boolean hasInvalidStatus = payment.getOrder().getOrderItemList().stream()
-                .anyMatch(o -> o.getOrderStatus() != OrderStatus.PAID && o.getOrderStatus() != OrderStatus.PENDING);
-
-        if (hasInvalidStatus) {
-            throw new ConflictException(ErrorCode.PAYMENT_CANNOT_BE_CANCELED);
-        }
-
-        PaymentCancelResponse cancelResponse =  revertPayment(request, paymentKey);
-        paymentService.completeCancelFlow(paymentKey);
-
-        return cancelResponse;
-    }
-
-
-    private PaymentCancelResponse revertPayment(PaymentCancelRequest request, String paymentKey){
-        PaymentCancelResponse cancelResponse = webClient.post()
-                .uri("https://api.tosspayments.com/v1/payments/{paymentKey}/cancel", paymentKey)
-                .header("Authorization", "Basic " + encodedAuth)
-                .bodyValue(request)
-                .retrieve()
-                .onStatus(
-                        status -> status.is4xxClientError() || status.is5xxServerError(),
-                        response -> response.bodyToMono(String.class)
-                                .flatMap(errorBody -> {
-                                    log.error("Toss 결제 취소 API 에러 발생: {}", errorBody);
-                                    return Mono.error(new InternalServerException(ErrorCode.PAYMENT_CANCEL_FAILED));
-                                })
-                )
-                .bodyToMono(PaymentCancelResponse.class)
-                .block();
-
-        return cancelResponse;
+        Payment payment = paymentService.validatePaymentElseThrowException(request.paymentKey());
+        TossPaymentResponse tossCancelResponse = tossPaymentClient.sendCancelRequest(request);
+        PaymentEvent paymentCancelEvent = PaymentEvent.of(payment.getOrder().getId(), OrderStatus.CANCELED, PaymentStatus.CANCELED, tossCancelResponse);
+        kafkaPublisher.sendWithCallBack(paymentTopic, payment.getOrder().getId().toString(), jsonHelper.toJson(paymentCancelEvent));
+        return PaymentCancelResponse.from(tossCancelResponse);
     }
 }
+
