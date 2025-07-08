@@ -71,10 +71,7 @@ public class MemberCartService {
     public MemberCartResponse readCart(Long memberId) {
 
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
-
-        if (!memberRepository.existsById(memberId)) {
-            throw new NotFoundException(ErrorCode.MEMBER_NOT_FOUND);
-        }
+        if (!memberRepository.existsById(memberId)) {throw new NotFoundException(ErrorCode.MEMBER_NOT_FOUND);}
 
         Cart cart = cartRepository.findByMemberId(memberId).orElseGet(() -> cartRepository.save(Cart.of(member)));
 
@@ -121,9 +118,7 @@ public class MemberCartService {
         Cart cart = cartRepository.findByMemberId(memberId).orElseGet(() -> cartRepository.save(Cart.of(member)));
         CartItem cartItem = cartItemRepository.findById(cartItemId).orElseThrow(() -> new NotFoundException(ErrorCode.CART_ITEM_NOT_FOUND));
 
-        if (!cartItem.getCart().getMember().getId().equals(memberId)) {
-            throw new UnauthorizedException(ErrorCode.CART_ACCESS_DENIED);
-        }
+        if (!cartItem.getCart().getMember().getId().equals(memberId)) {throw new UnauthorizedException(ErrorCode.CART_ACCESS_DENIED);}
         cartItemRepository.deleteById(cartItemId);
     }
 

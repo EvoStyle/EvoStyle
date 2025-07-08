@@ -3,9 +3,7 @@ package com.example.evostyle.domain.product.service;
 import com.example.evostyle.domain.brand.entity.Brand;
 import com.example.evostyle.domain.member.repository.MemberRepository;
 import com.example.evostyle.domain.order.entity.Order;
-import com.example.evostyle.domain.order.repository.OrderItemRepository;
 import com.example.evostyle.domain.order.repository.OrderQueryDslImpl;
-import com.example.evostyle.domain.order.repository.OrderRepository;
 import com.example.evostyle.domain.product.dto.request.UpdateProductDetailRequest;
 import com.example.evostyle.domain.product.dto.response.ProductDetailResponse;
 import com.example.evostyle.domain.product.entity.*;
@@ -37,8 +35,6 @@ public class ProductDetailService {
     private final ProductDetailOptionRepository productDetailOptionRepository;
     private final OptionRepository optionRepository;
     private final MemberRepository memberRepository;
-    private final OrderItemRepository orderItemRepository;
-    private final OrderRepository orderRepository;
     private final OrderQueryDslImpl orderQueryDslImpl;
 
     @Transactional
@@ -169,8 +165,9 @@ public class ProductDetailService {
             if (!p.getProduct().getId().equals(productId)) {
                 throw new ConflictException(ErrorCode.PRODUCT_DETAIL_MISMATCH);
             }
-            boolean isUpdateSuccess = p.updateStock(requestMap.get(p.getId()));
-            if (!isUpdateSuccess) {
+
+            int affectedRows = productDetailRepository.updateStock(p.getId(), requestMap.get(p.getId()));
+            if (affectedRows == 0) {
                 throw new ConflictException(ErrorCode.STOCK_MODIFICATION_NOT_ALLOWED);
             }
         });
@@ -178,22 +175,26 @@ public class ProductDetailService {
     }
 
     @Transactional
-    public void decreaseStock(Long orderId) {
+    public void decreaseStock(Long orderId)  {
+
         Order order = orderQueryDslImpl.findByIdWithItemsAndProductDetail(orderId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_NOT_FOUND));
 
         order.getOrderItemList().forEach(i -> {
-            boolean isStockDecreased = i.getProductDetail().decreaseStock(i.getEachAmount());
-            if (!isStockDecreased) {
-                throw new BadRequestException(ErrorCode.INSUFFICIENT_STOCK_PAYMENT_FAILED);
-            }
+            int affectedRows  = productDetailRepository.decreaseStock(i.getProductDetail().getId(), i.getEachAmount());
+            if(affectedRows == 0){throw new ConflictException(ErrorCode.INSUFFICIENT_STOCK_PAYMENT_FAILED);}
         });
     }
 
     @Transactional
     public void increaseStock(Long orderId) {
+
         Order order = orderQueryDslImpl.findByIdWithItemsAndProductDetail(orderId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_NOT_FOUND));
-        order.getOrderItemList().forEach(i -> i.getProductDetail().increaseStock(i.getEachAmount()));
+
+        order.getOrderItemList().forEach(i -> {
+            int affectedRows = productDetailRepository.increaseStock(i.getProductDetail().getId(), i.getEachAmount());
+            if (affectedRows == 0) {throw new ConflictException(ErrorCode.STOCK_MODIFICATION_NOT_ALLOWED);}
+        });
     }
 }
